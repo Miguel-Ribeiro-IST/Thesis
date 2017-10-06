@@ -1,0 +1,59 @@
+(*Initial Parameters*)
+n = 50;			(*Number of exercise points per year*)
+T = 1;			(*Number of years in the contract*)
+r = 0.06; 		(*Discount factor*)
+sigma = 0.2; 		(*Volatility of the option*)
+S0 = 44; 		(*Initial price of the option*)
+M = 100000; 		(*Number of simulated paths*)
+callput = "Put"; 	(*option type: "Put" or "Call"*)
+K = 40.; 		(*Strike Price*)
+
+
+
+(*Path Simulation*)
+dT = T/n; (*Time step duration*)
+
+S = Table[0, M, n + 1]; (*Table with all the simulated paths. All entries are initially assigned 0*)
+
+S[[All, 1]] = S0; (*Set all paths' starting points to the initial asset price*)
+
+
+dW = Sqrt[dT]*RandomVariate[NormalDistribution[], {M, n}];
+
+For[i = 1, i <= n, i++, S[[All, i + 1]] = S[[All, i]] + r*dT*S[[All, i]] + sigma*S[[All, i]]*dW[[All, i]]] (*Simulate geometric Brownian Motion: dS=r*S*dt+sigma*S*dW *)
+
+
+(*Longstaff-Schwartz Method*)
+Payoff[stock_] :=  If[callput == "Put", Max[K - stock, 0], Max[stock - K, 0]]; (*Return Put/Call stike price payoff functions*)
+
+cfdisc = Table[0, M, n]; (*Matrix with all discounted cash flows*)
+cfdisc[[All, n]] = Map[Payoff, S[[All, n + 1]]]*Exp[-r*T]; (*Calculate discounted cash flows at the maturity*)
+
+cfreal = Table[0, M, n];(*Matrix with all [not-discounted] cash flows*)
+cfreal[[All, n]] = Map[Payoff, S[[All, n + 1]]];(*Calculate cash flows at the maturity*)
+
+sr = Table[0, M, n]; (*Matrix with all recommended exercice decisions. Entry 1 if exercise is recommended at the respective period and 0 otherwise*)
+sr[[All, n]] = Map[Sign, cfdisc[[All, n]]]; (*Obtain all recommended exercise decisions at the maturity*)
+
+lastsr[path_] := FirstPosition[sr[[path]], 1, {0}][[1]] (*Auxiliary function to find the recommended exercise time for a given path*)
+
+discpayoff[path_, current_] := If[lastsr[path] != 0, cfdisc[[path, lastsr[path]]]*Exp[-r*(lastsr[path] - current)]; cfreal[[path, lastsr[path]]], 0](*Auxiliary function that returns the discounted cash flow between the last recommended exercise time and the "current time", that we are trying to check if is optimal*)
+
+For[j = n - 1, j > 0, j--,
+  reg = {}; (*Matrix with all the current optimal exercise that will be used to fit the Laguerre polynomials*)
+  For[i = 1, i <= M, i++, If[Payoff[S[[i, j + 1]]] > 0, AppendTo[reg, {S[[i, j + 1]], discpayoff[i, j]}],]]; (*Find where if it is optimal to exercise at the current time and if so, insert a row in the previous matrix*)
+  regr[x_] = Fit[reg, Exp[-x/2]*{Exp[x/2], LaguerreL[0, x], LaguerreL[1, x], LaguerreL[2, x], LaguerreL[3, x]}, x]; (*Fit the optimal data*)
+  For[i = 1, i <= M, i++, 
+   If[Payoff[S[[i, j + 1]]] > 0, 
+    If[Payoff[S[[i, j + 1]]] >= regr[S[[i, j + 1]]], (*if it is recommended to exercise at the current time, update the cash flow tables. otherwise, do nothing*)
+     cfdisc[[i, All]] = 0;
+     cfreal[[i, All]] = 0;
+     sr[[i, All]] = 0;
+     cfdisc[[i, j]] = Payoff[S[[i, j + 1]]]*Exp[-r*j*dT];
+     cfreal[[i, j]] = Payoff[S[[i, j + 1]]];
+     sr[[i, j]] = 1,],]]];
+
+
+(*Final Result*)
+Total[cfdisc, 2]/M (*american option price*)
+1.1071

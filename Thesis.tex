@@ -1,0 +1,58 @@
+\documentclass[a4paper,prd,nofootinbib,superscriptaddress,floatfix]{revtex4}
+%\documentclass[prd,twocolumn,nofootinbib,showpacs]{revtex4-1}
+
+%\usepackage{amsmath,amssymb}
+\usepackage{cancel}
+\usepackage{graphicx}
+\usepackage{epsfig}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{color,soul}
+\newcommand{\myexp}{e^}
+\usepackage{float}
+\usepackage{graphicx}
+\graphicspath{ {Images/} }
+\usepackage[utf8]{inputenc}
+\usepackage[compatibility=false]{caption}
+\usepackage{subcaption}
+\usepackage{eurosym}
+\usepackage{siunitx}
+
+
+\begin{document}
+
+\title{Sensitivity Analysis on Least-Squares American Options Pricing}
+
+\author{Miguel Ângelo Maia Ribeiro (n.79013)}
+
+\affiliation{Departamento de F\'{\i}sica, Instituto Superior T\'ecnico, Universidade de Lisboa, Lisboa, Portugal}
+%\begin{document}
+
+
+
+\maketitle
+\section{Thesis Summary}
+\noindent Derivatives have become increasingly important in recent decades, with the sums currently handled in these markets amounting to several trillion dollars.\\
+For this reason, it is of the utmost importance to be able to accurately predict the payoff of such contracts to correctly price them.\\
+In this thesis we will study particularly the pricing of American options. These contracts are especially difficult to price due to the high uncertainty associated with optimal stopping.\\
+Several methods have been suggested to achieve this goal, such as finite difference, but we shall use the procedure proposed by Longstaff et al., using Monte Carlo simulation and least-squares regression.\\
+We will mainly focus on the sensitivity analysis of this pricing process, namely how the parameters’ volatility affects the final calculated price.\\
+This analysis is particularly important due to the sometimes-large uncertainty associated with the parameters used. For this reason, we find that the least-squares approach is ideal under such conditions, since we expect it to be less sensitive to volatility than other methods.
+
+
+\section{Thesis Supervisors}
+\begin{itemize}
+  \item Cláudia Nunes Philippart, \ \ cnunes@math.tecnico.ulisboa.pt
+  \item Rui Manuel Agostinho Dilão, \ \ ruidilao@tecnico.ulisboa.pt
+  \item Claude Yves Cochet, \ \ claude.cochet@bnpparibas.com
+\end{itemize}
+
+\section{Main Bibliography}
+\begin{itemize}
+\item Hull, J. (2012). \textit{Options, futures, and other derivatives}. Boston: Prentice Hall.
+
+\item Longstaff, F. A., \& Schwartz, E. S. (2001, January 1). Valuing American Options by Simulation: A Simple Least-Squares Approach. \textit{The Review of Financial Studies, 14}(1), 113-147.
+
+\item Choe, G. H. (2016). \textit{Stochastic Analysis for Finance with Simulations}. Universitext. Springer International Publishing. 
+\end{itemize}
+\end{document}
+

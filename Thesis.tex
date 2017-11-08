@@ -1,4 +1,4 @@
-\documentclass[a4paper,prd,nofootinbib,superscriptaddress,floatfix]{revtex4}
+\documentclass[a4paper,prd,twocolumn,nofootinbib,superscriptaddress,floatfix]{revtex4}
 %\documentclass[prd,twocolumn,nofootinbib,showpacs]{revtex4-1}
 
 %\usepackage{amsmath,amssymb}
@@ -31,31 +31,74 @@
 
 \maketitle
 \section{Introduction}
-The stock market has suffered a complete paradigm shift in recent decades. The surge of computer science and mathematical finance has greatly enhanced our abilities to predict stock price changes sometimes long before they occur.
+The stock market has suffered a complete paradigm shift in recent decades. The recent developments in computer science and mathematical finance have greatly enhanced our abilities to predict stock price changes. It shouldn't come as much of a surprise that there has been an ever growing desire from investors to take advantage of these new developments to increase the potential profits.
 
-With the colossal sums handled daily in the stock market, even a small improvement on the predictive abilities of a given algorithm can lead to enormous profits for investors. Thus, it should be clear that a great amount of resources should be invested in developing these algorithms to perfection. An investor that does not follow this strategy would surely lose major resources when faced against his better prepared counterparts.
+With the colossal sums handled daily in the stock market, even a small improvement on the predictive abilities of a given algorithm can lead to great increases in profits for investors. Thus, it should be clear that a great amount of resources should be invested in the development of these algorithms. An investor that does not follow this strategy is bound to lose major profits when compared with his better prepared counterparts.
 
-In the stock market, contrary to common belief, not only stocks are exchanged. The derivatives market has become increasingly important in recent decades. In fact, this market alone is responsible for several trillion dollars worth of trades anually.
+\subsection{Derivatives and Options}
+In the stock market, contrary to common belief, not only stocks are exchanged. The derivatives market has become increasingly important in recent decades. In fact, this market alone is currently responsible for several trillion dollars worth of trades annually.
 
-One of the most important types of derivatives are options, with the most used being call and put options. In short, an option gives me the right to buy (in the case of a call option) or sell (in case of a put option) a particular stock for a fixed price at some point in the future. If the price of the stock goes up (call) or down (put), I can simply buy the said stock in the stock market for the lower fixed price, and sell it immediately after (called exercising the option), earning the difference.
+One of the most important types of derivatives is options. Among these, the most commonly traded are call and put options. In short, a call (resp. put) option gives an investor the right to buy (resp. sell) a particular stock for a fixed price (called the strike price) at some point in the future. If the stock price increases above (resp. decreases below) the fixed price, the investor can simply buy the said stock in the stock market for the lower fixed (resp. current) price, and sell it immediately after for the higher current (resp. fixed) price, earning the difference. If, otherwise, the stock price goes down (resp. up), then the option is worthless and the investor loses his investment.\\
+The payoff functions can be easily deduced as
+\begin{equation}\label{callput}
+\begin{split}
+&\text{Payoff}_\text{call}(t)=(K-S(t))^+;\\
+&\text{Payoff}_\text{put}(t)=(S(t)-K)^+,
+\end{split}
+\end{equation}
+\noindent where $K$ is the strike price and $S(t)$ is the stock price at the time of exercise, $t$.
 
-Options have several advantages. For one, they limit the exposure to risk. If the price of a given stock were to crash, stock holders would lose a serious amount of funds whereas the owner of a call option could simply choose to not buy the option. On the other hand, they can also lead to great profits. With the same example, with the crash of a stock price, the owner of a put option could buy this option for the lower price (after the crash) and sell it for the higher price, fixed at the time of acquisition.
+Options have several advantages that make them especially appealing to investors. For one, they limit the exposure to risk, e.g. if the price of a given stock were to crash, stock holders would lose a serious amount of funds whereas the owner of a call option would only lose his smaller original investment. On the other hand, options can also lead to greater profits e.g. using the same example of the stock price crash, the owner of a put option could buy this option for the lower current price (after the crash) and sell it for the higher price, fixed at the time of acquisition, before the crash happened.
 
-These derivatives also have their own caveats. The main disadvantage is fact that options always deal with stock prices in the future, one can never precisely predict how much will be earned, if anything at all. Thus, when dealing with options, stock price prediction is of the highest importance.
+This type of derivatives also comes with its own caveats. The main disadvantage is fact that options always deal with stock prices in the future, i.e one can never precisely anticipate how much will be earned, if anything at all. Thus, it's clear that accurately modeling the stock price is paramount when dealing with options.
 
-Options are also separated into different categories. The two best known are european and american options. An european option can only be exercised at a fixed date in the future, whereas an american option can be exercised anytime up until a fixed date.
-It is clear that american options are pose a greater challenge to deal with. One can never be absolutely sure when exercising the option is the optimal decision. Immediately after the exercise, the stock price could change so that it would have been better to wait a while longer.
-American options are nonetheless very much used by investors, so it is absolutely critical to understand which factors influence these types of derivatives.
+\subsection{European and American Options}
+Call and put options are also divided into different types. The two most commonly used are European and American options. An European option can only be exercised - buying/selling the stocks for the fixed stock price with a call/put option - at a fixed date in the future, whereas an American option can be exercised anytime up until that fixed date. The payoffs of each of these types of options is simply
+\begin{equation}
+\begin{split}
+&\text{Payoff}_\text{European}=\text{Payoff}_\text{call/put}(T);\\
+&\text{Payoff}_\text{American}=\text{Payoff}_\text{call/put}(t), \ \ \ \forall 0<t<T,
+\end{split}
+\end{equation}
+
+\noindent where $\text{Payoff}_\text{call/put}(t)$ corresponds to the payoffs from equations \ref{callput} and $T$ corresponds the fixed exercise date of European options.
 
 Due to their high importance, options have been studied in detail in the past.
-Robert Merton and Myron Scholes earned the 1997 Nobel prize in Economics for developing a mathematical model to predict the price of european options, the famous Black-Scholes formula.
-Models to price american options, derived from the results of Black and Scholes, have also been proposed, among which the work of Longstaff and Schwartz are paramount.
+Robert Merton and Myron Scholes earned the 1997 Nobel prize in Economics for developing a mathematical model to predict the price of European options, the famous Black-Scholes formula, still used nowadays (with some modifications).
+American options, however, pose a greater challenge to study. They potentially lead to higher profits than European options (they are also more expensive), but one can never be absolutely sure when exercising is the optimal decision to make. Many different methods have been proposed to deal with this optimal stopping problem. In this work, we will use one of such methods.
+
+American options are nonetheless very much used by investors, so it is absolutely critical to understand which variables influence these types of derivatives and by what amount. With this knowledge, one can better prepare oneself to market changes and even mitigate potential risks.
+
+\section{Objectives}
+The main objective of this thesis is to study which factors affect the price of an option and in what extent.
+
+We will begin by replicating the model developed by Longstaff and Schwartz to price American options. Their method is based upon a Monte Carlo generation of stock price paths with a set of market variables such as stock volatility and interest rate (using the Black-Scholes stochastic deferential equation). To these results, a least squares regression is then applied iteratively to generate an optimal stopping decision matrix with all the stock price paths generated.
+
+With this method, we shall then apply a variation-based sensitivity analysis, as developed by Sobol and Saltelli. This analysis outputs a weight for each of the variables used that corresponds to their influence in the variance of the final option price.
+Thus, if a variable has a large weight, its variance has a large impact in the variance of the option price.
+
+As a next step, we shall modify the Longstaff-Schwartz method to closely resemble real-world stocks. We will, for example, implement the GARCH(1,1) model for the stock price volatility to account for daily changes on its value. We could also try to implement interest rate models for the same reason.
+A further study of which models better suit our needs is still necessary.
+
+Finally, we will apply our model to real-world stock prices, publicly available, and try to predict option prices.
+
+\iffalse
+First we will begin by simulating a large number of stocks, using the simple Black-Scholes formula to generate each path. The main point behind this method is to apply the Monte Carlo approach to the stock price which will be used later in the option pricing.
+After generating all the paths, we shall attempt to replicate the method developed by Longstaff and Schwartz for pricing American options, using the results from the previous simulation.
+Next, we will modify the initial simulations using more complex models that better replicate real-world stocks, such as varying volatility, varying interest rate. We shall further study which other factors influence the final price of an option.
+We shall then apply a sensitivity analysis on the option price, using the model developed by Sobol and Saltelli.
+\fi
+
+\section{State of the art}
+
+
+Models to price American options, derived from the results of Black and Scholes, have also been proposed, among which the work of Longstaff and Schwartz are paramount.
 
 
 Nowadays, computers have become fundamental tools in the study of stock
 
 
-
+\iffalse
 
 \noindent Derivatives have become increasingly important in recent decades, with the sums currently handled in these markets amounting to several trillion dollars.\\
 For this reason, it is of the utmost importance to be able to accurately predict the payoff of such contracts to correctly price them.\\
@@ -63,13 +106,19 @@ In this thesis we will study particularly the pricing of American options. These
 Several methods have been suggested to achieve this goal, such as finite difference, but we shall use the procedure proposed by Longstaff et al., using Monte Carlo simulation and least-squares regression.\\
 We will mainly focus on the sensitivity analysis of this pricing process, namely how the parameters’ volatility affects the final calculated price.\\
 This analysis is particularly important due to the sometimes-large uncertainty associated with the parameters used. For this reason, we find that the least-squares approach is ideal under such conditions, since we expect it to be less sensitive to volatility than other methods.
-
+\fi
 \section{Objectives}
 
 \section{State of the Art}
 
-\section{Bibliography}
+\section{Commented Bibliography}
+\begin{itemize}
+\item Hull, J. (2012). \textit{Options, futures, and other derivatives}. Boston: Prentice Hall.
 
+\item Longstaff, F. A., \& Schwartz, E. S. (2001, January 1). Valuing American Options by Simulation: A Simple Least-Squares Approach. \textit{The Review of Financial Studies, 14}(1), 113-147.
+
+\item Choe, G. H. (2016). \textit{Stochastic Analysis for Finance with Simulations}. Universitext. Springer International Publishing. 
+\end{itemize}
 \section{Timetable}
 
 \iffalse
@@ -81,13 +130,5 @@ This analysis is particularly important due to the sometimes-large uncertainty a
 \end{itemize}
 \fi
 
-\section{Main Bibliography}
-\begin{itemize}
-\item Hull, J. (2012). \textit{Options, futures, and other derivatives}. Boston: Prentice Hall.
-
-\item Longstaff, F. A., \& Schwartz, E. S. (2001, January 1). Valuing American Options by Simulation: A Simple Least-Squares Approach. \textit{The Review of Financial Studies, 14}(1), 113-147.
-
-\item Choe, G. H. (2016). \textit{Stochastic Analysis for Finance with Simulations}. Universitext. Springer International Publishing. 
-\end{itemize}
 \end{document}
 

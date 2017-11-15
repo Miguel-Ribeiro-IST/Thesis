@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[    165702,       3227]
-NotebookOptionsPosition[    163258,       3144]
-NotebookOutlinePosition[    163604,       3159]
-CellTagsIndexPosition[    163561,       3156]
+NotebookDataLength[    165755,       3228]
+NotebookOptionsPosition[    163311,       3145]
+NotebookOutlinePosition[    163657,       3160]
+CellTagsIndexPosition[    163614,       3157]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -724,41 +724,40 @@ Cell[BoxData[
      ImageScaled[{0.5, 0}]], 
     InsetBox["0.11409322797974876`", 
      Offset[{0, 4}, {3., 0.11409322797974876}], ImageScaled[{0.5, 0}]]}, 
-   StyleBox[
-    StyleBox[{
-      {Thickness[Tiny], 
-       LineBox[{{0.48597994530537825`, 0.}, {3.5151846855059254`, 0.}}], 
-       StyleBox[{}, "GraphicsLabel",
-        StripOnInput->False]}, 
-      StyleBox[{
+   StyleBox[{
+     {Thickness[Tiny], 
+      LineBox[{{0.48597994530537825`, 0.}, {3.5151846855059254`, 0.}}], 
+      StyleBox[{}, "GraphicsLabel",
+       StripOnInput->False]}, 
+     StyleBox[{
+       {Thickness[Tiny], 
+        LineBox[{{0.544211485870556, 0.}, 
+          Offset[{-1.102182119232618*^-15, -6.}, {0.544211485870556, 0.}]}], 
+        LineBox[{{3.455788514129444, 0.}, 
+          Offset[{-1.102182119232618*^-15, -6.}, {3.455788514129444, 
+           0.}]}], {{}, {}, {}, {
+          LineBox[{{1.455788514129444, 0.}, 
+            Offset[{-7.347880794884119*^-16, -4.}, {1.455788514129444, 0.}]}],
+           LineBox[{{1.544211485870556, 0.}, 
+            Offset[{-7.347880794884119*^-16, -4.}, {1.544211485870556, 0.}]}],
+           LineBox[{{2.455788514129444, 0.}, 
+            Offset[{-7.347880794884119*^-16, -4.}, {2.455788514129444, 0.}]}],
+           LineBox[{{2.544211485870556, 0.}, 
+            Offset[{-7.347880794884119*^-16, -4.}, {2.544211485870556, 
+             0.}]}]}, {}}}, 
+       StyleBox[
         {Thickness[Tiny], 
-         LineBox[{{0.544211485870556, 0.}, 
-           Offset[{-1.102182119232618*^-15, -6.}, {0.544211485870556, 0.}]}], 
-         LineBox[{{3.455788514129444, 0.}, 
-           Offset[{-1.102182119232618*^-15, -6.}, {3.455788514129444, 
-            0.}]}], {{}, {}, {}, {
-           LineBox[{{1.455788514129444, 0.}, 
-             Offset[{-7.347880794884119*^-16, -4.}, {1.455788514129444, 
-              0.}]}], LineBox[{{1.544211485870556, 0.}, 
-             Offset[{-7.347880794884119*^-16, -4.}, {1.544211485870556, 
-              0.}]}], LineBox[{{2.455788514129444, 0.}, 
-             Offset[{-7.347880794884119*^-16, -4.}, {2.455788514129444, 
-              0.}]}], LineBox[{{2.544211485870556, 0.}, 
-             Offset[{-7.347880794884119*^-16, -4.}, {2.544211485870556, 
-              0.}]}]}, {}}}, 
-        StyleBox[
-         {Thickness[Tiny], 
-          InsetBox["\<\"r\"\>", Offset[{0., -2.}, {1., 0.}], 
-           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
-          InsetBox["\<\"\[Sigma]\"\>", Offset[{0., -2.}, {2., 0.}], 
-           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
-          InsetBox["\<\"S0\"\>", Offset[{0., -2.}, {3., 0.}], 
-           ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}]}, 
-         "GraphicsLabel",
-         StripOnInput->False]}, "GraphicsTicks",
-       StripOnInput->False]},
-     Antialiasing->False], "GraphicsAxes",
-    StripOnInput->False]},
+         InsetBox["\<\"r\"\>", Offset[{0., -2.}, {1., 0.}], 
+          ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+         InsetBox["\<\"\[Sigma]\"\>", Offset[{0., -2.}, {2., 0.}], 
+          ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}], 
+         InsetBox["\<\"S0\"\>", Offset[{0., -2.}, {3., 0.}], 
+          ImageScaled[{Rational[1, 2], 1}], Automatic, {1, 0}]}, 
+        "GraphicsLabel",
+        StripOnInput->False]}, "GraphicsTicks",
+      StripOnInput->False]}, "GraphicsAxes",
+    StripOnInput->False,
+    Antialiasing->False]},
   AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
   Axes->{False, True},
   AxesLabel->{None, None},
@@ -3018,48 +3017,49 @@ Cell[BoxData[{
   RowBox[{"Export", "[", 
    RowBox[{
    "\"\<C:\\\\Users\\\\Miguel \
-Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\MatA.m\>\"", ",", 
+Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\MatA3.m\>\"", ",", 
     "MatA"}], "]"}], ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"Export", "[", 
    RowBox[{
    "\"\<C:\\\\Users\\\\Miguel \
-Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\MatB.m\>\"", ",", 
+Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\MatB3.m\>\"", ",", 
     "MatB"}], "]"}], ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"Export", "[", 
    RowBox[{
    "\"\<C:\\\\Users\\\\Miguel \
-Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\fA.m\>\"", ",", 
+Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\fA3.m\>\"", ",", 
     "fA"}], "]"}], ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"Export", "[", 
    RowBox[{
    "\"\<C:\\\\Users\\\\Miguel \
-Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\fB.m\>\"", ",", 
+Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\fB3.m\>\"", ",", 
     "fB"}], "]"}], ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"Export", "[", 
    RowBox[{
    "\"\<C:\\\\Users\\\\Miguel \
-Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\fVA.m\>\"", ",", 
+Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\fVA3.m\>\"", ",", 
     "fVA"}], "]"}], ";"}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{"Export", "[", 
    RowBox[{
    "\"\<C:\\\\Users\\\\Miguel \
-Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\Param.m\>\"", ",", 
+Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Matrices\\\\Param3.m\>\"", ",", 
     RowBox[{"Param", "[", 
      RowBox[{"[", "1", "]"}], "]"}]}], "]"}], ";"}]}], "Input",
  CellChangeTimes->{{3.7190746265386105`*^9, 3.719074835142562*^9}, {
-  3.719075729672616*^9, 3.7190758646329126`*^9}}],
+  3.719075729672616*^9, 3.7190758646329126`*^9}, {3.719771981300747*^9, 
+  3.719771993302252*^9}}],
 
 Cell[BoxData[{
  RowBox[{
   RowBox[{"Export", "[", 
    RowBox[{
    "\"\<C:\\\\Users\\\\Miguel \
-Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Images\\\\sigma.eps\>\"", ",", 
+Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Images\\\\sigma3.eps\>\"", ",", 
     RowBox[{"ListPlot", "[", 
      RowBox[{
       RowBox[{"Transpose", "[", 
@@ -3086,7 +3086,7 @@ Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Images\\\\sigma.eps\>\"", ",",
   RowBox[{"Export", "[", 
    RowBox[{
    "\"\<C:\\\\Users\\\\Miguel \
-Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Images\\\\r.eps\>\"", ",", 
+Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Images\\\\r3.eps\>\"", ",", 
     RowBox[{"ListPlot", "[", 
      RowBox[{
       RowBox[{"Transpose", "[", 
@@ -3113,7 +3113,7 @@ Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Images\\\\r.eps\>\"", ",",
   RowBox[{"Export", "[", 
    RowBox[{
    "\"\<C:\\\\Users\\\\Miguel \
-Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Images\\\\S0.eps\>\"", ",", 
+Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Images\\\\S03.eps\>\"", ",", 
     RowBox[{"ListPlot", "[", 
      RowBox[{
       RowBox[{"Transpose", "[", 
@@ -3137,7 +3137,8 @@ Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Images\\\\S0.eps\>\"", ",",
         RowBox[{"\"\<S0\>\"", ",", "\"\<option price\>\""}], "}"}]}]}], "]"}],
      ",", "\"\<eps\>\""}], "]"}], ";"}]}], "Input",
  CellChangeTimes->{{3.7190759028030148`*^9, 3.7190760087795076`*^9}, {
-  3.7190763008637867`*^9, 3.719076544938571*^9}}],
+  3.7190763008637867`*^9, 3.719076544938571*^9}, {3.7197719962119017`*^9, 
+  3.719772001052683*^9}}],
 
 Cell[BoxData[
  RowBox[{"NotebookSave", "[", "]"}]], "Input"]
@@ -3212,23 +3213,23 @@ Cell[23253, 645, 608, 11, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[23898, 661, 539, 13, 30, "Input"],
-Cell[24440, 676, 6366, 151, 248, "Output"]
+Cell[24440, 676, 6310, 150, 248, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[30843, 832, 839, 24, 30, "Input"],
-Cell[31685, 858, 42132, 703, 243, "Output"]
+Cell[30787, 831, 839, 24, 30, "Input"],
+Cell[31629, 857, 42132, 703, 243, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[73854, 1566, 882, 25, 30, "Input"],
-Cell[74739, 1593, 41869, 699, 245, "Output"]
+Cell[73798, 1565, 882, 25, 30, "Input"],
+Cell[74683, 1592, 41869, 699, 245, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[116645, 2297, 832, 24, 30, "Input"],
-Cell[117480, 2323, 41270, 689, 240, "Output"]
+Cell[116589, 2296, 832, 24, 30, "Input"],
+Cell[117424, 2322, 41270, 689, 240, "Output"]
 }, Open  ]],
-Cell[158765, 3015, 1405, 39, 126, "Input"],
-Cell[160173, 3056, 3018, 83, 126, "Input"],
-Cell[163194, 3141, 60, 1, 30, "Input"]
+Cell[158709, 3014, 1460, 40, 126, "Input"],
+Cell[160172, 3056, 3072, 84, 126, "Input"],
+Cell[163247, 3142, 60, 1, 30, "Input"]
 }
 ]
 *)

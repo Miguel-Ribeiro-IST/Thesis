@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     17305,        475]
-NotebookOptionsPosition[     16937,        459]
-NotebookOutlinePosition[     17283,        474]
-CellTagsIndexPosition[     17240,        471]
+NotebookDataLength[     17987,        492]
+NotebookOptionsPosition[     17618,        476]
+NotebookOutlinePosition[     17964,        491]
+CellTagsIndexPosition[     17921,        488]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -307,7 +307,7 @@ Cell[BoxData[
 Cell[BoxData[
  RowBox[{
   RowBox[{"Volatility", "[", 
-   RowBox[{"CSVFile_", ",", "days_", ",", "column_"}], "]"}], ":=", 
+   RowBox[{"CSVFile_", ",", "column_", ",", "n_", ",", "years_"}], "]"}], ":=", 
   RowBox[{"(", 
    RowBox[{
     RowBox[{"S", "=", 
@@ -317,14 +317,29 @@ Cell[BoxData[
         RowBox[{"CSVFile", ",", 
          RowBox[{"{", 
           RowBox[{"\"\<Data\>\"", ",", "All", ",", "column"}], "}"}]}], "]"}],
-        ",", "1"}], "]"}]}], ";", 
+        ",", "1"}], "]"}]}], ";", "\[IndentingNewLine]", 
+    RowBox[{"If", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{
+        RowBox[{"Dimensions", "[", "S", "]"}], "[", 
+        RowBox[{"[", "1", "]"}], "]"}], ">", "251"}], ",", 
+      "\[IndentingNewLine]", 
+      RowBox[{"S", "=", 
+       RowBox[{"Drop", "[", 
+        RowBox[{"S", ",", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"251", "*", "years"}], "+", "1"}], ",", 
+           RowBox[{"-", "1"}]}], "}"}]}], "]"}]}], ","}], "]"}], ";", 
+    "\[IndentingNewLine]", 
     RowBox[{"S", "=", 
-     RowBox[{"Drop", "[", 
-      RowBox[{"S", ",", 
-       RowBox[{"{", 
-        RowBox[{
-         RowBox[{"days", "+", "1"}], ",", 
-         RowBox[{"-", "1"}]}], "}"}]}], "]"}]}], ";", 
+     RowBox[{"S", "[", 
+      RowBox[{"[", 
+       RowBox[{";;", ";;", 
+        RowBox[{"Floor", "[", 
+         RowBox[{"251", "/", "n"}], "]"}]}], "]"}], "]"}]}], ";", 
     RowBox[{"U", "=", 
      RowBox[{"Table", "[", 
       RowBox[{
@@ -430,7 +445,9 @@ Cell[BoxData[
   3.719755996115943*^9, 3.719756121534581*^9}, {3.7197562441428795`*^9, 
   3.7197565198251343`*^9}, {3.719766117945212*^9, 3.7197661587650995`*^9}, {
   3.719767632378028*^9, 3.719767651403123*^9}, {3.719767979224289*^9, 
-  3.7197681343951883`*^9}, {3.7197685312518244`*^9, 3.719768625914798*^9}}],
+  3.7197681343951883`*^9}, {3.7197685312518244`*^9, 3.719768625914798*^9}, {
+  3.7199237649618044`*^9, 3.7199238609933043`*^9}, {3.71992410778393*^9, 
+  3.719924151141794*^9}, {3.7199243884392123`*^9, 3.719924392217058*^9}}],
 
 Cell[BoxData[{
  RowBox[{
@@ -457,8 +474,8 @@ Cell[BoxData[
  RowBox[{"NotebookSave", "[", "]"}]], "Input",
  CellChangeTimes->{{3.718894952505781*^9, 3.7188949632530756`*^9}}]
 },
-WindowSize->{1344, 669},
-WindowMargins->{{0, Automatic}, {Automatic, 0}},
+WindowSize->{678, 676},
+WindowMargins->{{Automatic, -7}, {Automatic, 0}},
 FrontEndVersion->"11.0 for Microsoft Windows (64-bit) (September 21, 2016)",
 StyleDefinitions->"Default.nb"
 ]
@@ -473,10 +490,10 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 10791, 284, 506, "Input"],
-Cell[11352, 306, 4655, 126, 145, "Input"],
-Cell[16010, 434, 792, 19, 50, "Input"],
-Cell[16805, 455, 128, 2, 30, "Input"]
+Cell[558, 20, 10791, 284, 658, "Input"],
+Cell[11352, 306, 5336, 143, 278, "Input"],
+Cell[16691, 451, 792, 19, 107, "Input"],
+Cell[17486, 472, 128, 2, 30, "Input"]
 }
 ]
 *)

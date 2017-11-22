@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     17987,        492]
-NotebookOptionsPosition[     17618,        476]
-NotebookOutlinePosition[     17964,        491]
-CellTagsIndexPosition[     17921,        488]
+NotebookDataLength[     18062,        495]
+NotebookOptionsPosition[     17697,        479]
+NotebookOutlinePosition[     18040,        494]
+CellTagsIndexPosition[     17997,        491]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -454,7 +454,8 @@ Cell[BoxData[{
   RowBox[{"DumpSave", "[", 
    RowBox[{
    "\"\<C:\\\\Users\\\\Miguel \
-Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Function_Garch.m\>\"", ",", 
+Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Functions\\\\Function_Garch.m\>\"\
+", ",", 
     RowBox[{"{", 
      RowBox[{"Simul", ",", "Volatility"}], "}"}]}], "]"}], 
   ";"}], "\[IndentingNewLine]", 
@@ -462,21 +463,23 @@ Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Function_Garch.m\>\"", ",",
   RowBox[{"Save", "[", 
    RowBox[{
    "\"\<C:\\\\Users\\\\Miguel \
-Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Function_Garch.m\>\"", ",", 
+Ribeiro\\\\Documents\\\\GitHub\\\\Thesis\\\\Functions\\\\Function_Garch.m\>\"\
+", ",", 
     RowBox[{"{", 
      RowBox[{"Simul", ",", "Volatility"}], "}"}]}], "]"}], ";"}]}], "Input",
  CellChangeTimes->{{3.7166588241317654`*^9, 3.716658853086111*^9}, {
   3.71665980279562*^9, 3.716659812328401*^9}, {3.716730784562719*^9, 
   3.7167308412700396`*^9}, {3.7197565801857805`*^9, 3.719756597000962*^9}, {
-  3.7197677566714506`*^9, 3.719767762855948*^9}}],
+  3.7197677566714506`*^9, 3.719767762855948*^9}, {3.720364413031806*^9, 
+  3.720364442288037*^9}}],
 
 Cell[BoxData[
  RowBox[{"NotebookSave", "[", "]"}]], "Input",
  CellChangeTimes->{{3.718894952505781*^9, 3.7188949632530756`*^9}}]
 },
-WindowSize->{678, 676},
-WindowMargins->{{Automatic, -7}, {Automatic, 0}},
-FrontEndVersion->"11.0 for Microsoft Windows (64-bit) (September 21, 2016)",
+WindowSize->{1366, 685},
+WindowMargins->{{-8, Automatic}, {Automatic, -8}},
+FrontEndVersion->"10.2 for Microsoft Windows (64-bit) (July 29, 2015)",
 StyleDefinitions->"Default.nb"
 ]
 (* End of Notebook Content *)
@@ -490,10 +493,10 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 10791, 284, 658, "Input"],
-Cell[11352, 306, 5336, 143, 278, "Input"],
-Cell[16691, 451, 792, 19, 107, "Input"],
-Cell[17486, 472, 128, 2, 30, "Input"]
+Cell[558, 20, 10791, 284, 532, "Input"],
+Cell[11352, 306, 5336, 143, 192, "Input"],
+Cell[16691, 451, 871, 22, 52, "Input"],
+Cell[17565, 475, 128, 2, 31, "Input"]
 }
 ]
 *)

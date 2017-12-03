@@ -5,6 +5,7 @@
 \usepackage{cancel}
 \usepackage{graphicx}
 \usepackage{epsfig}
+\usepackage{physics}
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage{color,soul}
 \newcommand{\myexp}{e^}
@@ -23,7 +24,7 @@
 
 \title{Sensitivity Analysis on Least-Squares American Options Pricing}
 
-\author{Miguel Ângelo Maia Ribeiro (n.79013)}
+\author{Miguel Ângelo Maia Ribeiro}
 
 \affiliation{Departamento de F\'{\i}sica, Instituto Superior T\'ecnico, Universidade de Lisboa, Lisboa, Portugal}
 %\begin{document}
@@ -34,67 +35,54 @@
 \section{Introduction}
 The stock market has suffered a complete paradigm shift in the past decades. Recent developments in computer science and mathematical finance have greatly enhanced our abilities to predict and take advantage of stock price changes. It shouldn't come as much of a surprise that there has been an ever growing desire from investors to take advantage of these new developments to increase potential profits.
 
-With the colossal sums handled daily in the stock market, even a small improvement on the predictive abilities of a given forecasting algorithm can lead to significant increases in profits for investors. Thus, it should be clear that a great amount of resources should be devoted to the research and development of these algorithms. An investor that does not follow this strategy is bound to lose major profits when compared with his better prepared counterparts.
+With the colossal sums handled daily in the stock market, even a small improvement on the predictive abilities of a given forecasting algorithm can lead to significant increases in profits for investors. In such a highly competitive subject, it should be clear that a great amount of resources should be devoted to the research and development of these algorithms. An investor that does not follow this strategy is bound to lose major profits when compared with his better prepared counterparts.
 
 
 
 
-\subsection{Derivatives and Options}
 Due to the developments in stock price forecasting, our knowledge of derivatives has also greatly increased. A derivative is simply a contract whose value depends on other simpler financial instruments, like stocks or interest rates. Derivatives can virtually take any form desirable, so long as there are two parties interested in taking a part in it. In this work we will focus on the most common type of derivatives - options.
 
 The derivatives market has become increasingly important in recent times. In fact, as of June 2017, derivatives are responsible for over $\$542$ trillion worth of trades, in the Over-the-Counter (OTC) market alone, as can be seen on \autoref{fig:OTC} (the OTC market refers to all deals signed outside of derivatives exchanges). Though the market size peaked in 2013 with over $\$710$ trillion, it seems to have shrinked in the last decade, which might be attributed to the global financial crisis of 2007.
 
 \begin{figure}[H]
     \centering
-      \includegraphics[width=1.0\columnwidth]{OTC.eps}
+      \includegraphics[width=.9\columnwidth,trim={2pt 17pt 0 0},clip]{OTC.eps}
       \caption{Size of OTC derivatives market.\newline \footnotesize{\textbf{Source:} stats.bis.org/statx/srs/table/d5.1 (on 16/11/2017)}}\label{fig:OTC}
     \end{figure}
 
-
-Among the many types of derivatives, the most commonly traded are options.
+\subsection{Call and Put Options}
+Among the many types of derivatives, the most commonly traded are options, of which there are two main types - calls and puts.
 
 In simple terms, a \textit{call option} grants the investor the right to buy the underlying asset (e.g. stock) for a fixed price, known as the \textit{strike price}, by a certain date, known as the \textit{expiration date}.\\
 On the other hand, a \textit{put option} grants the investor the right to sell the underlying asset for the strike price, by the expiration date.\\
 If at the time of exercise, the stock price is above (resp. below) the strike price, the owner of a call (resp. put) option should exercise his right to buy (resp. sell) the stocks, earning the difference between the stock price and the strike price. The payoff function of these two types of derivatives can then simply be deduced as
 \begin{equation}\label{callput}
 \begin{split}
-&\text{Payoff}_\text{call}(t)=(K-S(t))^+;\\
-&\text{Payoff}_\text{put}(t)=(S(t)-K)^+,
+&\text{Payoff}_\text{call}(t)=(S(t)-K)^+,\\
+&\text{Payoff}_\text{put}(t)=(K-S(t))^+;
 \end{split}
 \end{equation}
 \noindent where $K$ is the strike price and $S(t)$ is the stock price at the time of exercise, $t$.
 
-It should be noted that an option gives the holder the right to buy/sell the underlying asset but he is not obliged to do so.
+\begin{figure}[H]
+    \centering
+      \includegraphics[width=.8\columnwidth]{Payoff.eps}
+      \caption{Payoff functions of \textit{call} and \textit{put options}.}\label{fig:Payoff}
+    \end{figure}
 
-\iffalse
-Among these, the most commonly traded are call and put options. In short, a call (resp. put) option gives an investor the right to buy (resp. sell) a particular stock for a fixed price (called the strike price) at some point in the future. If the stock price increases above (resp. decreases below) the fixed price, the investor can simply buy the said stock in the stock market for the lower fixed (resp. current) price, and sell it immediately after for the higher current (resp. fixed) price, earning the difference. If, otherwise, the stock price goes down (resp. up), then the option is worthless and the investor loses his investment.\\
-The payoff functions can be easily deduced as
-\begin{equation}\label{callput}
-\begin{split}
-&\text{Payoff}_\text{call}(t)=(K-S(t))^+;\\
-&\text{Payoff}_\text{put}(t)=(S(t)-K)^+,
-\end{split}
-\end{equation}
-\noindent where $K$ is the strike price and $S(t)$ is the stock price at the time of exercise, $t$.\fi
-
-Options have several advantages that make them especially appealing to investors.\\
-To hedgers (i.e. investors that want to limit their exposure to risk), options provide safety by fixing the future price of a stock. If a hedger is afraid of a stock price crash in the future in one of the stocks he holds, by buying put options he ensures that his losses are contained because he can always sell the stocks he owns for the fixed strike price.\\
-To speculators (i.e. investors that take advantage of the uncertainty of future asset prices by betting on their outcome), options grant access to much larger profits when the market forecast proves true, with much smaller initial investments.
-
-\iffalse
-In short, options magnify consequences: a good forecast turns into a large profit whereas a bad prediction results in a loss of investment.
-\fi
+It's important to note that an option gives the holder the right to buy/sell the underlying asset but he is not obliged to do so. If exercising the option would lead to losses, the investor can simply let the option expire.
 
 
-All these advantages don't come without their cost, so an investor has to pay a certain fee to acquire an option. This pricing problem is a fundamental concern to investors, because under or overpricing an option could have severe consequences and lead to major losses.
+
+Options have several advantages that make them especially appealing to investors.
+To hedgers (i.e. investors that want to limit their exposure to risk), options provide safety by fixing the future price of a stock. If a hedger is afraid of a stock price crash in the future in one of the stocks he holds, by buying put options he ensures that his losses are contained because he can always sell the stocks he owns for the fixed strike price, even if the price crashes.
+To speculators (i.e. investors that want to take advantage of the uncertainty of future stock prices by betting on their outcome), options grant access to much larger profits when the market forecast proves true, with much smaller initial investments.
+
+
+Because of all their advantages, unlike some other types of derivatives options have a cost. Finding the ideal price for an option is quite difficult, however. This pricing problem is a fundamental concern to investors, because under or overpricing an option could have severe consequences and lead to major losses.
 The price of an option and what influences it will be the main focus of this work.
 
 
-\iffalse
-For one, they limit the exposure to risk, e.g. if the price of a given stock were to crash, stock holders would lose a serious amount of funds whereas the owner of a call option would only lose his smaller original investment. On the other hand, options can also lead to greater profits e.g. using the same example of the stock price crash, the owner of a put option could buy this option for the lower current price (after the crash) and sell it for the higher price, fixed at the time of acquisition, before the crash happened.
-
-This type of derivatives also comes with its own caveats. The main disadvantage is the fact that options always deal with stock prices in the future, i.e one can never precisely anticipate how much will be earned, if anything at all. Thus, it's clear that accurately modeling the stock price is paramount when dealing with options.
-\fi
 
 
 \subsection{European and American Options}
@@ -103,22 +91,23 @@ The holder of an \textit{European option} can only exert his right to buy/sell (
 On the other hand, an \textit{American option} enables its owner to exercise it at any time up to its expiration date.
 
 
-\iffalse
-Call and put options are also divided into different types. The two most commonly used are European and American options. An European option can only be exercised - buying/selling the stocks for the fixed stock price with a call/put option - at a fixed date in the future, whereas an American option can be exercised anytime up until that fixed date. The payoffs of each of these types of options is simply
-\begin{equation}
-\begin{split}
-&\text{Payoff}_\text{European}=\text{Payoff}_\text{call/put}(T);\\
-&\text{Payoff}_\text{American}=\text{Payoff}_\text{call/put}(t), \ \ \ \forall 0<t<T,
-\end{split}
-\end{equation}
-
-\noindent where $\text{Payoff}_\text{call/put}(t)$ corresponds to the payoffs from equations \ref{callput} and $T$ corresponds the fixed exercise date of European options.
-\fi
 
 Due to their high importance, options have been studied in detail in the past.
-Possibly the most important result in this field came from Robert Merton and Myron Scholes who earned the 1997 Nobel prize in Economics for developing a mathematical model to price European options - the famous Black-Scholes formula - still used nowadays, though with some modifications.
+Possibly the most important result in this field came from Robert Merton and Myron Scholes who earned the 1997 Nobel prize in Economics for developing a mathematical model to price European options - the famous Black-Scholes formula - still used nowadays, though with some modifications. Their result states that an European call or put option's price follows the partial differential equation (PDE)
 
-Pricing American options, however, poses a greater challenge. Because they can be exercised at any time, the underlying assets must be closely monitored so as to attempt to optimal stopping.
+\begin{equation}
+\pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{V^2}{S^2}+rS\pdv{V}{S}-rV=0,
+\end{equation}
+
+\noindent where $V$ is the price of the option, $S$ is the price of the underlying stock, $r$ is the risk-free interest rate and $sigma$ is the stock price volatility.
+This model assumes furthermore that stock prices follow a Geometric Brownian Motion (GBM), which can be defined as
+
+\begin{equation}
+dS(t)=rSdt+\sigma SdW(t),
+\end{equation}
+\noindent with W(t) defining a Brownian motion.
+
+Pricing American options, however, poses a much greater challenge. Because they can be exercised at any time, the underlying assets must be closely monitored so as to attempt optimal stopping.
 Furthermore, unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to price these options. Among these, Longstaff and Schwartz developed one of the most popular, based on Monte Carlo simulation with least squares regression to calculate the option price. Their results will be heavily used in this work.
 
 Despite their complexity, American options are nonetheless very much used by investors. In fact, most of the options currently traded in exchanges are American. Thus, it is absolutely critical to understand which variables influence this type of derivatives and by what amount. With this knowledge, one can better prepare oneself to market changes and even mitigate potential risks.
@@ -135,16 +124,6 @@ In option pricing this is particularly useful. If an investor knows where the gr
 
 Due to its usefulness, this particular type of sensitivity analysis and its application to option pricing will be the main focus of this work.
 
-\iffalse
-When dealing with problems with no analytic solutions, such as the case of American options pricing, it becomes impossible to precisely predict how the model inputs directly affect the final output.
-
-When dealing with inputs with an associated uncertainty, one must use sensitivity analysis to find how the model parameters influence the final result.
-
-A sensitivity analysis simply outputs
-
-Many factors have a weight in the final price of an option.
-Because there is no analytic solution to price American options, we depend solely on numerical models to achieve this task.
-\fi
 
 
 \section{Objectives}
@@ -166,25 +145,9 @@ A further study of which models better suit our needs is still necessary, howeve
 Finally, we will try to apply our model to real-world stock prices, publicly available, and perform this sensitivity analysis using this data.
 
 
-\iffalse
-First we will begin by simulating a large number of stocks, using the simple Black-Scholes formula to generate each path. The main point behind this method is to apply the Monte Carlo approach to the stock price which will be used later in the option pricing.
-After generating all the paths, we shall attempt to replicate the method developed by Longstaff and Schwartz for pricing American options, using the results from the previous simulation.
-Next, we will modify the initial simulations using more complex models that better replicate real-world stocks, such as varying volatility, varying interest rate. We shall further study which other factors influence the final price of an option.
-We shall then apply a sensitivity analysis on the option price, using the model developed by Sobol and Saltelli.
-\fi
 
 \section{State of the art}
 
-
-\iffalse
-
-\noindent Derivatives have become increasingly important in recent decades, with the sums currently handled in these markets amounting to several trillion dollars.\\
-For this reason, it is of the utmost importance to be able to accurately predict the payoff of such contracts to correctly price them.\\
-In this thesis we will study particularly the pricing of American options. These contracts are especially difficult to price due to the high uncertainty associated with optimal stopping.\\
-Several methods have been suggested to achieve this goal, such as finite difference, but we shall use the procedure proposed by Longstaff et al., using Monte Carlo simulation and least-squares regression.\\
-We will mainly focus on the sensitivity analysis of this pricing process, namely how the parameters’ volatility affects the final calculated price.\\
-This analysis is particularly important due to the sometimes-large uncertainty associated with the parameters used. For this reason, we find that the least-squares approach is ideal under such conditions, since we expect it to be less sensitive to volatility than other methods.
-\fi
 
 \section{Commented Bibliography}
 \subsection{Miscellaneous Topics}
@@ -223,3 +186,56 @@ Saltelli
 
 \end{document}
 
+\iffalse
+Among these, the most commonly traded are call and put options. In short, a call (resp. put) option gives an investor the right to buy (resp. sell) a particular stock for a fixed price (called the strike price) at some point in the future. If the stock price increases above (resp. decreases below) the fixed price, the investor can simply buy the said stock in the stock market for the lower fixed (resp. current) price, and sell it immediately after for the higher current (resp. fixed) price, earning the difference. If, otherwise, the stock price goes down (resp. up), then the option is worthless and the investor loses his investment.\\
+The payoff functions can be easily deduced as
+\begin{equation}\label{callput}
+\begin{split}
+
+\end{split}
+\end{equation}
+\noindent where $K$ is the strike price and $S(t)$ is the stock price at the time of exercise, $t$.\fi
+\iffalse
+In short, options magnify consequences: a good forecast turns into a large profit whereas a bad prediction results in a loss of investment.
+\fi
+\iffalse
+For one, they limit the exposure to risk, e.g. if the price of a given stock were to crash, stock holders would lose a serious amount of funds whereas the owner of a call option would only lose his smaller original investment. On the other hand, options can also lead to greater profits e.g. using the same example of the stock price crash, the owner of a put option could buy this option for the lower current price (after the crash) and sell it for the higher price, fixed at the time of acquisition, before the crash happened.
+
+This type of derivatives also comes with its own caveats. The main disadvantage is the fact that options always deal with stock prices in the future, i.e one can never precisely anticipate how much will be earned, if anything at all. Thus, it's clear that accurately modeling the stock price is paramount when dealing with options.
+\fi
+\iffalse
+Call and put options are also divided into different types. The two most commonly used are European and American options. An European option can only be exercised - buying/selling the stocks for the fixed stock price with a call/put option - at a fixed date in the future, whereas an American option can be exercised anytime up until that fixed date. The payoffs of each of these types of options is simply
+\begin{equation}
+\begin{split}
+&\text{Payoff}_\text{European}=\text{Payoff}_\text{call/put}(T);\\
+&\text{Payoff}_\text{American}=\text{Payoff}_\text{call/put}(t), \ \ \ \forall 0<t<T,
+\end{split}
+\end{equation}
+
+\noindent where $\text{Payoff}_\text{call/put}(t)$ corresponds to the payoffs from equations \ref{callput} and $T$ corresponds the fixed exercise date of European options.
+\fi
+\iffalse
+When dealing with problems with no analytic solutions, such as the case of American options pricing, it becomes impossible to precisely predict how the model inputs directly affect the final output.
+
+When dealing with inputs with an associated uncertainty, one must use sensitivity analysis to find how the model parameters influence the final result.
+
+A sensitivity analysis simply outputs
+
+Many factors have a weight in the final price of an option.
+Because there is no analytic solution to price American options, we depend solely on numerical models to achieve this task.
+\fi
+\iffalse
+First we will begin by simulating a large number of stocks, using the simple Black-Scholes formula to generate each path. The main point behind this method is to apply the Monte Carlo approach to the stock price which will be used later in the option pricing.
+After generating all the paths, we shall attempt to replicate the method developed by Longstaff and Schwartz for pricing American options, using the results from the previous simulation.
+Next, we will modify the initial simulations using more complex models that better replicate real-world stocks, such as varying volatility, varying interest rate. We shall further study which other factors influence the final price of an option.
+We shall then apply a sensitivity analysis on the option price, using the model developed by Sobol and Saltelli.
+\fi
+\iffalse
+
+\noindent Derivatives have become increasingly important in recent decades, with the sums currently handled in these markets amounting to several trillion dollars.\\
+For this reason, it is of the utmost importance to be able to accurately predict the payoff of such contracts to correctly price them.\\
+In this thesis we will study particularly the pricing of American options. These contracts are especially difficult to price due to the high uncertainty associated with optimal stopping.\\
+Several methods have been suggested to achieve this goal, such as finite difference, but we shall use the procedure proposed by Longstaff et al., using Monte Carlo simulation and least-squares regression.\\
+We will mainly focus on the sensitivity analysis of this pricing process, namely how the parameters’ volatility affects the final calculated price.\\
+This analysis is particularly important due to the sometimes-large uncertainty associated with the parameters used. For this reason, we find that the least-squares approach is ideal under such conditions, since we expect it to be less sensitive to volatility than other methods.
+\fi

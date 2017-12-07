@@ -205,7 +205,7 @@ u_i=\frac{S_i-S_{i-1}}{S_{i-1}},
 This model assumes that the volatility increases when great changes in the daily stock price occur and that it decreases otherwise. Furthermore, the long-run average variance, $V_L$, can be deduced from past data and makes the volatilities tend to a constant value.
 The GARCH(1,1) model provides a better representation of volatilities than the simple assumption that they are constant. Due to its simplicity, it is also easily implemented with negligible computational impact in the calculation of the option prices.
 
-\hl{mention the optimal boundary result (see Hull)}
+\hl{mention the optimal boundary result?}
 
 \subsection{Variance-Based Sensitivity Analysis}
 The algorithm developed by Ilya Sobol~\cite{Sobol} to calculate the indices in \ref{Si} and \ref{STi} is to simply generate two vectors, $A$ and $B$, of size $N$. Each entry of each vector corresponds to a single model run with a random selection of the uncertain input variables.

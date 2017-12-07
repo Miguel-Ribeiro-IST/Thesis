@@ -1,9 +1,10 @@
-\documentclass[a4paper,prd,twocolumn,nofootinbib,superscriptaddress,floatfix]{revtex4}
+\documentclass[a4paper,twocolumn,aps,prd,longbibliography,superscriptaddress]{revtex4-1}
 %\documentclass[prd,twocolumn,nofootinbib,showpacs]{revtex4-1}
 
 %\usepackage{amsmath,amssymb}
 \usepackage{cancel}
 \usepackage{graphicx}
+%\usepackage{cite}
 \usepackage{epsfig}
 \usepackage{physics}
 \usepackage{amsmath,amsfonts,amssymb}
@@ -19,6 +20,8 @@
 \usepackage{eurosym}
 \usepackage{siunitx}
 \renewcommand*{\figureautorefname}{FIG.}
+\DeclareSIUnit\year{yr}
+\def\bibsection{\section{References}} %remove a linha das referencias
 
 \begin{document}
 
@@ -33,16 +36,16 @@
 
 \maketitle
 \section{Introduction}
-The stock market has suffered a complete paradigm shift in the past decades. Recent developments in computer science and mathematical finance have greatly enhanced our abilities to predict and take advantage of stock price changes. It shouldn't come as much of a surprise that there has been an ever growing desire from investors to take advantage of these new developments to increase potential profits.
+The stock market has suffered a complete paradigm shift in the past decades. Recent developments in computer science and mathematical finance have greatly enhanced our abilities to predict and take advantage of stock price changes. New forecasting algorithms not only enable us to better defend ourselves against unexpected unfavorable market shifts but even to take advantage of them, making such techniques highly desirable to investors.
 
-With the colossal sums handled daily in the stock market, even a small improvement on the predictive abilities of a given forecasting algorithm can lead to significant increases in profits for investors. In such a highly competitive subject, it should be clear that a great amount of resources should be devoted to the research and development of these algorithms. An investor that does not follow this strategy is bound to lose major profits when compared with his better prepared counterparts.
-
-
+With the colossal sums handled daily in the stock market, even a small improvement on the predictive abilities of a given forecasting algorithm can lead to significant increases in profits for investors. In such a highly competitive subject, it should be clear that a lot of resources must be devoted to the research and development of these algorithms. An investor that does not follow this strategy is bound to lose major profits when compared with his better-prepared counterparts.
 
 
-Due to the developments in stock price forecasting, our knowledge of derivatives has also greatly increased. A derivative is simply a contract whose value depends on other simpler financial instruments, like stocks or interest rates. Derivatives can virtually take any form desirable, so long as there are two parties interested in taking a part in it. In this work we will focus on the most common type of derivatives - options.
 
-The derivatives market has become increasingly important in recent times. In fact, as of June 2017, derivatives are responsible for over $\$542$ trillion worth of trades, in the Over-the-Counter (OTC) market alone, as can be seen on \autoref{fig:OTC} (the OTC market refers to all deals signed outside of derivatives exchanges). Though the market size peaked in 2013 with over $\$710$ trillion, it seems to have shrinked in the last decade, which might be attributed to the global financial crisis of 2007.
+
+Along with stock prices, derivatives have also seen great algorithmic developments in recent times. A derivative is simply a contract whose value depends on other simpler financial instruments, like stocks or interest rates. Derivatives can virtually take any form desirable, so long as there are two parties interested in taking a part in it. In this work, we will focus on the most common type of derivatives - options~\cite{Hull}.
+
+The derivatives market has become increasingly important in recent times. In fact, as of June 2017, derivatives are responsible for over $\$542$ trillion worth of trades, in the Over-the-Counter (OTC) market alone, as can be seen in \autoref{fig:OTC} (the OTC market refers to all deals signed outside of exchanges). Though the market size peaked in 2013 with over $\$710$ trillion, it seems to have shrunk in the last decade.
 
 \begin{figure}[H]
     \centering
@@ -51,129 +54,207 @@ The derivatives market has become increasingly important in recent times. In fac
     \end{figure}
 
 \subsection{Call and Put Options}
-Among the many types of derivatives, the most commonly traded are options, of which there are two main types - calls and puts.
+Among the many types of derivatives, the most commonly traded are options~\citep{Hull}, of which there are two main types - calls and puts.
 
-In simple terms, a \textit{call option} grants the investor the right to buy the underlying asset (e.g. stock) for a fixed price, known as the \textit{strike price}, by a certain date, known as the \textit{expiration date}.\\
-On the other hand, a \textit{put option} grants the investor the right to sell the underlying asset for the strike price, by the expiration date.\\
-If at the time of exercise, the stock price is above (resp. below) the strike price, the owner of a call (resp. put) option should exercise his right to buy (resp. sell) the stocks, earning the difference between the stock price and the strike price. The payoff function of these two types of derivatives can then simply be deduced as
+In simple terms, a \textit{call option} grants an investor the right to buy the underlying asset (e.g. stock) for a fixed price, known as the \textit{strike price}, by a certain date, known as the \textit{expiration date}.\\
+On the other hand, a \textit{put option} grants an investor the right to sell the underlying asset for the strike price, by the expiration date.\\
+If at the time of exercise, the asset price is above (resp. below) the strike price, we say it is \textit{in the money} and the owner of a call (resp. put) option should exert his right to buy (resp. sell) the underlying asset, also known as \textit{exercising}, earning the difference between the asset price at the time of exercise and the fixed strike price. Otherwise, we say the option is \textit{out of the money}.
+The payoff function of these two types of derivatives can then simply be deduced as
 \begin{equation}\label{callput}
 \begin{split}
 &\text{Payoff}_\text{call}(t)=(S(t)-K)^+,\\
 &\text{Payoff}_\text{put}(t)=(K-S(t))^+;
 \end{split}
 \end{equation}
-\noindent where $K$ is the strike price and $S(t)$ is the stock price at the time of exercise, $t$.
+\noindent where $K$ is the strike price and $S(t)$ is the asset price at the time of exercise, $t$. These functions are represented in \autoref{fig:Payoff}.
 
 \begin{figure}[H]
     \centering
-      \includegraphics[width=.8\columnwidth]{Payoff.eps}
+      \includegraphics[width=.9\columnwidth]{Payoff.eps}
       \caption{Payoff functions of \textit{call} and \textit{put options}.}\label{fig:Payoff}
     \end{figure}
 
-It's important to note that an option gives the holder the right to buy/sell the underlying asset but he is not obliged to do so. If exercising the option would lead to losses, the investor can simply let the option expire.
+It's important to note that an option gives the holder the right to buy/sell the underlying asset but he is not obliged to do so. If exercising the option would lead to losses the investor can simply let the option expire.
 
+In the present work, we shall focus on options whose underlying assets are stocks. Though some of the results presented might also be applied to other option types, these have to be analyzed carefully.
 
 
 Options have several advantages that make them especially appealing to investors.
-To hedgers (i.e. investors that want to limit their exposure to risk), options provide safety by fixing the future price of a stock. If a hedger is afraid of a stock price crash in the future in one of the stocks he holds, by buying put options he ensures that his losses are contained because he can always sell the stocks he owns for the fixed strike price, even if the price crashes.
-To speculators (i.e. investors that want to take advantage of the uncertainty of future stock prices by betting on their outcome), options grant access to much larger profits when the market forecast proves true, with much smaller initial investments.
+To hedgers (i.e. investors that want to limit their exposure to risk), options provide safety by fixing the future price of a stock. If a hedger is afraid of a stock price crash in the future in one of the stocks he owns, by buying put options on that stock, he ensures that his losses are contained because he can always sell the stocks for the fixed strike price after the stock price crash.
+To speculators (i.e. investors that want to take advantage of the uncertainty of future stock prices by betting on their outcome), options grant access to much higher profits. Due to the options having a lower price than their underlying stock, a speculator can buy a much larger number of options than stocks with the same initial investment, magnifying the consequences of the outcome - if the speculator's initial prediction proves true, his profits will increase greatly whereas a wrong prediction will lead to a total loss of the initial investment.
 
-
-Because of all their advantages, unlike some other types of derivatives options have a cost. Finding the ideal price for an option is quite difficult, however. This pricing problem is a fundamental concern to investors, because under or overpricing an option could have severe consequences and lead to major losses.
-The price of an option and what influences it will be the main focus of this work.
+Due to all their advantages, and unlike some other types of derivatives, options have a price. Finding the ideal price for an option is quite difficult, however, due to the great complexity of these financial instruments. This is a fundamental concern to investors, since knowing the true value of an option can give them a chance to take advantage of under or overpriced options.
 
 
 
 
 \subsection{European and American Options}
-Both call and put options can be further separated into several categories. Among these, European and American options are by far the most commonly traded.
-The holder of an \textit{European option} can only exert his right to buy/sell (call/put) the underlying assets, also known as \textit{exercising}, at the specified expiration date.
+Both call and put options can be further separated into several categories. Among these, European and American options are by far the most commonly traded~\cite{Hull}.
+
+The holder of a \textit{European option} can only exert his right to buy/sell (call/put) the underlying assets at the specified expiration date.
 On the other hand, an \textit{American option} enables its owner to exercise it at any time up to its expiration date.
 
 
 
 Due to their high importance, options have been studied in detail in the past.
-Possibly the most important result in this field came from Robert Merton and Myron Scholes who earned the 1997 Nobel prize in Economics for developing a mathematical model to price European options - the famous Black-Scholes formula - still used nowadays, though with some modifications. Their result states that an European call or put option's price follows the partial differential equation (PDE)
+Possibly the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price European options - the famous Black-Scholes-Merton model - still in use in present days~\cite{Hull}. The last two actually earned the 1997 Nobel prize in Economics for this development.
+
+This model states that a European call or put option's price follows the partial differential equation (PDE)
 
 \begin{equation}
 \pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{V^2}{S^2}+rS\pdv{V}{S}-rV=0,
 \end{equation}
 
-\noindent where $V$ is the price of the option, $S$ is the price of the underlying stock, $r$ is the risk-free interest rate and $sigma$ is the stock price volatility.
+\noindent where $V$ is the price of the option, $S$ is the price of the underlying stock, $r$ is the risk-free interest rate and $\sigma$ is the stock price volatility.
 This model assumes furthermore that stock prices follow a Geometric Brownian Motion (GBM), which can be defined as
 
-\begin{equation}
+\begin{equation}\label{BS}
 dS(t)=rSdt+\sigma SdW(t),
 \end{equation}
-\noindent with W(t) defining a Brownian motion.
+\noindent with $W(t)$ defining a one-dimensional Brownian motion.
 
-Pricing American options, however, poses a much greater challenge. Because they can be exercised at any time, the underlying assets must be closely monitored so as to attempt optimal stopping.
-Furthermore, unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to price these options. Among these, Longstaff and Schwartz developed one of the most popular, based on Monte Carlo simulation with least squares regression to calculate the option price. Their results will be heavily used in this work.
+Because the stock price depends on a Brownian motion process, it follows that it is not differentiable. For this reason, it's impossible to exactly simulate such a process. An approximation is possible, however, using discrete jumps of length $\Delta t$ and using the Brownian motion property $W(t)\sim N(0,t)$~\citep{Mikosch}. Such a discretization of the process is represented in \autoref{fig:GBM}.
 
-Despite their complexity, American options are nonetheless very much used by investors. In fact, most of the options currently traded in exchanges are American. Thus, it is absolutely critical to understand which variables influence this type of derivatives and by what amount. With this knowledge, one can better prepare oneself to market changes and even mitigate potential risks.
+\begin{figure}[H]
+    \centering
+      \includegraphics[width=1\columnwidth]{GBM.eps}
+      \caption{Geometric Brownian Motion using the parameters $r=\SI{0.06}{\per\year}$, $\sigma=0.05$, $S(0)=\ $\euro$1$ and time steps $\Delta t=10^{-3}\SI{}{\year}$.}\label{fig:GBM}
+    \end{figure}
+    
+Using this method one can easily simulate a stock price path and observe its behavior. By simulating a large number of paths, some underlying tendencies might become apparent, which will prove useful in option pricing.
+
+Though pricing European options is fairly straightforward, American options pose a much greater challenge. Since they can be exercised at any time, the underlying assets must be closely monitored so as to attempt optimal stopping.
+Furthermore, unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to solve this problem, such as the Longstaff-Schwartz algorithm, which we shall approach in later sections of the present thesis.
+
+Despite their complexity, American options are nonetheless the most currently traded options in exchanges~\citep{Hull}. Thus, it is absolutely critical to understand which variables influence this type of derivatives and by what amount. With this knowledge, one can better defend oneself against market changes and even mitigate potential risks.
 
 \subsection{Sensitivity Analysis}
-Many factors influence the final price of an option.
-Some factors are absolutely defined, such as the option strike price or the expiration date, while others have an associated uncertainty, like the stock price volatility or the interest rate.
+The option pricing problem's difficulty arises from the fact that the price of an option is influenced by many factors.
+From the strike price to the expiration date, some factors are well defined in the option contract and the investor is well aware of their values. Others, like the stock price volatility or the risk-free interest rate, have an associated uncertainty and require a detailed market study. This input uncertainty will cause a variance in the final model output.
 
-To fully understand how models with uncertain inputs work, a sensitivity analysis is required. In short, sensitivity analysis studies which factors have a greater effect on the final model output.
-There are many types of sensitivity analysis that go from simple scatter plots to more complex variogram-based methods. One particularly useful type of analysis is the variance-based sensitivity analysis.
+To fully understand how models with uncertain inputs work, a sensitivity analysis is required. In short, sensitivity analyses indicate which factors have a greater impact on the final model output's variance.
+There are many types of sensitivity analyses that go from simple scatter plots~\cite{Saltelli} to more complex Monte-Carlo filtering~\cite{Saltelli}. Variance-based sensitivity analysis is particularly useful when dealing with options.
 
-Initially created by Ilya Sobol in 1990 and later further developed by several people, among which the work by Andrea Saltelli is paramount, variance-based sensitivity analysis enables the knowledge of by how much the final model output's variance would decrease if we could completely nullify the uncertainty of a given input.
-In option pricing this is particularly useful. If an investor knows where the greatest source of uncertainty of the option price comes from, he can invest greater sums in the mitigation of that uncertainty.
+Initially created by Ilya Sobol in 1990 and later further developed by several people, among which the work by Andrea Saltelli is paramount, variance-based sensitivity analysis enables the knowledge of by how much the final model output's variance would decrease if we could completely nullify the uncertainty of a given input~\cite{Saltelli}.
+The output variance has contributions from each of the uncertain inputs, as well as their combinations. We can therefore decompose the model output variance, $\mathrm{Var}(Y)$, into each of its components as
+\begin{equation}
+\mathrm{Var}(Y)=\sum_{i=1}^dV_i+\sum_{i<j}^dV_{ij}+\dots+V_{1\dots d},
+\end{equation}
+\noindent where $d$ is the total number of uncertain input variables, $V_{i}$ is the contribution of the i\textsuperscript{th} input variable to the total variance, $V_{klm}$ is the joint contribution of the k\textsuperscript{th}, l\textsuperscript{th} and m\textsuperscript{th} variables, and so on.
+We can then define the \textit{first order sensitivity index}, $S_i$, as
+\begin{equation}\label{Si}
+S_i=\frac{V_i}{\mathrm{Var}(Y)},
+\end{equation}
+\noindent which simply gives the effect in the total output variance of only varying the i\textsuperscript{th} variable.
+Furthermore, we can define the \textit{total effect index}, $S_{Ti}$, as
+\begin{equation}\label{STi}
+S_{Ti}=S_i+\sum_{j}^dS_{ij}+\dots+S_{1\dots d},
+\end{equation}
+\noindent which can be interpreted as the importance of the i\textsuperscript{th} variable to the total model output variance.
+By finding each of these indices we can better understand which variables contribute the most to our uncertainty in the final option price as well as their relationships.
 
-Due to its usefulness, this particular type of sensitivity analysis and its application to option pricing will be the main focus of this work.
+The usefulness of this method in option pricing arises from the fact that if an investor knows where the greatest source of uncertainty of the option price is originated, he can invest greater resources in the mitigation of that uncertainty.
+This particular type of sensitivity analysis will be studied in more detail in the later sections of the present thesis.
 
 
 
 \section{Objectives}
-The main objective of this thesis is to perform a sensitivity analysis on the price of American options.
+In this work, we shall attempt to perform a sensitivity analysis on the price of American options.
 
-We will begin by replicating the model developed by Longstaff and Schwartz to price American options. Their method is based upon a Monte Carlo generation of stock price paths with a set of market variables such as stock price volatility and interest rate (using the Black-Scholes stochastic differential equation). To these results, a least squares regression is then applied iteratively to generate an optimal stopping decision matrix with all the stock price paths generated.
+As a first step, we will begin by replicating the model developed by Longstaff and Schwartz to price American options.
 
-Having replicated this algorithm, we shall then apply a variation-based sensitivity analysis, as developed by Sobol and Saltelli. This analysis outputs a weight for each of the variables used proportional to their influence in the variance of the final option price.
-Thus, if a variable has a large weight, its variance has a large impact in the variance of the option price.
-
-Some other aspects of this sensitivity analysis will also be considered, such as how each variable's weight changes with time.
-
-As a next step, we shall modify the Longstaff-Schwartz method to more closely resemble real-world stocks.
-We might, for example, implement the GARCH(1,1) model for the stock price volatility to account for daily changes on its value. We could also try to implement interest rate models for the same reason.
-Some more recent studies of the Longstaff-Schwartz algorithm suggest that a more effective method to price American options would consist of replacing the least squares regression by some other numerical method, related to optimal stopping.
+Having replicated this algorithm, we shall then modify it to more closely resemble real-world stocks.
+Since the model assumes a constant stock price volatility throughout the simulations, which does not hold in the real-world stock market, we might, for example, implement the GARCH(1,1) model to account for changes in the volatility.
+We could also attempt to implement new models for the risk-free interest rate since its value also changes with time.
+Some other studies of the Longstaff-Schwartz algorithm suggest that a more effective method to price American options would consist of replacing the least squares regression by a simpler optimal stopping boundary~\cite{Andersen}.
 A further study of which models better suit our needs is still necessary, however, and perfecting the initial algorithm will also be a major section of this thesis.
 
+With the enhanced Longstaff-Schwartz algorithm, we will then apply a variation-based sensitivity analysis, as developed by Sobol and Saltelli.
+Some other aspects of this sensitivity analysis will also be considered, such as how each variable's weight changes with time.
 
-Finally, we will try to apply our model to real-world stock prices, publicly available, and perform this sensitivity analysis using this data.
+
+Finally, we will try to apply our model to real-world stock prices, and perform the sensitivity analysis using the publicly available data.
 
 
 
 \section{State of the art}
+\subsection{American Option Pricing}
+As previously stated, Longstaff and Schwartz have presented a numerical algorithm to price American options~\cite{Longstaff}.\\
+They begin by simulating a very large number (e.g. 100,000) of stock price paths using the PDE in \ref{BS}. To do so, they partition the option time frame into many (e.g. 50) smaller intervals to simulate each stock price jump, similar to \autoref{fig:GBM}. It should be noted that such an approximation no longer perfectly mimics the behavior of an American option since this type of option assumes a continuous exercising time frame. However, a sufficiently great number of partitions would approximate such an option as closely as desired.\\
+With the paths simulated, they then check which of the simulated stock price paths are in the money at the time step immediately before expiration. For each of these, they perform a least squares regression - a possible choice of basis functions for the regression is the set of Laguerre polynomials - using the cash flows of immediate exercise against the discounted cash flows of the following time step as data.
+With this regression, they obtain the expected cash flow of continuation i.e. how much cash flow is the stock price path expected to generate if it were not immediately exercised.
+By comparing the expected cash flow of continuation with the cash flow of immediate exercise, we can check which one is greater and decide if it is optimal, for a particular path, to immediately exercise the option or not.
+This algorithm is then iterated backward through every time step until the start.
+Then, we simply average over all of the paths' cash flows and obtain the American option price.
+
+This algorithm is quite useful and has been shown to give results very similar to other more computationally demanding procedures, such as finite difference~\citep{Longstaff}.
+
+Despite its usefulness, Longstaff and Schwartz's algorithm only uses a simple GBM to describe each of the paths. For this reason, a constant stock price volatility is assumed throughout the simulations, which does not apply to real world stocks.
+For this reason, some modifications might be applied to the GBM used in the simulations performed prior to the backward iterative part of the algorithm.
+
+One such possible modification is the GARCH(1,1) model for the volatility~\citep{Hull}.
+It states that the volatility in each path has to be updated after each time step using the formula
+\begin{equation}
+\sigma_n^2=\gamma V_L+\alpha u_{n-1}^2+\beta\sigma_{n-1}^2,
+\end{equation}
+\noindent where $\gamma$, $\alpha$ and $\beta$ are weights (summing to unity), $V_L$ corresponds to the long-run average variance, $\sigma_i$ corresponds to the volatility at time step $i$ and $u_i$ follows
+\begin{equation}
+u_i=\frac{S_i-S_{i-1}}{S_{i-1}},
+\end{equation}
+\noindent with $S_i$ the stock price at time step $i$.
+This model assumes that the volatility increases when great changes in the daily stock price occur and that it decreases otherwise. Furthermore, the long-run average variance, $V_L$, can be deduced from past data and makes the volatilities tend to a constant value.
+The GARCH(1,1) model provides a better representation of volatilities than the simple assumption that they are constant. Due to its simplicity, it is also easily implemented with negligible computational impact in the calculation of the option prices.
+
+\hl{mention the optimal boundary result (see Hull)}
+
+\subsection{Variance-Based Sensitivity Analysis}
+The algorithm developed by Ilya Sobol~\cite{Sobol} to calculate the indices in \ref{Si} and \ref{STi} is to simply generate two vectors, $A$ and $B$, of size $N$. Each entry of each vector corresponds to a single model run with a random selection of the uncertain input variables.
+Some new vectors, $A^{(i)}$, are then generated using the same input values as the vector $A$ but replacing the values of the i\textsuperscript{th} input variable with the values used in vector $B$. Thus, we should generate one vector $A^{(i)}$ for each of the input variables with associated uncertainty.
+
+Having obtained all the vectors, we can use the formula proposed by Saltelli~\citep{Saltelli} to calculate the indices
+\begin{equation}\label{Si2}
+S_i\approx\frac{1}{N\mathrm{Var}(Y)}\sum_{j=1}^NB_j\left(A^{(i)}_j-A_j\right),
+\end{equation}
+\begin{equation}\label{STi2}
+S_{Ti}\approx\frac{1}{2N\mathrm{Var}(Y)}\sum_{j=1}^N\left(A^{(i)}_j-A_j\right)^2,
+\end{equation}
+\noindent where $B_j$, $A^{(i)}_j$ and $A_j$ are the j\textsuperscript{th} entries of the vectors $B$, $A^{(i)}$ and $A$, respectively.
+
+\hl{include this part?:}
+The reason behind these formulas is due to the correlation between vectors $A^{(i)}$ and $B$. If the i\textsuperscript{th} variable has a large influence on the output variance then, whenever $A^{(i)}_j$ is large, $B_j$ would also be large. The value of $A_j$, however, would be independent. When multiplying $A^{(i)}_j$ by $B_j$ on \ref{Si2}, the correlated values would give a larger result than the uncorrelated multiplication of $A_j$ and $B_j$ and thus return a greater value.
 
 
 \section{Commented Bibliography}
 \subsection{Miscellaneous Topics}
-John Hull's book is a great source for most option related information. In this book, Hull explains most option market mechanics and some recent results in this field. In what concerns the present work, the most important topic explored in the book is related to the GARCH(1,1) model.
+
+John Hull's book is a great source for most option related information. In this book, Hull explains most option market mechanics and some recent results in this field in a clear and intuitive way. In what concerns the present work, the most important topic explored in the book is related to the GARCH(1,1) model.
 \begin{itemize}
-\item Hull, J. (2012). \textit{Options, futures, and other derivatives}. Boston: Prentice Hall.
+\item J. Hull. \textit{Options, Futures, and Other Derivatives}. Boston: Prentice Hall, 2012.
 \end{itemize}
 
 \subsection{American Option Pricing}
 Longstaff and Schwartz's paper on the pricing of American options will be heavily used throughout this work. Most results will be based on some variation of their algorithm. Their paper is not only important for the results it presents but also for the examples it provides that enable a clear and deep understanding of the algorithm.
 \begin{itemize}
-\item Longstaff, F. A., \& Schwartz, E. S. (2001, January 1). Valuing American Options by Simulation: A Simple Least-Squares Approach. \textit{The Review of Financial Studies, 14}(1), 113-147.
+\item  F. Longstaff and E. Schwartz. \textit{Valuing American Options by Simulation: a Simple Least-Squares Approach}. The review of financial studies, 14(1):113–147, 2001.
 \end{itemize}
 
-This book presents some useful simulations of many option based results. Though Chloe presents no new results in the option pricing field, some of the simulations developed in this thesis may be based, up to some extent, in the ones presented in Chloe's book.
+Chloe's book presents some useful algorithms of many option based results discussed here. Though Chloe presents no new results in the option pricing field, some of the simulations developed in this thesis may be based, up to some extent, in the ones presented in the book.
 \begin{itemize}
-\item Choe, G. H. (2016). \textit{Stochastic Analysis for Finance with Simulations}. Universitext. Springer International Publishing. 
+\item G. H. Choe. \textit{Stochastic Analysis for Finance with Simulations}. Springer International Publishing, 2016.
 \end{itemize}
 
 \subsection{Sensitivity Analysis}
-Sobol
-
-
-Saltelli
+Saltelli's book provides a deep insight into sensitivity analysis. In particular, it gives a great explanation of the variance-based sensitivity analysis used in the present work as well as all the necessary background.
+\begin{itemize}
+\item A. Saltelli et al. \textit{Global Sensitivity Analysis: The Primer}. John Wiley, 2008.
+\end{itemize}
 
 \section{Timetable}
+
+
+\bibliographystyle{abbrv}
+\bibliography{Thesis}
+
 
 \iffalse
 \section{Thesis Supervisors}
@@ -204,7 +285,7 @@ For one, they limit the exposure to risk, e.g. if the price of a given stock wer
 This type of derivatives also comes with its own caveats. The main disadvantage is the fact that options always deal with stock prices in the future, i.e one can never precisely anticipate how much will be earned, if anything at all. Thus, it's clear that accurately modeling the stock price is paramount when dealing with options.
 \fi
 \iffalse
-Call and put options are also divided into different types. The two most commonly used are European and American options. An European option can only be exercised - buying/selling the stocks for the fixed stock price with a call/put option - at a fixed date in the future, whereas an American option can be exercised anytime up until that fixed date. The payoffs of each of these types of options is simply
+Call and put options are also divided into different types. The two most commonly used are European and American options. a European option can only be exercised - buying/selling the stocks for the fixed stock price with a call/put option - at a fixed date in the future, whereas an American option can be exercised anytime up until that fixed date. The payoffs of each of these types of options is simply
 \begin{equation}
 \begin{split}
 &\text{Payoff}_\text{European}=\text{Payoff}_\text{call/put}(T);\\

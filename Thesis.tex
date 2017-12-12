@@ -109,9 +109,9 @@ This model states that a European call or put option's price follows the partial
 This model assumes furthermore that stock prices follow a Geometric Brownian Motion (GBM), which can be defined as
 
 \begin{equation}\label{BS}
-dS(t)=rSdt+\sigma SdW(t),
+dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \end{equation}
-\noindent with $W(t)$ defining a one-dimensional Brownian motion.
+\noindent with $\{W(t),t>0\}$ defining a one-dimensional Brownian motion.
 
 Because the stock price depends on a Brownian motion process, it follows that it is not differentiable. For this reason, it's impossible to exactly simulate such a process. An approximation is possible, however, using discrete jumps of length $\Delta t$ and using the Brownian motion property $W(t)\sim N(0,t)$~\citep{Mikosch}. Such a discretization of the process is represented in \autoref{fig:GBM}.
 
@@ -192,7 +192,7 @@ This algorithm is quite useful and has been shown to give results very similar t
 Despite its usefulness, Longstaff and Schwartz's algorithm only uses a simple GBM to describe each of the paths. For this reason, a constant stock price volatility is assumed throughout the simulations, which does not apply to real world stocks.
 For this reason, some modifications might be applied to the GBM used in the simulations performed prior to the backward iterative part of the algorithm.
 
-One such possible modification is the GARCH(1,1) model for the volatility~\citep{Hull}.
+One such possible modification is the GARCH(1,1) model for the volatility~\citep{Wei}.
 It states that the volatility in each path has to be updated after each time step using the formula
 \begin{equation}
 \sigma_n^2=\gamma V_L+\alpha u_{n-1}^2+\beta\sigma_{n-1}^2,

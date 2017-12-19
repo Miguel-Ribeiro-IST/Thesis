@@ -45,25 +45,27 @@ With the colossal sums handled daily in the stock market, even a small improveme
 
 Along with stock prices, derivatives have also seen great algorithmic developments in recent times. A derivative is simply a contract whose value depends on other simpler financial instruments, like stocks or interest rates. Derivatives can virtually take any form desirable, so long as there are two parties interested in taking a part in it. In this work, we will focus on the most common type of derivatives - options~\cite{Hull}.
 
-The derivatives market has become increasingly important in recent times. In fact, as of June 2017, derivatives are responsible for over $\$542$ trillion worth of trades, in the Over-the-Counter (OTC) market alone, as can be seen in \autoref{fig:OTC} (the OTC market refers to all deals signed outside of exchanges). Though the market size peaked in 2013 with over $\$710$ trillion, it seems to have shrunk in the last decade.
+The derivatives market has become increasingly important in recent times~\cite{Hull}. In fact, as of June 2017, derivatives were responsible for over $\$542$ trillion worth of trades, in the Over-the-Counter (OTC) market alone~\cite{BIS}, as can be seen in \autoref{fig:OTC} (the OTC market refers to all deals signed outside of exchanges). Though the market size peaked in 2013 with over $\$710$ trillion, it seems to have shrunk in the last decade.
 
 \begin{figure}[H]
     \centering
       \includegraphics[width=.9\columnwidth,trim={2pt 17pt 0 0},clip]{OTC.eps}
-      \caption{Size of OTC derivatives market.\newline \footnotesize{\textbf{Source:} stats.bis.org/statx/srs/table/d5.1 (on 16/11/2017)}}\label{fig:OTC}
+      \caption{Size of OTC derivatives market.}\label{fig:OTC}
     \end{figure}
 
 \subsection{Call and Put Options}
 Among the many types of derivatives, the most commonly traded are options~\citep{Hull}, of which there are two main types - calls and puts.
 
-In simple terms, a \textit{call option} grants an investor the right to buy the underlying asset (e.g. stock) for a fixed price, known as the \textit{strike price}, by a certain date, known as the \textit{expiration date}.\\
-On the other hand, a \textit{put option} grants an investor the right to sell the underlying asset for the strike price, by the expiration date.\\
-If at the time of exercise, the asset price is above (resp. below) the strike price, we say it is \textit{in the money} and the owner of a call (resp. put) option should exert his right to buy (resp. sell) the underlying asset, also known as \textit{exercising}, earning the difference between the asset price at the time of exercise and the fixed strike price. Otherwise, we say the option is \textit{out of the money}.
+In simple terms, a \textit{call option} grants an investor the right to buy the underlying asset (e.g. stock) for a fixed price, known as the \textit{strike price}, by a certain date, known as the \textit{expiration date}.
+On the other hand, a \textit{put option} grants an investor the right to sell the underlying asset for the strike price, by the expiration date.
+
+If at the time of exercise, the asset price is above (resp. below) the strike price, we say the option is \textit{in the money} and the owner of a call (resp. put) option should exert his right to buy (resp. sell) the underlying asset, also known as \textit{exercising}, earning the difference between the asset price at the time of exercise and the fixed strike price. Otherwise, we say the option is \textit{out of the money}.
+
 The payoff function of these two types of derivatives can then simply be deduced as
 \begin{equation}\label{callput}
 \begin{split}
-&\text{Payoff}_\text{call}(t)=(S(t)-K)^+,\\
-&\text{Payoff}_\text{put}(t)=(K-S(t))^+;
+&\text{Payoff}_\text{call}(t)=(S(t)-K)^+;\\
+&\text{Payoff}_\text{put}(t)=(K-S(t))^+,
 \end{split}
 \end{equation}
 \noindent where $K$ is the strike price and $S(t)$ is the asset price at the time of exercise, $t$. These functions are represented in \autoref{fig:Payoff}.
@@ -76,14 +78,14 @@ The payoff function of these two types of derivatives can then simply be deduced
 
 It's important to note that an option gives the holder the right to buy/sell the underlying asset but he is not obliged to do so. If exercising the option would lead to losses the investor can simply let the option expire.
 
-In the present work, we shall focus on options whose underlying assets are stocks. Though some of the results presented might also be applied to other option types, these have to be analyzed carefully.
+In the present work, we shall focus on options whose underlying assets are stocks. Though some of the results presented might also be applied to other option types~\cite{Hull}, these have to be analyzed carefully.
 
 
 Options have several advantages that make them especially appealing to investors.
-To hedgers (i.e. investors that want to limit their exposure to risk), options provide safety by fixing the future price of a stock. If a hedger is afraid of a stock price crash in the future in one of the stocks he owns, by buying put options on that stock, he ensures that his losses are contained because he can always sell the stocks for the fixed strike price after the stock price crash.
-To speculators (i.e. investors that want to take advantage of the uncertainty of future stock prices by betting on their outcome), options grant access to much higher profits. Due to the options having a lower price than their underlying stock, a speculator can buy a much larger number of options than stocks with the same initial investment, magnifying the consequences of the outcome - if the speculator's initial prediction proves true, his profits will increase greatly whereas a wrong prediction will lead to a total loss of the initial investment.
+To hedgers (i.e. investors that want to limit their exposure to risk), options provide safety by fixing the future price of a stock - if a hedger is afraid of a stock price crash in the future in one of the stocks he owns, by buying put options on that stock, he ensures that his losses are contained because he can always sell the stocks for the fixed strike price, after the stock price crash.
+To speculators (i.e. investors that want to take advantage of the uncertainty of future stock prices by betting on their outcome), options grant access to much higher profits - due to the options having a lower price than their underlying stock, a speculator can buy a much larger number of options than stocks with the same initial investment, magnifying the consequences of the outcome i.e. if the speculator's initial prediction proves true, his profits will increase greatly whereas a wrong prediction will lead to a total loss of the initial investment.
 
-Due to all their advantages, and unlike some other types of derivatives, options have a price. Finding the ideal price for an option is quite difficult, however, due to the great complexity of these financial instruments. This is a fundamental concern to investors, since knowing the true value of an option can give them a chance to take advantage of under or overpriced options.
+Due to all their advantages, and unlike some other types of derivatives, options have a price. Finding the ideal price for an option is quite difficult, however, due to the great complexity of these financial instruments~\citep{Hull}. This is a fundamental concern to investors, since knowing the true value of an option can give them a chance to take advantage of under or overpriced options.
 
 
 
@@ -97,11 +99,11 @@ On the other hand, an \textit{American option} enables its owner to exercise it 
 
 
 Due to their high importance, options have been studied in detail in the past.
-Possibly the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price European options - the famous Black-Scholes-Merton model - still in use in present days~\cite{Hull}. The last two actually earned the 1997 Nobel prize in Economics for this development.
+Possibly the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price European options~\cite{Scholes} - the famous Black-Scholes-Merton model - still in use in present days~\cite{Hull}. The last two actually earned the 1997 Nobel prize in Economics for this development.
 
 This model states that a European call or put option's price follows the partial differential equation (PDE)
 
-\begin{equation}
+\begin{equation}\label{BS2}
 \pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{V^2}{S^2}+rS\pdv{V}{S}-rV=0,
 \end{equation}
 
@@ -111,7 +113,7 @@ This model assumes furthermore that stock prices follow a Geometric Brownian Mot
 \begin{equation}\label{BS}
 dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \end{equation}
-\noindent with $\{W(t),t>0\}$ defining a one-dimensional Brownian motion.
+\noindent with $\{W(t),\ t>0\}$ defining a one-dimensional Brownian motion.
 
 Because the stock price depends on a Brownian motion process, it follows that it is not differentiable. For this reason, it's impossible to exactly simulate such a process. An approximation is possible, however, using discrete jumps of length $\Delta t$ and using the Brownian motion property $W(t)\sim N(0,t)$~\citep{Mikosch}. Such a discretization of the process is represented in \autoref{fig:GBM}.
 
@@ -123,8 +125,8 @@ Because the stock price depends on a Brownian motion process, it follows that it
     
 Using this method one can easily simulate a stock price path and observe its behavior. By simulating a large number of paths, some underlying tendencies might become apparent, which will prove useful in option pricing.
 
-Though pricing European options is fairly straightforward, American options pose a much greater challenge. Since they can be exercised at any time, the underlying assets must be closely monitored so as to attempt optimal stopping.
-Furthermore, unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to solve this problem, such as the Longstaff-Schwartz algorithm, which we shall approach in later sections of the present thesis.
+Pricing European options is fairly straightforward - we simply need to solve the PDE in eq. \ref{BS2} with the appropriate boundary conditions. American options, however, pose a much greater challenge. Since they can be exercised at any time, the underlying assets must be closely monitored so as to attempt optimal stopping.
+Furthermore, unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to solve this problem~\citep{Hull}, such as the Longstaff-Schwartz algorithm, which we shall approach in later sections of the present thesis.
 
 Despite their complexity, American options are nonetheless the most currently traded options in exchanges~\citep{Hull}. Thus, it is absolutely critical to understand which variables influence this type of derivatives and by what amount. With this knowledge, one can better defend oneself against market changes and even mitigate potential risks.
 

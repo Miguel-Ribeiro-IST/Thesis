@@ -131,13 +131,13 @@ Furthermore, unlike European options, no analytic pricing model currently exists
 Despite their complexity, American options are nonetheless the most currently traded options in exchanges~\citep{Hull}. Thus, it is absolutely critical to understand which variables influence this type of derivatives and by what amount. With this knowledge, one can better defend oneself against market changes and even mitigate potential risks.
 
 \subsection{Sensitivity Analysis}
-The option pricing problem's difficulty arises from the fact that the price of an option is influenced by many factors.
-From the strike price to the expiration date, some factors are well defined in the option contract and the investor is well aware of their values. Others, like the stock price volatility or the risk-free interest rate, have an associated uncertainty and require a detailed market study. This input uncertainty will cause a variance in the final model output.
+The option pricing problem's difficulty arises from the fact that the price of an option is influenced by many factors~\citep{Hull}.
+From the strike price to the expiration date, some factors are well defined in the option contract and the investor is well aware of their values. Others, like the stock price volatility or the risk-free interest rate, have an associated uncertainty and require a detailed market study. This input uncertainty will cause a variance in the final model output price.
 
 To fully understand how models with uncertain inputs work, a sensitivity analysis is required. In short, sensitivity analyses indicate which factors have a greater impact on the final model output's variance.
 There are many types of sensitivity analyses that go from simple scatter plots~\cite{Saltelli} to more complex Monte-Carlo filtering~\cite{Saltelli}. Variance-based sensitivity analysis is particularly useful when dealing with options.
 
-Initially created by Ilya Sobol in 1990 and later further developed by several people, among which the work by Andrea Saltelli is paramount, variance-based sensitivity analysis enables the knowledge of by how much the final model output's variance would decrease if we could completely nullify the uncertainty of a given input~\cite{Saltelli}.
+Initially created by Ilya Sobol in 1990 and later further developed by several people, among which the work by Andrea Saltelli is paramount, variance-based sensitivity analysis enables the knowledge of by how much the final model output's variance would decrease if we could completely nullify the uncertainty of a given input~\cite{Saltelli,Sobol}.
 The output variance has contributions from each of the uncertain inputs, as well as their combinations. We can therefore decompose the model output variance, $\mathrm{Var}(Y)$, into each of its components as
 \begin{equation}
 \mathrm{Var}(Y)=\sum_{i=1}^dV_i+\sum_{i<j}^dV_{ij}+\dots+V_{1\dots d},
@@ -147,7 +147,7 @@ We can then define the \textit{first order sensitivity index}, $S_i$, as
 \begin{equation}\label{Si}
 S_i=\frac{V_i}{\mathrm{Var}(Y)},
 \end{equation}
-\noindent which simply gives the effect in the total output variance of only varying the i\textsuperscript{th} variable.
+\noindent which simply gives the effect in the total output variance when varying only the i\textsuperscript{th} variable.
 Furthermore, we can define the \textit{total effect index}, $S_{Ti}$, as
 \begin{equation}\label{STi}
 S_{Ti}=S_i+\sum_{j}^dS_{ij}+\dots+S_{1\dots d},
@@ -182,20 +182,20 @@ Finally, we will try to apply our model to real-world stock prices, and perform 
 \section{State of the art}
 \subsection{American Option Pricing}
 As previously stated, Longstaff and Schwartz have presented a numerical algorithm to price American options~\cite{Longstaff}.\\
-They begin by simulating a very large number (e.g. 100,000) of stock price paths using the PDE in \ref{BS}. To do so, they partition the option time frame into many (e.g. 50) smaller intervals to simulate each stock price jump, similar to \autoref{fig:GBM}. It should be noted that such an approximation no longer perfectly mimics the behavior of an American option since this type of option assumes a continuous exercising time frame. However, a sufficiently great number of partitions would approximate such an option as closely as desired.\\
+They begin by simulating a very large number (e.g. 100,000) of stock price paths using the PDE in eq. \ref{BS}. To do so, they partition the option time frame into many (e.g. 50) smaller intervals to simulate each stock price jump, similar to what was presented in \autoref{fig:GBM}. It should be noted that such an approximation no longer perfectly mimics the behavior of an American option since this type of option assumes a continuous exercising time frame. However, a sufficiently great number of partitions would approximate such an option as closely as desired.\\
 With the paths simulated, they then check which of the simulated stock price paths are in the money at the time step immediately before expiration. For each of these, they perform a least squares regression - a possible choice of basis functions for the regression is the set of Laguerre polynomials - using the cash flows of immediate exercise against the discounted cash flows of the following time step as data.
-With this regression, they obtain the expected cash flow of continuation i.e. how much cash flow is the stock price path expected to generate if it were not immediately exercised.
-By comparing the expected cash flow of continuation with the cash flow of immediate exercise, we can check which one is greater and decide if it is optimal, for a particular path, to immediately exercise the option or not.
-This algorithm is then iterated backward through every time step until the start.
-Then, we simply average over all of the paths' cash flows and obtain the American option price.
+With this regression, they obtain the expected cash flow of continuation i.e. how much cash flow is a given stock price path expected to generate if it were not immediately exercised.
+By comparing the expected cash flow of continuation with the cash flow of immediate exercise, we can check if, for a particular path, it is optimal to immediately exercise the option or not and pick the best decision.
+This algorithm is then iterated backward through every time step until the present.
+This algorithm provides the expected cash flows of every stock price path. Thus, we simply average over all of the paths' cash flows and obtain the American option price.
 
 This algorithm is quite useful and has been shown to give results very similar to other more computationally demanding procedures, such as finite difference~\citep{Longstaff}.
 
-Despite its usefulness, Longstaff and Schwartz's algorithm only uses a simple GBM to describe each of the paths. For this reason, a constant stock price volatility is assumed throughout the simulations, which does not apply to real world stocks.
-For this reason, some modifications might be applied to the GBM used in the simulations performed prior to the backward iterative part of the algorithm.
+Despite its usefulness, Longstaff and Schwartz's algorithm only uses a simple GBM to describe each of the paths. For this reason, a constant stock price volatility is assumed throughout the simulations, which does not hold in real world stocks.
+For this reason, some modifications might be applied to the GBM used in the simulations performed prior to the backward iterative section of the algorithm.
 
 One such possible modification is the GARCH(1,1) model for the volatility~\citep{Wei}.
-It states that the volatility in each path has to be updated after each time step using the formula
+It states that the volatility in each stock price path has to be updated after each time step using the formula
 \begin{equation}
 \sigma_n^2=\gamma V_L+\alpha u_{n-1}^2+\beta\sigma_{n-1}^2,
 \end{equation}
@@ -203,19 +203,19 @@ It states that the volatility in each path has to be updated after each time ste
 \begin{equation}
 u_i=\frac{S_i-S_{i-1}}{S_{i-1}},
 \end{equation}
-\noindent with $S_i$ the stock price at time step $i$.
+\noindent with $S_j$ the stock price at time step $j$.
 This model assumes that the volatility increases when great changes in the daily stock price occur and that it decreases otherwise. Furthermore, the long-run average variance, $V_L$, can be deduced from past data and makes the volatilities tend to a constant value.
 The GARCH(1,1) model provides a better representation of volatilities than the simple assumption that they are constant. Due to its simplicity, it is also easily implemented with negligible computational impact in the calculation of the option prices.
 
 \hl{mention the optimal boundary result?}
 
 \subsection{Variance-Based Sensitivity Analysis}
-The algorithm developed by Ilya Sobol~\cite{Sobol} to calculate the indices in \ref{Si} and \ref{STi} is to simply generate two vectors, $A$ and $B$, of size $N$. Each entry of each vector corresponds to a single model run with a random selection of the uncertain input variables.
-Some new vectors, $A^{(i)}$, are then generated using the same input values as the vector $A$ but replacing the values of the i\textsuperscript{th} input variable with the values used in vector $B$. Thus, we should generate one vector $A^{(i)}$ for each of the input variables with associated uncertainty.
+The algorithm developed by Ilya Sobol~\cite{Sobol} to calculate the indices in eqs. \ref{Si} and \ref{STi} consists of simply generating two vectors, $A$ and $B$, of size $N$, with each of their entries corresponding to a single model run with a random selection of the uncertain input variables.
+A set of new vectors, $A^{(i)}$, is then generated using the same input values used to generate vector $A$ but replacing the values of the i\textsuperscript{th} input variable with the values used in vector $B$. Thus, we should generate one vector $A^{(i)}$ for each of the input variables with associated uncertainty.
 
 Having obtained all the vectors, we can use the formula proposed by Saltelli~\citep{Saltelli} to calculate the indices
 \begin{equation}\label{Si2}
-S_i\approx\frac{1}{N\mathrm{Var}(Y)}\sum_{j=1}^NB_j\left(A^{(i)}_j-A_j\right),
+S_i\approx\frac{1}{N\mathrm{Var}(Y)}\sum_{j=1}^NB_j\left(A^{(i)}_j-A_j\right);
 \end{equation}
 \begin{equation}\label{STi2}
 S_{Ti}\approx\frac{1}{2N\mathrm{Var}(Y)}\sum_{j=1}^N\left(A^{(i)}_j-A_j\right)^2,
@@ -223,13 +223,15 @@ S_{Ti}\approx\frac{1}{2N\mathrm{Var}(Y)}\sum_{j=1}^N\left(A^{(i)}_j-A_j\right)^2
 \noindent where $B_j$, $A^{(i)}_j$ and $A_j$ are the j\textsuperscript{th} entries of the vectors $B$, $A^{(i)}$ and $A$, respectively.
 
 \hl{include this part?:}
-The reason behind these formulas is due to the correlation between vectors $A^{(i)}$ and $B$. If the i\textsuperscript{th} variable has a large influence on the output variance then, whenever $A^{(i)}_j$ is large, $B_j$ would also be large. The value of $A_j$, however, would be independent. When multiplying $A^{(i)}_j$ by $B_j$ on \ref{Si2}, the correlated values would give a larger result than the uncorrelated multiplication of $A_j$ and $B_j$ and thus return a greater value.
+The concept behind these formulas is related to the correlation between vectors $A^{(i)}$ and $B$. If the i\textsuperscript{th} variable has a large influence on the output variance then, whenever $A^{(i)}_j$ is large, $B_j$ would also be large. The value of $A_j$, however, would be independent of $B_j$. When multiplying $A^{(i)}_j$ by $B_j$ on eq. \ref{Si2}, the highly correlated values would return a larger result than the uncorrelated multiplication of $A_j$ and $B_j$. After the subtraction, we would be left with a large value for $S_i$.
+On the other hand, if the i\textsuperscript{th} variable has little or no influence on the model output, the values $A^{(i)}_j$ would be uncorrelated with $B_j$ and would cancel out after the subtraction. Thus, the value of $S_i$ would be small.
 
 
 \section{Commented Bibliography}
 \subsection{Miscellaneous Topics}
 
-John Hull's book is a great source for most option related information. In this book, Hull explains most option market mechanics and some recent results in this field in a clear and intuitive way. In what concerns the present work, the most important topic explored in the book is related to the GARCH(1,1) model.
+John Hull's book is a great source for most option related information. In this book, Hull covers most option market mechanics and some other recent results in this field in a clear and intuitive way.
+In what concerns the present work, the most important state-of-the-art topic explored in the book is related to the GARCH(1,1) model.
 \begin{itemize}
 \item J. Hull. \textit{Options, Futures, and Other Derivatives}. Boston: Prentice Hall, 2012.
 \end{itemize}

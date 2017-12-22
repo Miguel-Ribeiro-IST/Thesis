@@ -19,7 +19,11 @@
 \usepackage{subcaption}
 \usepackage{eurosym}
 \usepackage{siunitx}
+\usepackage{makecell}
 \renewcommand*{\figureautorefname}{FIG.}
+\captionsetup[table]{name=TAB.}
+\renewcommand*{\tableautorefname}{TAB.}
+\renewcommand{\thetable}{\arabic{table}}   
 \DeclareSIUnit\year{yr}
 \def\bibsection{\section{References}} %remove a linha das referencias
 \renewcommand{\andname}{\ignorespaces}
@@ -184,15 +188,15 @@ As a first step, we will begin by replicating the model developed by Longstaff a
 Having replicated this algorithm, we shall then modify it to more closely resemble real-world stocks.
 The model assumes a constant stock price volatility throughout the simulations, which does not hold in the real-world stock market. For this reason, we might implement the GARCH(1,1) model to account for changes in the volatility.
 We could also attempt to implement new models for the risk-free interest rate since its value also changes with time.
-Some other studies of the Longstaff-Schwartz algorithm suggest that a more effective method to price American options would consist of replacing the least squares regression by a simpler optimal stopping boundary~\cite{Andersen}.
+\hl{Some other studies of the Longstaff-Schwartz algorithm suggest that a more effective method to price American options would consist of replacing the least squares regression by a simpler optimal stopping boundary}~\cite{Andersen}.
 A further study of which models better suit our needs is still necessary, however, and perfecting the initial algorithm will also be a major section of this thesis.
 
 With the enhanced Longstaff-Schwartz algorithm, we will then apply a variation-based sensitivity analysis, as developed by Sobol and Saltelli.
 Some other aspects of this sensitivity analysis will also be considered, such as how each variable's weight changes with time.
 
-
-Finally, we will try to apply our model to real-world stock prices, and perform the sensitivity analysis using the publicly available data.
-
+Finally, we will try to apply our model to real-world American put options.
+We shall apply some algorithms, such as implied volatility model, to obtain some of the required model inputs, like the stock price volatility. The remaining inputs shall be obtained from publicly available data, like the interest rate.
+We will then perform a sensitivity analysis on these results and study them.
 
 
 \section{State of the art}
@@ -223,6 +227,8 @@ u_i=\frac{S_i-S_{i-1}}{S_{i-1}},
 This model assumes that the volatility increases when great changes in the daily stock price occur and that it decreases otherwise. Furthermore, the long-run average variance, $V_L$, can be deduced from past data and makes the volatilities tend to a constant value.
 The GARCH(1,1) model provides a better representation of volatilities than the simple assumption that they are constant. Due to its simplicity, it is also easily implemented with negligible computational impact in the calculation of the option prices.
 
+The volatility of a stock option, $\sigma$ is rather difficult to estimate because it does not have a directly measurable property. Some methods have been developed in an attempt to solve this problem. One such method is the \textit{implied volatility}. In short, this model outputs the volatility that would be required for a given option price to This method requires the current price of a publicly traded option as well as its underlying stock price, the option strike price and the interest rate. 
+
 \hl{optimal boundary result}
 \hl{implied volatility}
 \hl{comparison with real world}
@@ -241,13 +247,31 @@ S_{Ti}\approx\frac{1}{2N\mathrm{Var}(Y)}\sum_{j=1}^N\left(A^{(i)}_j-A_j\right)^2
 \noindent where $B_j$, $A^{(i)}_j$ and $A_j$ are the j\textsuperscript{th} entries of the vectors $B$, $A^{(i)}$ and $A$, respectively.
 
 
-The concept behind formula \eqref{Si2} is related to the correlation between vectors $A^{(i)}$ and $B$. If the i\textsuperscript{th} variable has a large influence on the output variance then, whenever $A^{(i)}_j$ is large, $B_j$ would also be large. The value of $A_j$, however, would be independent of $B_j$. When multiplying $A^{(i)}_j$ by $B_j$ on eq. \eqref{Si2}, the highly correlated values would return a larger result than the uncorrelated multiplication of $A_j$ and $B_j$. After the subtraction, we would be left with a large value for $S_i$.
+The concept behind eq. \eqref{Si2} is related to the correlation between vectors $A^{(i)}$ and $B$. If the i\textsuperscript{th} variable has a large influence on the output variance then, whenever $A^{(i)}_j$ is large, $B_j$ would also be large. The value of $A_j$, however, would be independent of $B_j$. When multiplying $A^{(i)}_j$ by $B_j$ on eq. \eqref{Si2}, the highly correlated values would return a larger result than the uncorrelated multiplication of $A_j$ and $B_j$. After the subtraction, we would be left with a large value for $S_i$.
 On the other hand, if the i\textsuperscript{th} variable has little or no influence on the model output, the values $A^{(i)}_j$ would be uncorrelated with $B_j$ and would cancel out after the subtraction. Thus, the value of $S_i$ would be small.
-
-\hl{Formula }\eqref{STi2}
+As for eq. \eqref{STi2}, it is clear that the vectors $A$ and $A^{(i)}$ have the same input variables except for the i\textsuperscript{th} variable. Thus, if this variable has a great influence in the model output, even small differences in this input will cause $A_j$ and $A^{(i)}_j$ to be very distinct. On the other hand, if this input has little impact in the model output, $A_j$ and $A^{(i)}_j$ would be very similar.
+By squaring the difference, we obtain a measure of how distinct these vectors are and thus how influential is the i\textsuperscript{th} variable.
 
 \section{Preliminary Work}
-Due to its high importance in the development of the sensitivity analysis, the Longstaff-Schwartz algorithm has already beem implemented. The results obtained closely resemble the ones presented in the original article\cite{Longstaff}.
+Due to its high importance in the development of the sensitivity analysis, the Longstaff-Schwartz algorithm has already beem implemented. The results obtained closely resemble the ones presented in the original article\cite{Longstaff}, as can be seen on \autoref{tab:LS}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{$S(0)$} & \textbf{$\sigma$} & \textbf{$T$} & \thead{\textbf{Original price}\\txt} & \textbf{Replicated price} \\ \hline
+36 & 0.2 & 1 & 4.472$\pm$0.010 &  \\ \hline
+36 & 0.2 & 2 & 4.821$\pm$0.012 &  \\ \hline
+36 & 0.4 & 1 & 7.091$\pm$0.020 &  \\ \hline
+36 & 0.4 & 2 & 8.488$\pm$0.024 &  \\ \hline
+40 & 0.2 & 1 & 2.313$\pm$0.009 &  \\ \hline
+40 & 0.2 & 2 & 2.879$\pm$0.010 &  \\ \hline
+40 & 0.4 & 1 & 5.308$\pm$0.018 &  \\ \hline
+40 & 0.4 & 2 & 6.921$\pm$0.022 &  \\ \hline
+\end{tabular}
+\caption{My caption}
+\label{tab:LS}
+\end{table}
 
 \section{Commented Bibliography}
 \subsection{Miscellaneous Topics}

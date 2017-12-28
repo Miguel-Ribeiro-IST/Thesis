@@ -105,7 +105,7 @@ Options have several other advantages that make them especially appealing to inv
 To hedgers (i.e. investors that want to limit their exposure to risk), options provide safety by fixing the future price of a stock i.e. if a hedger is afraid of a future stock price crash in one of the stocks he owns, by buying put options on that same stock, he ensures that his losses are contained because he can always sell the stocks for the fixed strike price, after the stock price crash.
 To speculators (i.e. investors that want to take advantage of the uncertainty of future stock prices by betting on their outcome), options grant access to much higher profits i.e. due to the options having a lower price than their underlying stock, a speculator can buy a much larger number of options than stocks with the same initial investment, magnifying the consequences of the outcome: if the speculator's initial prediction proves true, his profits will increase greatly whereas a wrong prediction will lead to a total loss of the initial investment.
 
-Due to all their advantages, and unlike some other types of derivatives, options have a price. Finding the ideal price for an option is quite difficult, however, due to the great complexity of these financial instruments~\cite{Hull}. This is a fundamental concern to investors, since knowing the true value of an option can give them a chance to take advantage of under or overpriced options.
+Due to all their advantages, and unlike some other types of derivatives, options have a price. Finding the ideal price for an option is quite difficult, however, due to the great complexity of these financial instruments~\cite{Wilmott1}. This is a fundamental concern to investors, since knowing the true value of an option can give them a chance to take advantage of under or overpriced options.
 
 
 
@@ -119,7 +119,7 @@ On the other hand, an \textit{American option} enables its owner to exercise it 
 
 
 Due to their high importance, options have been studied in detail in the past.
-Possibly the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price European options~\cite{Scholes} - the famous Black-Scholes-Merton model - still in use in present days~\cite{Hull}. The last two actually earned the 1997 Nobel prize in Economics for this development.
+Possibly the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price European options~\cite{Scholes} - the famous Black-Scholes-Merton model - still in use in present days~\cite{Wilmott2}. The last two actually earned the 1997 Nobel prize in Economics for this development.
 
 This model states that a European call or put option's price follows the partial differential equation (PDE)
 
@@ -153,12 +153,12 @@ S(t+\Delta t)=S(t)+rS(t)\Delta t+\sqrt{\Delta t}\sigma S(t)N(0,1),
 By simulating a large number of paths, some underlying tendencies might become apparent, which will prove useful in option pricing.
 
 Pricing European options is fairly straightforward - we simply need to solve the PDE in eq. \eqref{BS2} in a similar fashion to the initial value problem for the diffusion
-equation~\cite{Dilao}. American options, however, pose a much greater challenge.  Unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to solve this problem~\cite{Hull}, such as the Longstaff-Schwartz algorithm, which we shall approach in later sections of the present thesis.
+equation~\cite{Dilao}. American options, however, pose a much greater challenge.  Unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to solve this problem~\cite{Wilmott1,Hull}, such as the Longstaff-Schwartz algorithm~\citep{Longstaff}, which we shall approach in later sections of the present thesis.
 
 Despite their complexity, American options are nonetheless the most currently traded options in exchanges~\cite{Hull}. Thus, it is absolutely critical to understand which variables influence this type of derivatives and by what amount. With this knowledge, one can better defend oneself against market changes and even mitigate potential risks.
 
 \subsection{Sensitivity Analysis}
-One of the main difficulties in the study of option pricing arises from the fact that the price of an option is influenced by many factors~\cite{Hull}.
+One of the main difficulties in the study of option pricing arises from the fact that the price of an option is influenced by many factors~\cite{Wilmott2}.
 From the strike price to the expiration date, some factors are well defined in the option contract and the investor is well aware of their values. Others, like the stock price volatility or the risk-free interest rate, have an associated uncertainty and require a detailed market study. This input uncertainty will cause a variance in the final model output price.
 
 To fully understand how models with uncertain inputs work, a sensitivity analysis is required. In short, sensitivity analyses indicate which factors have a greater impact on the final model output's variance.
@@ -334,6 +334,14 @@ John Hull's book is a great source for most option related information. In it, H
 In what concerns the present work, the most important state-of-the-art topic explored in the book is related to the GARCH(1,1) model.
 \begin{itemize}
 \item J. Hull. \textit{Options, Futures, and Other Derivatives}. Boston: Prentice Hall, 2012.
+\end{itemize}
+
+Paul Wilmott's book, like Hull's, is a great introduction to the derivatives market, with a major focus on options. While Hull's book is more focused on the principles behind market mechanics, Wilmott's is more theoretical, offering more solid mathematical background.
+Despite this, Wilmott's book is outdated and some recent important results are not covered.
+\begin{itemize}
+\item P. Wilmott, S. Howison, and J. Dewynne. \textit{The Mathe-
+matics of Financial Derivatives: A Student Introduction}.
+Cambridge University Press, 1995.
 \end{itemize}
 
 \subsection{American Option Pricing}

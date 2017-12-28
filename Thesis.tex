@@ -142,17 +142,18 @@ We can then simply discretize eq. \eqref{BS} into
 \begin{equation}
 S(t+\Delta t)=S(t)+rS(t)\Delta t+\sqrt{\Delta t}\sigma S(t)N(0,1),
 \end{equation}
-\noindent where $\Delta t$ corresponds to a given time step. This discretization is represented in \autoref{fig:GBM}.
+\noindent where $\Delta t$ corresponds to a given time step. An example of this discretization is represented in \autoref{fig:GBM}.
 
 \begin{figure}[H]
     \centering
       \includegraphics[width=0.9\columnwidth]{GBM.eps}
-      \caption{Geometric Brownian Motion using the parameters $r=\SI{0.06}{\per\year}$, $\sigma=0.05$, $S(0)=\SI{1}[\EUR]{}$ and time steps $\Delta t=10^{-3}\SI{}{\year}$.}\label{fig:GBM}
+      \caption{Example of three GBM processes, using the parameters $r=\SI{0.06}{\per\year}$, $\sigma=0.05$, $S(0)=\SI{1}[\EUR]{}$ and time steps $\Delta t=10^{-3}\SI{}{\year}$.}\label{fig:GBM}
     \end{figure}
     
 By simulating a large number of paths, some underlying tendencies might become apparent, which will prove useful in option pricing.
 
-Pricing European options is fairly straightforward - we simply need to solve the PDE in eq. \eqref{BS2} with the appropriate boundary conditions. American options, however, pose a much greater challenge.  Unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to solve this problem~\cite{Hull}, such as the Longstaff-Schwartz algorithm, which we shall approach in later sections of the present thesis.
+Pricing European options is fairly straightforward - we simply need to solve the PDE in eq. \eqref{BS2} in a similar fashion to the initial value problem for the diffusion
+equation~\cite{Dilao}. American options, however, pose a much greater challenge.  Unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to solve this problem~\cite{Hull}, such as the Longstaff-Schwartz algorithm, which we shall approach in later sections of the present thesis.
 
 Despite their complexity, American options are nonetheless the most currently traded options in exchanges~\cite{Hull}. Thus, it is absolutely critical to understand which variables influence this type of derivatives and by what amount. With this knowledge, one can better defend oneself against market changes and even mitigate potential risks.
 
@@ -219,7 +220,7 @@ This algorithm is quite useful and has been shown to give results very similar t
 Despite its usefulness, Longstaff and Schwartz's algorithm only uses a simple GBM to describe each of the paths. For this reason, a constant stock price volatility is assumed throughout the simulations, which does not hold in real world stocks.
 For this reason, some modifications might be applied to the GBM used in the simulations performed prior to the least-squares section of the algorithm.
 
-One such possible modification is the GARCH(1,1) model for the volatility~\cite{Wei}.
+One such possible modification is the GARCH(1,1) model for the volatility~\cite{Wei} (short for Generalized Autoregressive Conditional Heteroscedasticity).
 It states that the volatility in each stock price path has to be updated after each time step using the formula
 \begin{equation}
 \sigma_n^2=\gamma V_L+\alpha u_{n-1}^2+\beta\sigma_{n-1}^2,
@@ -230,6 +231,8 @@ u_i=\frac{S_i-S_{i-1}}{S_{i-1}},
 \end{equation}
 \noindent with $S_j$ the stock price at time step $j$.
 This model assumes that the volatility increases when great changes in the daily stock price occur and that it decreases otherwise. Furthermore, the long-run average variance, $V_L$, can be deduced from past data and makes the volatilities tend to a constant value.
+The GARCH(1,1) is by far the most used of the GARCH($p,q$) models, that depend on the $p$ most recent values of $u_n$ and on the $q$ most recent estimates of $\sigma_n$~\citep{Hull}.
+
 The GARCH(1,1) model provides a better representation of volatilities than the simple assumption that they are constant. Due to its simplicity, it is also easily implemented with negligible computational impact in the calculation of the option prices.
 
 Besides changing over time, the volatility of a stock price is also difficult to estimate. Some methods have been developed in an attempt to solve this problem. One such method is the \textit{implied volatility}. In short, this model outputs the volatility that would be required for an option pricing model (e.g. Black-Scholes method) to return a price equal to the option's market price.
@@ -286,20 +289,20 @@ A set of $k$ new matrices, $\{\mathbf{C}^{(i)},\ i=1,\dots,k\}$, is then generat
 
 Each of the rows of each of these matrices is then used as input for our pricing model - vectors $f(\mathbf{A})$, $f(\mathbf{B})$ and $\{f(\mathbf{C}^{(i)}),\ i=1,\dots,k\}$ are produced, with each of their entries corresponding to the output of the model using the respective matrix's row.
 
-Having obtained all the vectors, we can use the formulas proposed by Saltelli~\cite{Saltelli2} to calculate the indices
+Having obtained all the vectors, we can use the formulas proposed by Saltelli~\cite{Saltelli} to calculate the indices
 \begin{equation}\label{Si2}
-S_i\approx\frac{1}{N\mathrm{Var}(Y)}\sum_{j=1}^Nf(\mathbf{B})_j\left(f(\mathbf{C}^{(i)})_j-f(\mathbf{A})_j\right);
+S_i=\frac{(1/N)\sum_{j=1}^Nf(\mathbf{B})_j.f(\mathbf{C}^{(i)})_j-f_0^2}{(1/N)\sum_{j=1}^N\left(f(\mathbf{B})_j\right)^2-f_0^2};
 \end{equation}
 \begin{equation}\label{STi2}
-S_{Ti}\approx\frac{1}{2N\mathrm{Var}(Y)}\sum_{j=1}^N\left(f(\mathbf{C}^{(i)})_j-f(\mathbf{A})_j\right)^2,
+S_{Ti}=1-\frac{(1/N)\sum_{j=1}^Nf(\mathbf{A})_j.f(\mathbf{C}^{(i)})_j-f_0^2}{(1/N)\sum_{j=1}^N\left(f(\mathbf{B})_j\right)^2-f_0^2},
 \end{equation}
-\noindent where $\mathrm{Var}(Y)$ is the output total variance and $f(\mathbf{B})_j$, $f(\mathbf{C}^{(i)})_j$ and $f(\mathbf{A})_j$ are the j\textsuperscript{th} entries of the vectors $f(\mathbf{B})$, $f(\mathbf{C}^{(i)})$ and $f(\mathbf{A})$, respectively.
+\noindent where $f(\mathbf{B})_j$, $f(\mathbf{C}^{(i)})_j$ and $f(\mathbf{A})_j$ are the j\textsuperscript{th} entries of the vectors $f(\mathbf{B})$, $f(\mathbf{C}^{(i)})$ and $f(\mathbf{A})$, respectively, and $f_0$ is given by
+\begin{equation}
+f_0=\frac{1}{N}\sum_{j=1}^Nf(\mathbf{B})_j.
+\end{equation}
 
-
-The concept behind eq. \eqref{Si2} is related to the high correlation between vectors $f(\mathbf{C}^{(i)})$ and $f(\mathbf{B})$. If the i\textsuperscript{th} variable has a large influence on the output variance then, whenever $f(\mathbf{C}^{(i)})_j$ is large, $f(\mathbf{B})_j$ would also be large, because they share the same i\textsuperscript{th} input variable. The value of $f(\mathbf{A})_j$, however, would be independent of $f(\mathbf{B})_j$. When multiplying $f(\mathbf{C}^{(i)})_j$ by $f(\mathbf{B})_j$ on eq. \eqref{Si2}, the highly correlated values would return a larger result than the uncorrelated multiplication of $f(\mathbf{A})_j$ and $f(\mathbf{B})_j$. After the subtraction, we would be left with a large value for $S_i$.
-On the other hand, if the i\textsuperscript{th} variable has little influence on the model output, the values $f(\mathbf{C}^{(i)})_j$ would be barelly correlated with $f(\mathbf{B})_j$ and would vanish after the subtraction. Thus, the value of $S_i$ would be small.
-As for eq. \eqref{STi2}, it is clear that the vectors $f(\mathbf{A})$ and $f(\mathbf{C}^{(i)})$ have the same input variables except for the i\textsuperscript{th} variable. Thus, if this variable has a great influence in the model output, even small differences in this input will cause $f(\mathbf{A})_j$ and $f(\mathbf{C}^{(i)})_j$ to be very distinct. On the other hand, if this input has little impact in the model output, $f(\mathbf{A})_j$ and $f(\mathbf{C}^{(i)})_j$ would be very similar.
-By squaring the difference, we obtain a measure of how distinct these vectors are and thus how influential is the i\textsuperscript{th} variable.
+An empirical explanation of eq. \eqref{Si2} can be obtained by the relation between vectors $f(\mathbf{C}^{(i)})$ and $f(\mathbf{B})$. Because they share the i\textsuperscript{th} variable as input, if this variable has a large influence on the output result, then vectors $f(\mathbf{C}^{(i)})$ and $f(\mathbf{B})$ would be very similar. For this reason, high (or low) values of $f(\mathbf{B})_j$ would be multiplied by high (or low) values of $f(\mathbf{C}^{(i)})_j$, we would have a large scalar product and therefore a large value for $S_i$. On the other hand, if this input variable has little effect on the output, $f(\mathbf{B})_j$ and $f(\mathbf{C}^{(i)})_j$ would be randomly associated and a small $S_i$ would be obtained.
+As for eq. \eqref{STi2} a similar explanation can be found. Because $f(\mathbf{A})$ and $f(\mathbf{C}^{(i)})$ share all the inputs but the i\textsuperscript{th}, the scalar product between $f(\mathbf{A})_j$ and $f(\mathbf{C}^{(i)})_j$ would return the first order effect of all input variables but the shared i\textsuperscript{th}. Using the same line of thought as for eq \eqref{Si2}, we are left with a value proportional to the influence of the i\textsuperscript{th} variable in the output.
 
 Having obtained the values for all variable indices, the results can now be interpreted and conclusions can be extracted from them.
 
@@ -461,10 +464,10 @@ The algorithm developed by Ilya Sobol~\cite{Sobol} to calculate the indices in e
 A set of new vectors, $A^{(i)}$, is then generated using the same input values used to generate vector $A$ but replacing the values of the i\textsuperscript{th} input variable with the values used in vector $B$. Thus, we should generate one vector $C^{(i)}$ for each of the input variables with associated uncertainty.
 
 Having obtained all the vectors, we can use the formulas proposed by Saltelli~\cite{Saltelli2} to calculate the indices
-\begin{equation}\label{Si2}
+\begin{equation}\label{Si3}
 S_i\approx\frac{1}{N\mathrm{Var}(Y)}\sum_{j=1}^NB_j\left(C^{(i)}_j-A_j\right);
 \end{equation}
-\begin{equation}\label{STi2}
+\begin{equation}\label{STi3}
 S_{Ti}\approx\frac{1}{2N\mathrm{Var}(Y)}\sum_{j=1}^N\left(C^{(i)}_j-A_j\right)^2,
 \end{equation}
 \noindent where $B_j$, $C^{(i)}_j$ and $A_j$ are the j\textsuperscript{th} entries of the vectors $B$, $C^{(i)}$ and $A$, respectively.
@@ -473,5 +476,21 @@ S_{Ti}\approx\frac{1}{2N\mathrm{Var}(Y)}\sum_{j=1}^N\left(C^{(i)}_j-A_j\right)^2
 The concept behind eq. \eqref{Si2} is related to the high correlation between vectors $C^{(i)}$ and $B$. If the i\textsuperscript{th} variable has a large influence on the output variance then, whenever $C^{(i)}_j$ is large, $B_j$ would also be large, because they share the same i\textsuperscript{th} input variable. The value of $A_j$, however, would be independent of $B_j$. When multiplying $C^{(i)}_j$ by $B_j$ on eq. \eqref{Si2}, the highly correlated values would return a larger result than the uncorrelated multiplication of $A_j$ and $B_j$. After the subtraction, we would be left with a large value for $S_i$.
 On the other hand, if the i\textsuperscript{th} variable has little or no influence on the model output, the values $C^{(i)}_j$ would be uncorrelated with $B_j$ and would vanish after the subtraction. Thus, the value of $S_i$ would be small.
 As for eq. \eqref{STi2}, it is clear that the vectors $A$ and $C^{(i)}$ have the same input variables except for the i\textsuperscript{th} variable. Thus, if this variable has a great influence in the model output, even small differences in this input will cause $A_j$ and $C^{(i)}_j$ to be very distinct. On the other hand, if this input has little impact in the model output, $A_j$ and $C^{(i)}_j$ would be very similar.
+By squaring the difference, we obtain a measure of how distinct these vectors are and thus how influential is the i\textsuperscript{th} variable.
+\fi
+
+\iffalse
+\begin{equation}\label{Si2}
+S_i\approx\frac{1}{N\mathrm{Var}(Y)}\sum_{j=1}^Nf(\mathbf{B})_j\left(f(\mathbf{C}^{(i)})_j-f(\mathbf{A})_j\right);
+\end{equation}
+\begin{equation}\label{STi2}
+S_{Ti}\approx\frac{1}{2N\mathrm{Var}(Y)}\sum_{j=1}^N\left(f(\mathbf{C}^{(i)})_j-f(\mathbf{A})_j\right)^2,
+\end{equation}
+\fi
+
+\iffalse
+After the division, we would be left with an index $S_i$ very close to 1. The value of $f(\mathbf{A})_j$, however, would be independent of $f(\mathbf{B})_j$. When multiplying $f(\mathbf{C}^{(i)})_j$ by $f(\mathbf{B})_j$ on eq. \eqref{Si2}, the highly correlated values would return a larger result than the uncorrelated multiplication of $f(\mathbf{A})_j$ and $f(\mathbf{B})_j$. After the subtraction, we would be left with a large value for $S_i$.
+On the other hand, if the i\textsuperscript{th} variable has little influence on the model output, the values $f(\mathbf{C}^{(i)})_j$ would be barelly correlated with $f(\mathbf{B})_j$ and would vanish after the subtraction. Thus, the value of $S_i$ would be small.
+As for eq. \eqref{STi2}, it is clear that the vectors $f(\mathbf{A})$ and $f(\mathbf{C}^{(i)})$ have the same input variables except for the i\textsuperscript{th} variable. Thus, if this variable has a great influence in the model output, even small differences in this input will cause $f(\mathbf{A})_j$ and $f(\mathbf{C}^{(i)})_j$ to be very distinct. On the other hand, if this input has little impact in the model output, $f(\mathbf{A})_j$ and $f(\mathbf{C}^{(i)})_j$ would be very similar.
 By squaring the difference, we obtain a measure of how distinct these vectors are and thus how influential is the i\textsuperscript{th} variable.
 \fi

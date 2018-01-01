@@ -46,9 +46,9 @@
 
 
 \begin{abstract}
-Derivatives have become increasingly important in recent decades, with the sums currently handled in these markets amounting to over \$542 trillion.
+\noindent Derivatives have become increasingly important in recent decades, with the sums currently handled in these markets amounting to over \$542 trillion.
 For this reason, it is of the utmost importance to be able to accurately predict the prices of such contracts and be aware of which factors influence them the most.
-In this thesis we will study, in particular, the pricing of American options. These contracts are especially difficult to price due to the high uncertainty associated with optimal stopping.
+In this thesis, we will study, in particular, the pricing of American options. These contracts are especially difficult to price due to the high uncertainty associated with optimal stopping.
 We shall use the procedure proposed by Longstaff and Schwartz to price this type of derivatives. We will, however, make some adjustments in order to better replicate real-world contracts.
 Afterwards, we shall perform a variance-based sensitivity analysis, as proposed by Sobol, which provides a measure of how each parameter's uncertainty affects the final option price variance.
 This analysis is particularly important in option pricing due to the sometimes-large uncertainty associated with the parameters used in the model, such as the stock price volatility.
@@ -58,7 +58,7 @@ This analysis is particularly important in option pricing due to the sometimes-l
 \maketitle
 \section{Introduction}
 The stock market has suffered a complete paradigm shift in the past decades. Recent developments in computer science and mathematical finance have greatly enhanced our abilities to predict and take advantage of stock price changes. New forecasting algorithms not only enable us to better defend ourselves against unexpected unfavorable market shifts but even to take advantage of them, making such techniques highly desirable to investors.
-With the colossal sums handled daily in the stock market, even a small improvement on the predictive abilities of a given forecasting algorithm can lead to significant increases in profits for investors. In such a highly competitive subject, it should be clear that a lot of resources must be devoted to the research and development of these algorithms. An investor that does not follow this strategy is bound to lose major profits when compared to his better-prepared counterparts.
+With the colossal sums handled daily in the stock market, even a small improvement on the predictive abilities of a given forecasting algorithm can lead to significant increases in profits for investors. In such a highly competitive environment, it should be clear that a lot of resources must be devoted to the research and development of these algorithms. An investor that does not follow this strategy is bound to lose major profits when compared to his better-prepared counterparts.
 
 
 
@@ -96,7 +96,7 @@ The payoff function of these two types of derivatives can then simply be deduced
       \caption{Payoff functions of \textit{call} and \textit{put options}.}\label{fig:Payoff}
     \end{figure}
 
-It's important to note that an option gives the holder the right to buy/sell the underlying asset but he is not obliged to do so. If exercising the option would lead to losses the investor can simply let the option expire. This is one of the most atractive characteristics of options.
+It's important to note that an option gives the holder the right to buy/sell the underlying asset but he is not obliged to do so. If exercising the option would lead to losses the investor can simply let the option expire. This is one of the most attractive characteristics of options.
 
 In the present work, we shall focus on options whose underlying assets are stocks. Though some of the results presented might also be applied to other option types~\cite{Hull}, these have to be analyzed carefully.
 
@@ -142,7 +142,7 @@ We can then simply discretize eq. \eqref{BS} into
 \begin{equation}
 S(t+\Delta t)=S(t)+rS(t)\Delta t+\sqrt{\Delta t}\sigma S(t)N(0,1),
 \end{equation}
-\noindent where $\Delta t$ corresponds to a given time step. An example of this discretization is represented in \autoref{fig:GBM}.
+\noindent where $\Delta t$ corresponds to a given time step. An example of this discretization is illustrated in \autoref{fig:GBM} with the realization of three sample paths.
 
 \begin{figure}[H]
     \centering
@@ -189,7 +189,7 @@ This particular type of sensitivity analysis will be studied in more detail in t
 
 
 \section{Objectives}
-In this work, we shall attempt to perform a sensitivity analysis on the price of American options.
+In this work, we shall attempt to perform a sensitivity analysis on the price of American options with respect to the stock price volatility, $\sigma$, the risk-free interest rate, $r$, and the initial stock price, $S(0)$.
 
 As a first step, we will begin by replicating the model developed by Longstaff and Schwartz to price American options.
 
@@ -217,7 +217,7 @@ Thus, we obtain the expected cash flows of every simulated stock price which we 
 
 This algorithm is quite useful and has been shown to give results very similar to other more computationally demanding procedures, such as finite difference~\cite{Longstaff}.
 
-Despite its usefulness, Longstaff and Schwartz's algorithm only uses a simple GBM to describe each of the paths. For this reason, a constant stock price volatility is assumed throughout the simulations, which does not hold in real world stocks.
+Despite its usefulness, Longstaff and Schwartz's algorithm only uses a simple GBM to describe each of the paths. For this reason, a constant stock price volatility is assumed throughout the simulations, which does not hold in real-world stocks.
 For this reason, some modifications might be applied to the GBM used in the simulations performed prior to the least-squares section of the algorithm.
 
 One such possible modification is the GARCH(1,1) model for the volatility~\cite{Wei} (short for Generalized Autoregressive Conditional Heteroscedasticity).
@@ -242,7 +242,7 @@ f(\widetilde{\sigma},\cdot)-P=0,
 \end{equation}
 \noindent where $f(\widetilde{\sigma},.)$ is the price output by the pricing model and $P$ is the option's market price.
 Because this problem has no analytical solution, we must use a numerical method to solve it, such as Newton's method.
-With this result we can deduce the volatility of the underlying stock price from publicly available option prices.
+With this result we, can deduce the volatility of the underlying stock price from publicly available option prices.
 
 
 \subsection{Variance-Based Sensitivity Analysis}
@@ -339,9 +339,7 @@ In what concerns the present work, the most important state-of-the-art topic exp
 Paul Wilmott's book, like Hull's, is a great introduction to the derivatives market, with a major focus on options. While Hull's book is more focused on the principles behind market mechanics, Wilmott's is more theoretical, offering more solid mathematical background.
 Despite this, Wilmott's book is outdated and some recent important results are not covered.
 \begin{itemize}
-\item P. Wilmott, S. Howison, and J. Dewynne. \textit{The Mathe-
-matics of Financial Derivatives: A Student Introduction}.
-Cambridge University Press, 1995.
+\item P. Wilmott, S. Howison, and J. Dewynne. \textit{The Mathematics of Financial Derivatives: A Student Introduction}. Cambridge University Press, 1995.
 \end{itemize}
 
 \subsection{American Option Pricing}

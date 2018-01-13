@@ -5,16 +5,22 @@ S0 = 42;
 K = 40;
 T = 2;
 r = 0.06;
-sigma = 0.4;
+sigma0 = 0.4;
 L = 50; % number of time intervals
-dt = T/L;
 M = 100000; % number of asset paths
+a=0.1;b=0.2;VL=0.4; %sigma*^2=a*u^2+b*sigma^2+(1-a-b)*VL^2
 
 
+dt = T/L;
+u=[];
+sigma=sigma0*ones(M,1);
+%u*=(S*-S)/S
 Y = zeros(M,L);
 S = S0*ones(M,L+1); % asset paths
 for k = 2:L+1
-S(:,k)=S(:,k-1).*exp((r-0.5*sigma^2)*dt+sigma*sqrt(dt)*randn(M,1));
+S(:,k)=S(:,k-1).*exp((r-0.5*sigma.*sigma)*dt+sqrt(dt)*sigma.*randn(M,1));
+u=(S(:,k)-S(:,k-1))./S(:,k-1);
+sigma=sqrt(a*u.*u+b*sigma.*sigma+(1-a-b)*VL^2*ones(M,1));
 end
 
 plot(S(1:100,:)')
@@ -24,8 +30,8 @@ for i=1:M
 Y(i,L) = max(K - S(i,L+1),0);
 end
 
-d1 = (log(S0/K) + (r + 0.5*sigma^2)*T)/(sigma*sqrt(T));
-d2 = d1 - sigma*sqrt(T);
+d1 = (log(S0/K) + (r + 0.5*sigma0^2)*T)/(sigma0*sqrt(T));
+d2 = d1 - sigma0*sqrt(T);
 N1 = normcdf(d1);
 N2 = normcdf(d2);
 European_put_BS = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;

@@ -1,9 +1,9 @@
 clear;
-S0 = 42;
-K = 40;
-T = 2;
+S0 = 177.12;
+K = 177.12+10.38;
+T = 4/252;
 r = 0.06;
-marketeuro=5.7356;
+marketeuro=9.35;
 putcall='put';
 euro=@(sigma)european_bs(S0,K,r,sigma,T,putcall)-marketeuro;
 vol=fzero(euro,0.5)

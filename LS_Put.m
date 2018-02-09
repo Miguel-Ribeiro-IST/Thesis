@@ -1,12 +1,13 @@
 clear;
-tic
+
 American_put_LS=[];
-for q=1:1
-S0 = 42;
+for q=1:10
+S0 = 40;
 K = 40;
-T = 2;
+T = 1;
 r = 0.06;
-sigma = 0.4;
+sigma = 0.2;
+
 L = 50; % number of time intervals
 dt = T/L;
 M = 100000; % number of asset paths
@@ -62,6 +63,7 @@ end
 American_put_LS(q) = exp(-r*dt)*mean(Y(:,1));
 clearvars -except American_put_LS European_put_LS European_put_BS
 end
-toc
+[mean(American_put_LS),std(American_put_LS)]
+%{
 [mean(American_put_LS),std(American_put_LS),0;
-mean(European_put_LS),std(European_put_LS),European_put_BS]
+mean(European_put_LS),std(European_put_LS),European_put_BS]%}

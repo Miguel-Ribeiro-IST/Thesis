@@ -7,7 +7,9 @@ B=A.data(:,:);
 Time=519;
 sigma=0.2;
 B=B(B(:,1)==Time,2:3);
-B=B(abs(B(:,1))<sqrt(Time/252)*sigma*S0,:)
+B=B(abs(B(:,1))<sqrt(Time/252)*sigma*S0,:);
+B(:,2)=smooth(B(:,1),B(:,2))
+
 for i=1:size(B,1)
 euro=@(sigma)european_bs(S0,B(i,1)+S0,r,sigma,Time/252,'put')-B(i,2);
 C(i)=fzero(euro,0.5);

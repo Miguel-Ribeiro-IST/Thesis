@@ -16,7 +16,7 @@ B=B(abs(B(:,1))<sqrt(Time/252)*sigma*S0,:)
 sigma=0.2;
 Exc=0;
 Excm=2000;
-Num=2;
+Num=20;
 B=B(abs(B(:,2))<sqrt(B(:,1)/252)*sigma*S0*Num & B(:,1)>Exc & B(:,1)<Excm,:);
 
 B(:,2)=B(:,2)+S0;
@@ -107,6 +107,7 @@ grad2Km=F2k(X,Y);
 %scatter3(gradK(:,1),gradK(:,2),gradK(:,3),'.');
 scatter3(grad2K(:,1),grad2K(:,2),grad2K(:,3),'.');
 s=meshc(X,Y,grad2Km);
+axis([0 max(B(:,1)) 0 max(B(:,2)) -0.005 0.05])
 %set(s,'LineStyle','none')
 
 

@@ -4,12 +4,13 @@ r=0.06;
 
 A = importdata('Options_AAPL.txt',';',1);
 B=A.data(:,:);
-%{
-Time=174;
+
 sigma=0.2;
-B=B(B(:,1)==Time,2:3);
-B=B(abs(B(:,1))<sqrt(Time/252)*sigma*S0,:)
-%}
+Exc=0;
+Excm=2000;
+Num=2;
+B=B(abs(B(:,2))<sqrt(B(:,1)/252)*sigma*S0*Num & B(:,1)>Exc & B(:,1)<Excm,:);
+
 
 B(:,2)=B(:,2)+S0;
 
@@ -23,9 +24,9 @@ end
 %vol(100,100)
 %plot(vol,[B(:,1),B(:,2)],C')
 
-scatter3(B(:,1),B(:,2),B(:,3),'.');
+%scatter3(B(:,1),B(:,2),B(:,3),'.');
 
-
+%{
 hold on;
 tri = delaunay(B(:,1),B(:,2)); %plot(B(:,1),B(:,2),'.')
 h = trisurf(tri, B(:,1),B(:,2),B(:,3));
@@ -36,23 +37,43 @@ l = light('Position',[0 0 200]);
 %l = light('Position',[200 0 0])
 shading interp;
 %}
+
 xlabel('time(days)');
 ylabel('strike');
 zlabel('price');
 
 hold on;
 
-T1=259;
-K1=160;
-dT=5;
-dK=1;
-F=scatteredInterpolant(B(:,1),B(:,2),B(:,3),'linear','nearest');
+Time=0:10:(max(B(:,1)));
+Strike=0:5:(max(B(:,2)));
+[X,Y] = meshgrid(Time,Strike);
 
+T1=480;
+K1=90;
+dT=40;
+dK=20;
+F=scatteredInterpolant(B(:,1),B(:,2),B(:,3),'natural','none');
+FgradK=(F(X,Y+dK)-F(X,Y-dK))/(2*dK);
+Fgrad2K=(F(X,Y+dK)+F(X,Y-dK)-2*F(X,Y))/(dK^2);
+F2=scatteredInterpolant(B(:,1),B(:,2),B(:,3),'natural','none');
+FgradT=(F2(X+dT,Y)-F2(X-dT,Y))/(2*dT);
+
+vol=(2*FgradT+r*Y.*FgradK)./(Y.^2.*Fgrad2K);
+s=surf(X,Y,vol);
+%s=surf(X,Y,FgradK);
+%s=surf(X,Y,Fgrad2K);
+%s=surf(X,Y,FgradT);
+%axis([0 max(B(:,1)) 0 max(B(:,2)) 0 0.5]);
+axis vis3d;
+
+%{
 price=F(T1,K1);
 gradK=(F(T1,K1+dK)-F(T1,K1-dK))/(2*dK);
 gradT=(F(T1+dT,K1)-F(T1-dT,K1))/(2*dT);
 grad2K=(F(T1,K1+dK)+F(T1,K1-dK)-2*F(T1,K1))/(dK^2)
+%}
 
+%{
 scatter3(T1,K1,price,'.','red');
 hold on;
 syms t
@@ -70,6 +91,7 @@ axis([0 max(B(:,1)) 0 max(B(:,2)) 0 max(B(:,3))])
 hold off;
 
 loc_vol=sqrt((2*gradT+K1*r*gradK)/(K1^2*grad2K))
+%}
 
 %fsurf(@(x,y)2*vol(x,y),[0 600 -200 200]);
 %fsurf(vol,[-200 200 0 600])

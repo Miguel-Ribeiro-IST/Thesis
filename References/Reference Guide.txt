@@ -1,0 +1,7 @@
+Saltelli - Variance-based Sensitivity Analysis (Algorithm and explanation, in particular pages 161-167)
+
+Gatheral - Local volatility equation (Derivation, in particular pages 7-13)
+
+Rebonato - Local volatility computation (Computational considerations, in particular chapter 12)
+
+(Due to storage restrictions in Github, not all references are included)

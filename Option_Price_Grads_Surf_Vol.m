@@ -10,15 +10,23 @@ Exc=10;
 Excm=200;
 Num=1;
 %B=B(abs(B(:,2))<sqrt(B(:,1)/252)*sigma*S0*Num & B(:,1)>Exc & B(:,1)<Excm,:);
-
+B=B(abs(B(:,2))<20 & B(:,1)<366 & B(:,1)>50,:);
 
 B(:,2)=B(:,2)+S0;
 
 
+for i=1:size(B,1)
+euro=@(sigma)european_bs(S0,B(i,2),r,sigma,B(i,1)./252,'put')-B(i,3);
+B(i,3)=fzero(euro,0.5);
+end
+
+
+
+%{
 for idx=unique(B(:,1))'
     B(B(:,1)==idx,3)=smooth(B(B(:,1)==idx,2),B(B(:,1)==idx,3));
 end
-
+%}
 
 xlabel('time(days)');
 ylabel('strike');
@@ -26,31 +34,23 @@ zlabel('price');
 
 
 
-dT=1;
+dT=15;
 dK=1;
 Time=0:2*dT:(max(B(:,1)));
-TimeP=Time+dT;
-TimeM=Time-dT;
 Strike=0:2*dK:(max(B(:,2)));
-StrikeP=Strike+dK;
-StrikeM=Strike-dK;
 [X,Y] = meshgrid(Time,Strike);
-[XKP,YKP] = meshgrid(Time,StrikeP);
-[XKM,YKM] = meshgrid(Time,StrikeM);
-[XTP,YTP] = meshgrid(TimeP,Strike);
-[XTM,YTM] = meshgrid(TimeM,Strike);
 
 
 F=scatteredInterpolant(B(:,1),B(:,2),B(:,3),'linear','none');
-FgradK=(F(XKP,YKP)-F(XKM,YKM))/(2*dK);
-Fgrad2K=(F(XKP,YKP)+F(XKM,YKM)-2*F(X,Y))/(dK^2);
-FgradT=(F(XTP,YTP)-F(XTM,YTM))/(2*dT);
+FgradK=(F(X,Y+dK)-F(X,Y-dK))/(2*dK);
+Fgrad2K=(F(X,Y+dK)+F(X,Y-dK)-2*F(X,Y))/(dK^2);
+FgradT=(F(X+dT,Y)-F(X-dT,Y))/(2*dT);
 FS=F(X,Y);
 
 vol=(2*FgradT+r*Y.*FgradK)./(Y.^2.*Fgrad2K);
 
+%{
 threshold=0.3;
-
 for i=1:size(vol,1)
     for j=1:size(vol,2)
         if not(isnan(vol(i,j)))
@@ -58,9 +58,11 @@ for i=1:size(vol,1)
         end
     end
 end
+%}
 
-%scatter3(B(:,1),B(:,2),B(:,3),'.');
-%hold on;
+
+scatter3(B(:,1),B(:,2),B(:,3),'.');
+hold on;
 s=surf(X,Y,FS);
 %s=surf(X,Y,vol);
 %s=surf(X,Y,FgradK);
@@ -100,3 +102,14 @@ loc_vol=sqrt((2*gradT+K1*r*gradK)/(K1^2*grad2K))
 %fsurf(vol,[-200 200 0 600])
 %plot(F(var,x,y),[B(:,1),B(:,2)],C')
 
+function euro=european_bs(S0,K,r,sigma0,T,putcall)
+d1 = (log(S0/K) + (r + 0.5*sigma0^2)*T)/(sigma0*sqrt(T));
+d2 = d1 - sigma0*sqrt(T);
+N1 = normcdf(d1);
+N2 = normcdf(d2);
+if putcall=='put'
+    euro = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
+else
+    euro = S0*N1 - K*exp(-r*T)*N2;
+end
+end

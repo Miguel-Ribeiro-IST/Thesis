@@ -68,7 +68,7 @@ Strike=MinK:2*dK:MaxK;
 [X,Y] = meshgrid(Time,Strike);
 
 
-F=scatteredInterpolant(B(:,1),B(:,2),B(:,3),'linear','none');
+F=scatteredInterpolant(B(:,1),B(:,2),B(:,3),'natural','none');
 FgradK=(F(X,Y+dK)-F(X,Y-dK))/(2*dK);
 Fgrad2K=(F(X,Y+dK)+F(X,Y-dK)-2*F(X,Y))/(dK^2);
 FgradT=(F(X+dT,Y)-F(X-dT,Y))/(2*dT);

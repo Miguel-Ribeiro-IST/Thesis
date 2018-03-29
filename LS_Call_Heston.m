@@ -1,24 +1,41 @@
-tic
 clear;
-American_call_LS=[];
-for q=1:1
 S0 = 42;
 K = 40;
 T = 2;
 r = 0.06;
-sigma = 0.4;
+sigma = .3;
 L = 50; % number of time intervals
 dt = T/L;
-M = 10000; % number of asset paths
+M = 100; % number of asset paths
 
+rho=.5;
+c=0.3;
+b=20;
+avg=0.3;
+a=avg^2*b;
 
 Y = zeros(M,L);
 S = S0*ones(M,L+1); % asset paths
+var=sigma^2*ones(M,L+1);
 for k = 2:L+1
-S(:,k)=S(:,k-1).*exp((r-0.5*sigma^2)*dt+sigma*sqrt(dt)*randn(M,1));
+    X1=randn(M,1);
+    Z=randn(M,1);
+    X2=rho*X1+sqrt(1-rho^2)*Z;
+    S(:,k)=S(:,k-1)+r*dt*S(:,k-1)+sqrt(var(:,k-1)).*S(:,k-1)*sqrt(dt).*X1;
+    var(:,k)=var(:,k-1)+(a-b*var(:,k-1))*dt+c*sqrt(var(:,k-1))*sqrt(dt).*X2;
 end
 
-plot(S(1:100,:)')
+figure
+ax1 = subplot(2,1,1);
+plot(ax1,0:dt:T,S(1:2,:)')
+axis(ax1,[0 T 0 3*S0])
+title(ax1,'Prices') 
+
+ax2 = subplot(2,1,2);
+plot(ax2,0:dt:T,sqrt(var(1:2,:))')
+axis(ax2,[0 T 0 2*sigma])
+title(ax2,'Volatilities') 
+
 
 % Find payoff Y at expiry.
 for i=1:M
@@ -31,7 +48,7 @@ N1 = normcdf(d1);
 N2 = normcdf(d2);
 European_call_BS = S0*N1 - K*exp(-r*T)*N2;
 
-European_call_LS(q)=exp(-r*dt*L)*mean(Y(:,L));
+European_call=exp(-r*dt*L)*mean(Y(:,L));
 
 % Find payoff Y at nodes for each time index.
 for k = L+1:-1:3
@@ -59,10 +76,4 @@ Y(i,k-2) = exp(-r*dt)*Y(i,k-1);
 end
 end
 end
-American_call_LS(q) = exp(-r*dt)*mean(Y(:,1));
-clearvars -except American_call_LS European_call_LS European_call_BS
-end
-[mean(American_call_LS),std(American_call_LS)]
-[mean(European_call_LS),std(European_call_LS)]
-European_call_BS
-toc
+American_call = exp(-r*dt)*mean(Y(:,1));

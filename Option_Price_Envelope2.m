@@ -15,7 +15,7 @@ U=zeros(size(B(B(:,1)==idx,3),1),1);
 U(:,1)=B(B(:,1)==idx,3);
 while 1
     bk=0;
-for i=2:(size(B(B(:,1)==idx,3),1)-1)
+for i=3:(size(B(B(:,1)==idx,3),1)-1)
     if C(i,1)>C(i-1,1)
         U(i-1,1)=(U(i,1)+U(i-2,1))/2;
         D(i,1)=(D(i-1,1)+D(i+1,1))/2;

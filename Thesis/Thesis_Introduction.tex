@@ -1,0 +1,73 @@
+\chapter{Introduction}
+\label{chapter:introduction}
+\section{Mathematical Finance}
+\label{section:mathematical finance}
+Mathematical finance, also known as quantitative finance, is a field of applied mathematics focused on the modeling of financial instruments.
+It is rather difficult to overestimate its importance since it is heavily used by investors and investment banks in everyday transactions.
+In recent decades, this field suffered a complete paradigm shift, following developments in computer science and new theoretical results that enabled investors to better price their assets.
+With the colossal sums traded daily in financial markets around the world, mathematical finance has become increasingly important and many resources are invested in the research and development of new and better theories and algorithms.
+
+
+\section{Derivatives}
+\label{section:derivatives}
+One of the subjects most studied by financial mathematicians is derivatives.
+In finance, a derivative is simply a contract whose value depends on other simpler financial instruments, known as underlying assets, such as stock prices or interest rates.
+\hl{Derivatives can virtually take any form desirable, so long as there are two parties interested in taking a part in it and no government regulations are broken.}
+
+
+The importance of derivatives has grown greatly in recent years. In fact, as of June 2017, derivatives were responsible for over $\$542$ trillion worth of trades, in the Over-the-Counter (OTC) market alone~\cite{BIS}, as can be seen in \autoref{fig:OTC} (the OTC market refers to all deals signed outside of exchanges).
+This growth stalled after the 2008 global financial crisis due to new government regulations since derivatives were one of the reasons the crisis occurred at all~\cite{FT}. 
+
+
+\begin{figure}[!htb]
+    \centering
+      \includegraphics[width=.5\linewidth,trim={2pt 17pt 0 0},clip]{OTC.eps}
+      \caption{Size of OTC derivatives market since May 1996.}\label{fig:OTC}
+    \end{figure}
+
+\section{Options}
+\label{section:options}
+Of all kinds of derivatives, in this master thesis we will focus particularly on the most traded one: options~\cite{Hull}.
+As the name implies, an option contract grants its buyer the option to buy or sell its underlying asset within a given time frame, known as the expiration date.
+
+\subsection{Call and Put Options}
+\label{subsection:calls and puts}
+The two main types of options are calls and puts. They grant their buyer the right to buy and sell the underlying asset, respectively, for a fixed price, known as the strike price, in the future.
+It's important to emphasize the fact that an option grants its buyer the right to do something. If this action would lead to losses, a buyer can simply decide to let the expiration date pass, thus avoiding further losses. This is indeed the most attractive characteristic of options.
+
+\subsection{European and American Options}
+\label{subsection:european and american options}
+Options are also categorized by the period at which the buyer is allowed to exercise his right. The two most traded types are European and American options.
+With an European option, an investor is only able to exercise the contract at the expiration date. The value of the underlying asset up to that point in time is irrelevant.
+As for American options, the buyer can exercise the contract at any moment up to the expiration date.
+In this case, the investor is faced with an optimal-stopping problem: when is the best time to exercise the option?
+For this very reason, it should be clear that American options are significantly more difficult to study than their European counterparts.
+
+\subsection{Why Options are Important}
+\label{subsection:why options are important}
+Options are very useful tools to all investors. 
+To hedgers (i.e. investors that want to limit their exposure to risk), options provide safety by fixing the future price of their underlying asset (e.g. if hedgers want to protect themselves against a potential price crash affecting one of their assets, they can buy put options on them. Now, even if the value their asset decreases significantly, their losses are contained because they can always exercise the options and sell the asset at the option's higher strike price).
+
+To speculators (i.e. investors that want to take advantage of the uncertainty of future markets by speculating on their outcome), options grant access to much higher profits (e.g. if speculators strongly believe that the value of a given asset will greatly increase in the future, they can buy call options on that asset. If their prediction proves right, they can buy that asset for the option's lower strike price).
+
+Due to all their advantages, and unlike some other types of derivatives, options have a cost. Finding the ideal price for an option is a fundamental concern to investors, since knowing its true value can give them a chance to take advantage of an under or overpriced option.
+Finding this price can be very difficult for some options, however. Though a lot of research has been done towards this goal, a great deal more is still required.
+
+
+\section{Topic Overview}
+\label{section:overview}
+
+Provide an overview of the topic to be studied...
+
+
+\section{Objectives}
+\label{section:objectives}
+
+Explicitly state the objectives set to be achieved with this thesis...
+
+
+\section{Thesis Outline}
+\label{section:outline}
+
+Briefly explain the contents of the different chapters...
+

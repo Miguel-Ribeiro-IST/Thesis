@@ -5,21 +5,42 @@ r=0.06;
 A = importdata('Options_AAPL.txt',';',1);
 B=A.data(:,:);
 
-sigma=0.2;
-Exc=10;
-Excm=200;
-Num=1;
-%B=B(abs(B(:,2))<sqrt(B(:,1)/252)*sigma*S0*Num & B(:,1)>Exc & B(:,1)<Excm,:);
-B=B(abs(B(:,2))<20 & B(:,1)<366 & B(:,1)>50,:);
 
 B(:,2)=B(:,2)+S0;
 
+%%{
+for idx=unique(B(:,1))' 
+C=zeros(size(B(B(:,1)==idx,3),1),1);
+C(:,1)=B(B(:,1)==idx,3);
+D=zeros(size(B(B(:,1)==idx,3),1),1);
+D(:,1)=B(B(:,1)==idx,3);
+U=zeros(size(B(B(:,1)==idx,3),1),1);
+U(:,1)=B(B(:,1)==idx,3);
+while 1
+    bk=0;
+for i=3:(size(B(B(:,1)==idx,3),1)-1)
+    if C(i,1)>C(i-1,1)
+        U(i-1,1)=(U(i,1)+U(i-2,1))/2;
+        D(i,1)=(D(i-1,1)+D(i+1,1))/2;
+        C([i-1 i])=C([i i-1]);
+        bk=1;
+    end
+end
+if bk==0
+    break
+end
+end
+B(B(:,1)==idx,3)=(U(:,1)+D(:,1))/2;
+end
+%}
 
+
+%%{
 for i=1:size(B,1)
 euro=@(sigma)european_bs(S0,B(i,2),r,sigma,B(i,1)./252,'put')-B(i,3);
 B(i,3)=fzero(euro,0.5);
 end
-
+%}
 
 
 %{
@@ -34,14 +55,19 @@ zlabel('price');
 
 
 
-dT=15;
-dK=1;
-Time=0:2*dT:(max(B(:,1)));
-Strike=0:2*dK:(max(B(:,2)));
+MinT=0;
+MaxT=100;
+MinK=S0-5;
+MaxK=S0+5;
+SB=B(B(:,2)<MaxK & B(:,2)>MinK & B(:,1)>MinT & B(:,1)<MaxT,:);
+dT=5;
+dK=0.5;
+Time=MinT:2*dT:MaxT;
+Strike=MinK:2*dK:MaxK;
 [X,Y] = meshgrid(Time,Strike);
 
 
-F=scatteredInterpolant(B(:,1),B(:,2),B(:,3),'linear','none');
+F=scatteredInterpolant(B(:,1),B(:,2),B(:,3),'natural','none');
 FgradK=(F(X,Y+dK)-F(X,Y-dK))/(2*dK);
 Fgrad2K=(F(X,Y+dK)+F(X,Y-dK)-2*F(X,Y))/(dK^2);
 FgradT=(F(X+dT,Y)-F(X-dT,Y))/(2*dT);
@@ -60,10 +86,11 @@ for i=1:size(vol,1)
 end
 %}
 
-
-scatter3(B(:,1),B(:,2),B(:,3),'.');
+%%{
+scatter3(SB(:,1),SB(:,2),SB(:,3),'.');
 hold on;
 s=surf(X,Y,FS);
+%}
 %s=surf(X,Y,vol);
 %s=surf(X,Y,FgradK);
 %s=surf(X,Y,Fgrad2K);

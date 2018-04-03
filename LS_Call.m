@@ -2,8 +2,8 @@ tic
 clear;
 American_call_LS=[];
 for q=1:1
-S0 = 42;
-K = 40;
+S0 = 1;
+K = 1;
 T = 2;
 r = 0.06;
 sigma = 0.4;

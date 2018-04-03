@@ -31,6 +31,7 @@ if bk==0
 end
 end
 B(B(:,1)==idx,3)=(U(:,1)+D(:,1))/2;
+A.data(A.data(:,1)==idx,3)=(U(:,1)+D(:,1))/2;
 end
 %}
 
@@ -53,12 +54,13 @@ ylabel('strike');
 zlabel('price');
 
 
-MinT=20;
+MinT=0;
 MaxT=100;
-MinK=157.4;
-MaxK=177.6;
-SB=B(B(:,2)<MaxK & B(:,2)>MinK & B(:,1)>MinT & B(:,1)<MaxT,:);
-dT=5;
+MinK=157.5;
+MaxK=177.5;
+SB=B(B(:,2)<=MaxK & B(:,2)>=MinK & B(:,1)>=MinT & B(:,1)<=MaxT,:);
+SP=A.data(A.data(:,2)<=MaxK & A.data(:,2)>=MinK & A.data(:,1)>=MinT & A.data(:,1)<=MaxT,:)
+dT=3.5;
 dK=0.5;
 Time=MinT:2*dT:MaxT;
 Strike=MinK:2*dK:MaxK;
@@ -66,10 +68,13 @@ Strike=MinK:2*dK:MaxK;
 
 
 F=scatteredInterpolant(B(:,1),B(:,2),B(:,3),'natural','none');
+F2=scatteredInterpolant(A.data(:,1),A.data(:,2),A.data(:,3),'natural','none');
+Price=S0.*normcdf((log(S0./Y) + (r + 0.5*F(X,Y).^2).*X/365)./(F(X,Y).*sqrt(X/365))) - Y.*exp(-r*X/365).*normcdf((log(S0./Y) + (r + 0.5*F(X,Y).^2).*X/365)./(F(X,Y).*sqrt(X/365)) - F(X,Y).*sqrt(X/365));
 FgradK=(F(X,Y+dK)-F(X,Y-dK))/(2*dK);
 Fgrad2K=(F(X,Y+dK)+F(X,Y-dK)-2*F(X,Y))/(dK^2);
 FgradT=(F(X+dT,Y)-F(X-dT,Y))/(2*dT);
 FS=F(X,Y);
+FP=F2(X,Y);
 
 
 vol=(2*FgradT+r*Y.*FgradK)./(Y.^2.*Fgrad2K);
@@ -84,10 +89,20 @@ for i=1:size(Fgrad2K,1)
 end
 %}
 
-%%{
+%{
 scatter3(SB(:,1),SB(:,2),SB(:,3),'.');
 hold on;
 s=surf(X,Y,FS);
+%}
+%{
+scatter3(SP(:,1),SP(:,2),SP(:,3),'.');
+hold on;
+s=surf(X,Y,Price);
+%}
+%%{
+scatter3(SP(:,1),SP(:,2),SP(:,3),'.');
+hold on;
+s=surf(X,Y,FP);
 %}
 %s=surf(X,Y,vol);
 %s=surf(X,Y,FgradK);
@@ -126,6 +141,9 @@ loc_vol=sqrt((2*gradT+K1*r*gradK)/(K1^2*grad2K))
 %fsurf(@(x,y)2*vol(x,y),[0 600 -200 200]);
 %fsurf(vol,[-200 200 0 600])
 %plot(F(var,x,y),[B(:,1),B(:,2)],C')
+
+
+
 
 function euro=european_bs(S0,K,r,sigma0,T,putcall)
 d1 = (log(S0/K) + (r + 0.5*sigma0^2)*T)/(sigma0*sqrt(T));

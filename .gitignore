@@ -222,3 +222,5 @@ TSWLatexianTemp*
 
 # expex forward references with \gathertags
 *-tags.tex
+tmp.m
+tmp.asv

@@ -1,22 +1,21 @@
 clear;
-tic
+
 S01=167.65;
 r1 = 0.06;
-
 
 A = importdata('AAPL.txt','\t',1);
 B1=A.data(:,:);
 
 times1=unique(B1(:,1));
+matur1=1;
+a1=zeros(matur1,1);
+b1=zeros(matur1,1);
+c1=ones(matur1,1);
+sigmamax1=1000;
 
-a1=zeros(size(times1,1),1);
-b1=zeros(size(times1,1),1);
-c1=zeros(size(times1,1),1);
-sigmamax1=0.8;
-matur1=5;
-M1 = 3000; % number of asset paths
-iterations1=150;
-tic
+M1 = 5000; % number of asset paths
+iterations1=250;
+
 
 
 
@@ -24,38 +23,47 @@ tic
 
 %a1(1)=0.1963;b1(1)=17.9684;c1(1)=182.9531;
 for iter=1:matur1
-
+tic
 T1 = times1(iter)/252;
-D1=252; %number of (trading) days in a year
-L1 = T1*D1*2; % number of time intervals
+D1=252;
+L1 = T1*D1*2;
 
 fun = @(var)Localvol(var(1),var(2),var(3),iter,S01,r1,T1,D1,M1,L1,B1,sigmamax1,a1,b1,c1,iterations1);
 
 A = [];b = [];Aeq = [];beq = [];nonlcon=[];
-lb = [0.15,0.1,175];
-ub = [0.3,25,190];
-x0=[0.21 18/iter 183];
+lb = [0.1,0,170];
+ub = [0.4,30,195];
+x0=[0.15 10/iter 180];
 
-options = optimset('MaxFunEvals',100000,'MaxIter',100000,'Display','off','FinDiffRelStep',[0.001,0.01,0.01]);
+options = optimset('MaxFunEvals',100000,'MaxIter',100000,'Display','off','FinDiffRelStep',[0.0005,0.005,0.005]);
 vars=fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options)
 a1(iter)=vars(1);
 b1(iter)=vars(2);
 c1(iter)=vars(3);
+toc
 end
 
-toc
 
 
 ti=times1(matur1);
+sigma0=0.2;
+iterations2=10;
 C=B1(B1(:,1)==ti,2:3);
 
 for i=1:size(C,1)
-Euro(i)=Pricer(a1,b1,c1,S01,r1,T1,D1,M1,L1,B1,sigmamax1,C(i,1),iterations1);
+Euro(i)=Pricer(a1,b1,c1,S01,r1,T1,D1,M1,L1,B1,sigmamax1,C(i,1),iterations2);
+end
+
+
+for i=1:size(C,1)
+Euro_Const(i)=Pricer_Const(sigma0,S01,r1,T1,M1,L1,C(i,1),iterations2);
 end
 
 scatter(C(:,1),C(:,2));
 hold on;
 scatter(C(:,1),Euro(:));
+hold on;
+scatter(C(:,1),Euro_Const(:));
 beep
 %{
 for i=1:size(C,1)
@@ -94,8 +102,9 @@ for k = 2:L+1
 S(:,k)=S(:,k-1)+S(:,k-1)*r*dt+sqrt(dt)*sigma(:).*S(:,k-1).*randn(M,1);
 
 for i=1:size(times,1)
-if dt*D*(k-1)<times(i)
-   sigma=arrayfun(@(x) min(a(i)+b(i)*max(x,0)^2,sigmamax),(S(:,k)-c(i))/c(i));
+if dt*D*(k-1)<=times(i)
+   %sigma=arrayfun(@(x) min(a(i)+b(i)*min(x,0)^2,sigmamax),(S(:,k)-c(i))/c(i));
+   sigma=arrayfun(@(x) a(i)+b(i)*x^2,(S(:,k)-c(i))/c(i));
    break;
 end
 end
@@ -130,8 +139,9 @@ for k = 2:L+1
 S(:,k)=S(:,k-1)+S(:,k-1)*r*dt+sqrt(dt)*sigma(:).*S(:,k-1).*randn(M,1);
 
 for i=1:size(times,1)
-if dt*D*(k-1)<times(i)
-   sigma=arrayfun(@(x) min(a(i)+b(i)*x^2,sigmamax),(S(:,k)-c(i))/c(i));
+if dt*D*(k-1)<=times(i)
+   %sigma=arrayfun(@(x) min(a(i)+b(i)*min(x,0)^2,sigmamax),(S(:,k)-c(i))/c(i));
+   sigma=arrayfun(@(x) a(i)+b(i)*x^2,(S(:,k)-c(i))/c(i));
    break;
 end
 end
@@ -146,6 +156,28 @@ Euro_Vol(iter)=exp(-r*dt*L)*mean(Y(:));
 end
 
 Euro_final=mean(Euro_Vol);
+end
+
+
+function Euro_final_Const=Pricer_Const(sigma,S0,r,T,M,L,K,iterations)
+dt = T/L;
+
+for iter=1:iterations
+S = S0*ones(M,L+1); % asset paths
+
+for k = 2:L+1
+S(:,k)=S(:,k-1)+S(:,k-1)*r*dt+sqrt(dt)*sigma.*S(:,k-1).*randn(M,1);
+
+end
+
+for i=1:M
+Y(i) = max(S(i,L+1)-K,0);
+end
+
+Euro_Vol(iter)=exp(-r*dt*L)*mean(Y(:));
+end
+
+Euro_final_Const=mean(Euro_Vol);
 end
 
 

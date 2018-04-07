@@ -1,0 +1,3 @@
+cd .\Documents\GitHub\Thesis\Thesis_Text
+
+del *.aux *.bbl *.blg *.glg *.glo *.gls *.ilg *.ist *.lof *.log *.lot *.nlo *.nls *.out *.toc

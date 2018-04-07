@@ -22,4 +22,3 @@ veryclean:
 	make clean
 	rm -f *~ *.*%
 	rm -f $(FILE).pdf $(FILE).ps
-

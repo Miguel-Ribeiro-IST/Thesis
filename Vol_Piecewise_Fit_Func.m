@@ -13,8 +13,8 @@ b1=zeros(matur1,1);
 c1=ones(matur1,1);
 sigmamax1=1000;
 
-M1 = 5000; % number of asset paths
-iterations1=250;
+M1 = 10; % number of asset paths
+iterations1=1;
 
 
 
@@ -65,6 +65,7 @@ scatter(C(:,1),Euro(:));
 hold on;
 scatter(C(:,1),Euro_Const(:));
 beep
+
 %{
 for i=1:size(C,1)
 euro=@(sigma)european_bs(S01,C(i,1),r1,sigma,ti/252,'call')-C(i,2);

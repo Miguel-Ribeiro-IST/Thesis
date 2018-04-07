@@ -11,12 +11,12 @@ With the colossal sums traded daily in financial markets around the world, mathe
 \section{Derivatives}
 \label{section:derivatives}
 One of the subjects most studied by financial mathematicians is derivatives.
-In finance, a derivative is simply a contract whose value depends on other simpler financial instruments, known as underlying assets, such as stock prices or interest rates.
-\hl{Derivatives can virtually take any form desirable, so long as there are two parties interested in taking a part in it and no government regulations are broken.}
+In finance, a derivative is simply a contract whose value depends on other simpler financial instruments, known as \emph{underlying assets}, such as stock prices or interest rates.
+They can virtually take any form desirable, so long as there are two parties interested in signing it and all government regulations are met.
 
 
-The importance of derivatives has grown greatly in recent years. In fact, as of June 2017, derivatives were responsible for over $\$542$ trillion worth of trades, in the Over-the-Counter (OTC) market alone~\cite{BIS}, as can be seen in \autoref{fig:OTC} (the OTC market refers to all deals signed outside of exchanges).
-This growth stalled after the 2008 global financial crisis due to new government regulations since derivatives were one of the reasons the crisis occurred at all~\cite{FT}. 
+The importance of derivatives has grown greatly in recent years. In fact, as of June 2017, derivatives were responsible for over \textdollar542 trillion worth of trades, in the Over-the-Counter (OTC) market alone~\cite{BIS}, as can be seen in \autoref{fig:OTC} (the OTC market refers to all deals signed outside of exchanges).
+This growth stalled after the 2008 global financial crisis due to new government regulations, implemented because of the role of derivatives in the market crashes~\cite{FT}. 
 
 
 \begin{figure}[!htb]
@@ -27,14 +27,20 @@ This growth stalled after the 2008 global financial crisis due to new government
 
 \section{Options}
 \label{section:options}
-Of all kinds of derivatives, in this master thesis we will focus particularly on the most traded one: options~\cite{Hull}.
-As the name implies, an option contract grants its buyer the option to buy or sell its underlying asset within a given time frame, known as the expiration date.
+Of all kinds of derivatives, in this master thesis we will focus particularly on the most traded one: \emph{options}~\cite{Hull}.
 
-\subsection{Call and Put Options}
-\label{subsection:calls and puts}
-The two main types of options are calls and puts. They grant their buyer the right to buy and sell the underlying asset, respectively, for a fixed price, known as the strike price, in the future.
-It's important to emphasize the fact that an option grants its buyer the right to do something. If this action would lead to losses, a buyer can simply decide to let the expiration date pass, thus avoiding further losses. This is indeed the most attractive characteristic of options.
+As the name implies, an option contract grants its buyer the \emph{option} to buy (in the case of a \emph{call} option) or sell (for \emph{put} options) its underlying asset at a future date, known as the \emph{maturity}, for a fixed price, known as the \emph{strike price}.
 
+The description above pertains only to the most traded type of option -\emph{European} options. In this thesis, unless stated otherwise, all options will be assumed European. There are, however, other types that enable exercising at dates other than maturity.
+The most well known example is American options, that enable their buyer to exercise at any point in type until the expiration.
+Other types, commonly known as \emph{exotic}, will be studied in more detail in the following sections.
+
+%The two main types of options are calls and puts. They grant their buyer the right to buy and sell the underlying asset, respectively, for a fixed price, known as the strike price, in the future.
+
+It's important to emphasize the fact that an option grants its buyer the right to do something. If \emph{exercising} the option would lead to further losses, its buyer can simply decide to let the expiration date pass. This is indeed the most attractive characteristic of options.
+
+
+\iffalse
 \subsection{European and American Options}
 \label{subsection:european and american options}
 Options are also categorized by the period at which the buyer is allowed to exercise his right. The two most traded types are European and American options.
@@ -42,6 +48,7 @@ With an European option, an investor is only able to exercise the contract at th
 As for American options, the buyer can exercise the contract at any moment up to the expiration date.
 In this case, the investor is faced with an optimal-stopping problem: when is the best time to exercise the option?
 For this very reason, it should be clear that American options are significantly more difficult to study than their European counterparts.
+\fi
 
 \subsection{Why Options are Important}
 \label{subsection:why options are important}

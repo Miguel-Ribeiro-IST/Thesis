@@ -1,6 +1,8 @@
 /PMEFT/*
 /Books/*
 /Faisca/*
+/Template/*
+/Stock_Price_Files/*
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

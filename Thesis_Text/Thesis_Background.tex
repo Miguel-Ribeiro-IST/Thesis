@@ -2,7 +2,7 @@
 \label{chapter:background}
 \section{Call and Put Options}
 As stated before, call and put options enable their buyer to buy and sell the underlying stock at the maturity for the fixed strike price.
-In the case of a call option, if at the maturity the price of my asset is greater than the strike, I can buy it for the latter and immediately sell it for its higher market price. Thus, the payoff of my option would be the difference of these two values. On the other hand, if the price of the asset decreases past the strike at the maturity, I should let my option expire, since I can buy the asset for the lower market price rather than the higher strike. In this case, the payoff of the option would be zero.
+In the case of a call option, if at the maturity the price of its underlying asset is greater than the strike, an investor can buy it for the latter and immediately sell it for its higher market price. Thus, the payoff of the option would be the difference of these two values. On the other hand, if the price of the asset decreases past the strike at the maturity, the investor should let the option expire, since the asset is available for a price in the market price lower than the higher strike. In this case, the payoff of the option would be zero.
 The same reasoning can be made for put type options.
 The payoff function of these two types of options can then simply be deduced as
 \begin{equation}\label{callput}
@@ -16,7 +16,7 @@ The payoff function of these two types of options can then simply be deduced as
 \begin{figure}[!htb]
     \centering
       \includegraphics[width=.5\columnwidth]{Payoff.eps}
-      \caption{Payoff functions of \emph{call} and \emph{put options}.}\label{fig:Payoff}
+      \caption[Payoff functions of call and put options]{Payoff functions of \emph{call} and \emph{put options}.}\label{fig:Payoff}
     \end{figure}
     
 \section{Black-Scholes-Merton Formulae}
@@ -105,7 +105,7 @@ The reason behind this odd market behavior is the simple demand-supply rule~\cit
     \subfigure[Smile]{\includegraphics[height=0.20\linewidth]{Smile.png}}
     \subfigure[Skew]{\includegraphics[height=0.20\linewidth]{Skew.png}}
   \end{subfigmatrix}
-  \caption{Example of an implied volatility smile and skew.\hl{source=Hull}}
+  \caption[Example of an implied volatility smile and skew.]{Example of an implied volatility smile and skew.\hl{source=Hull}}
   \label{fig:smileskew}
 \end{figure}
 
@@ -116,42 +116,98 @@ In their original work, Black \textit{et al.} assumed that volatility is constan
 The model in eq. \eqref{callputBS} is clearly not enough to truly grasp real-world trading. We should have a model where volatility is dynamic, measuring the amount of randomness in the stock price at any given time.
 The geometric Brownian motion from eq. \ref{GBM} would thus become
 \begin{equation*}
-dS(t)=rS(t)dt+\sigma(t) S(t)dW(t),
+dS(t)=rS(t)dt+\sigma(t)S(t)dW(t),
 \end{equation*}
 \noindent where $\sigma(t)$ is now some function of time.
 
 
 However, as we saw in subsection \ref{section:impliedvolatility} for implied volatility, the market's view of volatility also varies with the strike price. A simple dynamic volatility model is thus unsufficient. The local volatility should then be a function of both time and strike price. We are left with a new GBM, given by
 \begin{equation}\label{GBM2}
-dS(t)=rS(t)dt+\sigma(K,t) S(t)dW(t),
+dS(t)=rS(t)dt+\sigma(K,t)S(t)dW(t),
 \end{equation}
 \noindent where $\sigma(K,t)$ depends now on $K$ and $t$.
 
-The local volatility function is very difficult to measure. Some models have been proposed to model it. We shall approach them in section \ref{section:Dupire}.
 
+Finding the local volatility function is not very important when pricing typical European options, because we can simply use the implied volatility in eq. \ref{GBM} and assume it remains constant.
+However, for other contracts, such as American, Asian or Barrier options (among others) where the option value depends on the path the stock price takes, this function is indeed crucial.
 
-\section{Dupire's Formula}
-\label{section:Dupire}
+The local volatility function is very difficult to calibrate, because we can't directly measure the local volatility of a stock from market data. 
+Some models have been proposed in an attempt to achieve this goal. The most well known model is known as Dupire's formula.
 
-\iffalse
-Because the stock price depends on a Brownian motion process, it follows that it is not differentiable. For this reason, it's impossible to exactly simulate such a process. An approximation is possible, however, using discrete jumps of length $\Delta t$ and using the Brownian motion property $W(t)\sim \sqrt{t}N(0,1)$~\cite{Mikosch}, with $N(0,1)$ being a normal distribution with 0 expected value and 1 variance.
-We can then simply discretize eq. \eqref{BS} into
-\begin{equation}
-S(t+\Delta t)=S(t)+rS(t)\Delta t+\sqrt{\Delta t}\sigma S(t)N(0,1),
+\subsubsection{Dupire's Formula}
+\label{subsubsection:Dupire}
+One of the most famous results in the modelling of the local volatility function was obtained by Dupire~\cite{Dupire}. In his article, he derives a theoretical formula for this function, given by
+\begin{equation}\label{dupire}
+\sigma(K,T)=\sqrt{\frac{\displaystyle\pdv{C}{T}+rK\pdv{C}{K}}{\displaystyle\frac{1}{2}K^2\pdv{^2C}{K^2}}},
 \end{equation}
-\noindent where $\Delta t$ corresponds to a given time step. An example of this discretization is illustrated in \autoref{fig:GBM} with the realization of three sample paths.
-
-\begin{figure}[H]
-    \centering
-      \includegraphics[width=0.9\columnwidth]{GBM.eps}
-      \caption{Example of three GBM processes, using the parameters $r=\SI{0.06}{\per\year}$, $\sigma=0.05$, $S(0)=\SI{1}[\EUR]{}$ and time steps $\Delta t=10^{-3}\SI{}{\year}$.}\label{fig:GBM}
-    \end{figure}
-    
-By simulating a large number of paths, some underlying tendencies might become apparent, which will prove useful in option pricing.
+\noindent where $\sigma(K,T)$ is the volatility function for stock prices $K$ at time $T$ and $C=C(K,T)$ is the price of an European call option with strike price $K$ and maturity $T$.
+A brief demonstration of this formula can be found in appendix \ref{chapter:dupireformuladerivation}.
 
 
- American options, however, pose a much greater challenge.  Unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to solve this problem~\cite{Wilmott1,Hull}, such as the Longstaff-Schwartz algorithm~\citep{Longstaff}, which we shall approach in later sections of the present thesis.
-\fi
+As can be seen, we need to differentiate the option prices with respect to their strikes and maturities. To achieve this, we need to gather a large number of option prices from the market, for options with different maturities and strikes, and interpolate between them to obtain an option price surface (with $K$ and $T$ as variables). We then calculate the gradients in this surface and input them into eq. \ref{dupire} to obtain the local volatility surface.
+
+Even before implementation, four potential sources of error can be found.
+First, it should be noted that markets only trade options with very specific maturities (e.g. 1, 2, 4, 6-months maturity). For this reason, our data will be very sparse with respect to maturity and the interpolation obtained may not closely resemble reality.
+Furthermore, it can be seen that we are dividing by the second derivative with respect to the strike price. \hl{As we will see in the next section}, the prices of options with strikes very far from the current stock price change at an approximately constant rate with respect to the strike. The second derivative in these regions would then be very close to or actually zero. Because we are dividing by this value, our volatilities may explode for very large or very small strikes.
+Then, there is the problem of noise. Because we are interpolating very sparse data, even small errors in the option market price will cause variations in the interpolation which can be very problematic if the second derivative changes, because we are dividing by it.
+Finally, some problems arise from the market itself. While investors use mathematical finance in their trades, the market is still governed by the demand-supply rule. If many investors want to buy the option and few want to sell it, the option price will increase, even if it means that the option will be overpriced. It may also happen that the market is not liquid enough (i.e. very few trades or even no trades at all occur for some options) which causes the option prices to not truly follow the market's perception of future price movements.
+
+
+
+Dupire also developed an alternative formula based on the implied volatility surface rather than the option price's.
+The relation he obtained is as follows
+\begin{equation}\label{dupire2}
+\sigma(K,T)=\sqrt{\frac{\displaystyle\sigma_{imp}^2+2(T-t)\sigma_{imp}\pdv{\sigma_{imp}}{T}+2rK(T-t)\sigma_{imp}\pdv{\sigma_{imp}}{K}}{\displaystyle\left(1+Kd_1\sqrt{T-t}\pdv{\sigma_{imp}}{K}\right)^2+K^2(T-t)\sigma_{imp}\left(\pdv{^2\sigma_{imp}}{K^2}-d_1\left(\pdv{\sigma_{imp}}{K}\right)^2\sqrt{T-t}\right)}},
+\end{equation}
+\noindent where $d_1$ is given by
+\begin{equation}
+d_1=\frac{\log(S(t)/K)+\left(r+\frac{1}{2}\sigma_{imp}^2\right)(T-t)}{\sigma_{imp}\sqrt{T-t}},
+\end{equation}
+\noindent with $t$ representing the current time (usually $t=0$), $T$ being the time at which the local volatility is being measured, and $S(t)$ the stock price at time $t$. We assume that $\sigma_{imp}=\sigma_{imp}(K,T)$ is the interpolated surface of the implied volatilities evaluated at time $T$, and price $K$.
+This relation might be more useful than eq. \eqref{dupire} because the implied volatility surface might be smoother than the option price's. We will compare the results from both formulas in the next chapters.
+
+
+If the local volatility surface truly matched reality, it should remain constant in time, assuming the market's view of future price movements remained constant as well. However, this is not the case~\cite{Wilmott}, so we can conclude that the model doesn't completely correspond to reality and for that reason it shouldn't be used blindly.
+
+Despite all of its shortcomings, Dupire's formula is nonetheless very much used by traders to find the local volatility surfaces of assets and price exotic options afterwards. Due to its importance, we shall implement and study this model in more detail.
+
+
+\subsection{Stochastic Volatility}
+\label{subsection:stochastic volatility}
+As stated before, the volatility is not constant, is not observable and is not predictable, despite our attempts to model it. This seems to indicate that volatility is itself a stochastic process. Some research has been done into this hypothesis, and some models have been developed so far.
+
+As before, we assume that the stock price follows a geometric Brownian motion
+\begin{equation}
+dS=rSdt+\sigma SdW_1
+\end{equation}
+\noindent but we further hypothesize that the volatility follows
+\begin{equation}
+d\sigma=p(S,\sigma,t)dt+q(S,\sigma,t)dW_2
+\end{equation}
+\noindent where $p(S,\sigma,t)$ and $q(S,\sigma,t)$ are some functions that depend on the model used and $W_1$ and $W_2$ are two Brownian motion processes with a correlation of $\rho$. 
+This correlation can be explained by the relationship between prices and volatilities. As an example, we can consider a stock that costs \textdollar100 and changes by \textdollar0.10 daily. We can estimate, even without calculations, that it is very stable and thus has a low volatility.
+On the other hand if another stock costs \textdollar1 and changes by \textdollar0.10 in a day, we can see that it is extremely volatile even though it changed by the same amount as the first. With this example, we can see that the volatility has some correlation with the stock price.
+
+Choosing the right $p(S,\sigma,t)$ and $q(S,\sigma,t)$ is very important in the evolution of the volatility and each stochastic volatility model will depend on the choice these functions. Furthermore, each model will have parameters that we have to calibrate using past values of the stock price. In the next subsections, we will present two of the most used models.
+
+
+
+\subsubsection{Heston Model}
+One of the most popular stochastic volatility models is known as Heston model. It was developed in 1993 by Steven Heston~\cite{Heston} and it states that our system satisfies the relations
+\begin{equation}
+dS=\mu Sdt+\sqrt{\nu}SdW_1,
+\end{equation}
+\begin{equation}
+d\nu=\kappa(\overline{\nu}-\nu)dt+\xi\sqrt{\nu}dW_2,
+\end{equation}
+\noindent with $\nu$ corresponding to the variance (i.e. $\nu=\sigma^2$) and where $W_1$ and $W_2$ have a correlation of $\rho$. Note that our stock price is now governed by a drift parameter $\mu$, unlike the usual risk-free measure drift of $r$, as seen in eq. \eqref{GBM}. A transformation into the risk-free measure, using Gisarnov's theorem, is possible but the original model used the drift parameter $\mu$.
+The parameters $\kappa$, $\overline{\nu}$ and $\xi$ are, respectively, the mean-reversion rate (i.e. how fast the volatility converges to its mean value), the long-term variance (i.e. the mean value of variance) and the volatility of volatility (i.e. how erratic is the volatility).
+
+Calibrating the parameters  $\rho$, $\kappa$, $\overline{\nu}$ and $\xi$ is absolutely critical. A model with badly calibrated parameters would output wrong predictions, rendering it useless.
+This calibration requires a great amount of past market data and is by far the most complex and computationally demanding section of this model.
+
+Recent results ~\cite{Cui}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Theoretical Overview}

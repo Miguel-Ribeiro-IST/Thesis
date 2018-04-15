@@ -10,6 +10,7 @@
 
 \chapter{Implementation}
 \label{chapter:implementation}
+To calibrate SABR, we can either follow the Monte-Carlo approach and simulate a large number of paths, assuming stochastic volatility with some starting parameters and minimizing the difference between model-generated prices and real-world option prices, or we can use eq. \eqref{SABRImpvol} to obtain the implied volatility and minimize the market implied volatility.
 \iffalse
 Because the stock price depends on a Brownian motion process, it follows that it is not differentiable. For this reason, it's impossible to exactly simulate such a process. An approximation is possible, however, using discrete jumps of length $\Delta t$ and using the Brownian motion property $W(t)\sim \sqrt{t}N(0,1)$~\cite{Mikosch}, with $N(0,1)$ being a normal distribution with 0 expected value and 1 variance.
 We can then simply discretize eq. \eqref{BS} into
@@ -29,18 +30,3 @@ By simulating a large number of paths, some underlying tendencies might become a
 
  American options, however, pose a much greater challenge.  Unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to solve this problem~\cite{Wilmott1,Hull}, such as the Longstaff-Schwartz algorithm~\citep{Longstaff}, which we shall approach in later sections of the present thesis.
 \fi
-Insert your chapter material here...
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Numerical Model}
-\label{section:model}
-
-Description of the numerical implementation of the models explained in Chapter~\ref{chapter:background}...
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Verification and Validation}
-\label{section:verification}
-
-Basic test cases to compare the implemented model against other numerical tools (verification) and experimental data (validation)...
-

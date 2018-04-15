@@ -22,7 +22,7 @@ The payoff function of these two types of options can then simply be deduced as
 \section{Black-Scholes-Merton Formulae}
 \label{section:Black-Scholes-Merton Formulae}
 Due to their high importance, options have been studied in great detail in the past.
-Probably the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price options~\cite{Scholes} - the famous Black-Scholes-Merton model - still in use in present days~\cite{Wilmott}. The last two actually earned the 1997 Nobel prize in Economics for this development.
+Probably the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price options~~\cite{Scholes} - the famous Black-Scholes-Merton model - still in use in present days~~\cite{Wilmott}. The last two actually earned the 1997 Nobel prize in Economics for this development.
 
 This model states that the price of an European call or put option, whose underlying asset is a stock, follows the partial differential equation (PDE)
 
@@ -32,7 +32,7 @@ This model states that the price of an European call or put option, whose underl
 
 \noindent where $V$ is the price of the option, $S$ is the price of the underlying stock, $r$ is the risk-free interest rate and $\sigma$ is the stock price volatility.
 
-The risk-free interest rate, $r$, is the interest an investor would receive from a risk-free investment. An investor should never invest in risky products whose expected return is lower than this interest, since there's the alternative of investing without risk. In general, this rate changes slightly with time, but Black \textit{et al.} assumed, in their original model, that it remains constant throghout the option duration. Some later developments dealt with this shortcoming, but because option prices do not significantly depend on this value~\cite{Wilmott}, in the remainder of this thesis we shall assume it is constant and known.
+The risk-free interest rate, $r$, is the interest an investor would receive from a risk-free investment. An investor should never invest in risky products whose expected return is lower than this interest, since there's the alternative of investing without risk. In general, this rate changes slightly with time, but Black \textit{et al.} assumed, in their original model, that it remains constant throghout the option duration. Some later developments dealt with this shortcoming, but because option prices do not significantly depend on this value~~\cite{Wilmott}, in the remainder of this thesis we shall assume it is constant and known.
 
 Finally, the volatility, $\sigma$, is a measure of uncertainty and will be studied in more detail in section \ref{section:volatility}.
 
@@ -43,7 +43,7 @@ dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \noindent with $\{W(t),\ t>0\}$ defining a one-dimensional Brownian motion.
 
 
-Pricing options is fairly straightforward - we simply need to solve the PDE in eq. \eqref{BS2} in a similar fashion to the initial value problem for the diffusion equation~\cite{Dilao}.
+Pricing options is fairly straightforward - we simply need to solve the PDE in eq. \eqref{BS2} in a similar fashion to the initial value problem for the diffusion equation~~\cite{Dilao}.
 The results published in the original article by Black \textit{et al.} state that, at time $t$, call and put options can be valued as
 \begin{equation}\label{callputBS}
 \begin{split}
@@ -185,7 +185,7 @@ dS=rSdt+\sigma SdW_1
 d\sigma=p(S,\sigma,t)dt+q(S,\sigma,t)dW_2
 \end{equation}
 \noindent where $p(S,\sigma,t)$ and $q(S,\sigma,t)$ are some functions that depend on the model used and $W_1$ and $W_2$ are two Brownian motion processes with a correlation of $\rho$. 
-This correlation can be explained by the relationship between prices and volatilities. As an example, we can consider a stock that costs \textdollar100 and changes by \textdollar0.10 daily. We can estimate, even without calculations, that it is very stable and thus has a low volatility.
+\hl{This correlation can be explained by the relationship between prices and volatilities.} As an example, we can consider a stock that costs \textdollar100 and changes by \textdollar0.10 daily. We can estimate, even without calculations, that it is very stable and thus has a low volatility.
 On the other hand if another stock costs \textdollar1 and changes by \textdollar0.10 in a day, we can see that it is extremely volatile even though it changed by the same amount as the first. With this example, we can see that the volatility has some correlation with the stock price.
 
 Choosing the right $p(S,\sigma,t)$ and $q(S,\sigma,t)$ is very important in the evolution of the volatility and each stochastic volatility model will depend on the choice these functions. Furthermore, each model will have parameters that we have to calibrate using past values of the stock price. In the next subsections, we will present two of the most used models.
@@ -193,7 +193,7 @@ Choosing the right $p(S,\sigma,t)$ and $q(S,\sigma,t)$ is very important in the 
 
 
 \subsubsection{Heston Model}
-One of the most popular stochastic volatility models is known as Heston model. It was developed in 1993 by Steven Heston~\cite{Heston} and it states that our system satisfies the relations
+One of the most popular stochastic volatility models is known as \emph{Heston model}. It was developed in 1993 by Steven Heston~\cite{Heston} and it states that our system satisfies the relations
 \begin{equation}
 dS=\mu Sdt+\sqrt{\nu}SdW_1,
 \end{equation}
@@ -203,58 +203,39 @@ d\nu=\kappa(\overline{\nu}-\nu)dt+\xi\sqrt{\nu}dW_2,
 \noindent with $\nu$ corresponding to the variance (i.e. $\nu=\sigma^2$) and where $W_1$ and $W_2$ have a correlation of $\rho$. Note that our stock price is now governed by a drift parameter $\mu$, unlike the usual risk-free measure drift of $r$, as seen in eq. \eqref{GBM}. A transformation into the risk-free measure, using Gisarnov's theorem, is possible but the original model used the drift parameter $\mu$.
 The parameters $\kappa$, $\overline{\nu}$ and $\xi$ are, respectively, the mean-reversion rate (i.e. how fast the volatility converges to its mean value), the long-term variance (i.e. the mean value of variance) and the volatility of volatility (i.e. how erratic is the volatility).
 
-Calibrating the parameters  $\rho$, $\kappa$, $\overline{\nu}$ and $\xi$ is absolutely critical. A model with badly calibrated parameters would output wrong predictions, rendering it useless.
-This calibration requires a great amount of past market data and is by far the most complex and computationally demanding section of this model.
-
-Recent results ~\cite{Cui}
+Calibrating the parameters  $\rho$, $\kappa$, $\overline{\nu}$ and $\xi$ is absolutely critical. A model with badly calibrated parameters would output wrong predictions, rendering it completely useless.
+This calibration requires a fair amount of past market data and is by far the most complex and computationally demanding section of this model. We will deal with it in the next section.
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Theoretical Overview}
-\label{section:overview}
+\subsubsection{SABR Model}
+One other very famous model of stochastic volatility was developed by Hagan \textit{et al.}~\cite{Hagan} and is known as \emph{SABR}. It stands for "\emph{stochastic-}$\alpha\beta\rho$" and in this model it is assumed that the option prices and volatilities follow
+\begin{equation}\label{dF}
+dF=\sigma F^\beta dW_1,
+\end{equation}
+\begin{equation}
+d\sigma=\nu\sigma dW_2,
+\end{equation}
+\noindent with $\sigma(0)=\alpha$, $F(0)=f$ and where the two Brownian motion processes $W_1$ and $W_2$ have a correlation of $\rho$. It should be noted that we are now using the \hl{forward measure}, so in eq. \eqref{dF} we use $F$, the \emph{forward price}, instead of the usual spot price $S$ from eq.  \ref{GBM}. These two quantities are related by $S(t)=e^{-r(T-t)}F(t)$, so we can easily obtain one from the other.
 
+According to Hagan \textit{et al.}, the volatility smile obtained from the local-volatility model, as developed by Dupire (eq.\eqref{dupire}), doesn't follow true market dynamics~\cite{Hagan}. They demonstrate that when the price of the asset increases or decreases, the volatility smile shifts in the opposite direction. The minimum of the volatility smile would therefore be offset and no longer correspond to the local spot price. The dynamics obtained from the local-volatility model should then be actually worse than if we assumed a constant volatility. With SABR, the authors argue that this problem is solved and the smile shifts in the correct direction.
 
-Some overview of the underlying theory about the topic...
+In the original article, the authors claim that $\beta$ can be fitted from historical market data, but usually investors actually choose this value arbitrarily, depending on the type of assets traded. Typical values of $\beta$ are $\beta=1$ (stochastic lognormal model), usually used for foreign exchange options, $\beta=0$ (stochastic normal model), typical for interest rate options where forwards $f$ can be negative and $\beta=0.5$ (stochastic CIR model), also common for interest rate options.
 
+With SABR, Hagan \textit{et al.} show that we can price new European call and put options using the typical Black-Scholes pricing equations, as in eqs. \eqref{callputBS} and \eqref{d1d2}, but replacing the implied volatility, $\sigma$, in \eqref{d1d2} with $\sigma_{SABR}$ given by
+\begin{equation}\label{SABRImpvol}
+\begin{split}
+\sigma_{SABR}(K,f)\sim&\frac{\alpha}{\left(fK\right)^{(1-\beta)/2}\left\{1+\frac{(1-\beta)^2}{24}\log^2f/K+\frac{(1-\beta)^4}{1920}\log^4f/K\right\}}.\left(\frac{z}{x(z)}\right).\\
+&\left\{1+\left(\frac{(1-\beta)^2}{24}\frac{\alpha^2}{\left(fK\right)^{1-\beta}}+\frac{1}{4}\frac{\rho\beta\nu\alpha}{\left(fK\right)^{(1-\beta)/2}}+\frac{2-3\rho^2}{24}\nu^2\right)T\right\},\\
+\end{split}
+\end{equation}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Theoretical Model 1}
-\label{section:theory1}
+\noindent where $f=F(0)=S(0)e^{-rT}$, $z$ is given by
+\begin{equation}
+z=\frac{\nu}{\alpha}\left(fK\right)^{(1-\beta)/2}\log f/K,
+\end{equation}
+\noindent and $x(z)$ is
+\begin{equation}
+x(z)=\log\left\{\frac{\sqrt{1-2\rho z+z^2}+z-\rho}{1-\rho}\right\}.
+\end{equation}
 
-The research should be supported with a comprehensive list of references.
-These should appear whenever necessary, in the limit, from the first to the last chapter.
-
-A reference can be cited in any of the following ways:
-%
-\begin{itemize}
-  \item Citation mode \#1 - \quad \cite{jameson:adjointns}
-  \item Citation mode \#2 - \quad \citet{jameson:adjointns}
-  \item Citation mode \#3 - \quad \citep{jameson:adjointns}
-  \item Citation mode \#4 - \quad \citet*{jameson:adjointns}
-  \item Citation mode \#5 - \quad \citep*{jameson:adjointns}
-  \item Citation mode \#6 - \quad \citealt{jameson:adjointns}
-  \item Citation mode \#7 - \quad \citealp{jameson:adjointns}
-  \item Citation mode \#8 - \quad \citeauthor{jameson:adjointns}
-  \item Citation mode \#9 - \quad \citeyear{jameson:adjointns}
-  \item Citation mode \#10 - \quad \citeyearpar{jameson:adjointns}
-\end{itemize}
-%
-Several citations can be made simultaneously as \citep{nocedal:opt,marta:ijcfd}. \\
-
-This is often the default bibliography style adopted (numbers following the citation order), according to the options:\\
-{\tt \textbackslash usepackage\{natbib\}} in file {\tt Thesis\_Preamble.tex},\\
-{\tt \textbackslash bibliographystyle\{abbrvnat\}} in file {\tt Thesis.tex}.\\
-
-Notice however that this style can be changed from numerical citation order to authors' last name with the options: \\
-{\tt \textbackslash usepackage[numbers]\{natbib\}} in file {\tt Thesis\_Preamble.tex},\\
-{\tt \textbackslash bibliographystyle\{abbrvunsrtnat\}} in file {\tt Thesis.tex}. \\
-
-Multiple citations are compressed when using the {\tt sort\&compress} option when loading the {\tt natbib} package as {\tt \textbackslash usepackage[numbers,sort\&compress]\{natbib\}} in file {\tt Thesis\_Preamble.tex}, resulting in citations like \citep{marta:ijcfd1,marta:ijcfd2,marta:ijcfd3,marta:ijcfd4}.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Theoretical Model 2}
-\label{section:theory2}
-
-Other models...
-
+As with the Heston model, the main concern with saber is correctly calibrating the model parameters. This should take the most computational expense in the whole method.

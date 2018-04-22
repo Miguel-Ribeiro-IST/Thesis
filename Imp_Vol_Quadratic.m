@@ -2,12 +2,12 @@ clear;
 S0=167.65;
 r=0.06;
 
-A = importdata('AAPL3.txt','\t',1);
+A = importdata('AAPL.txt','\t',1);
 B=A.data(:,:);
 
 B=B(B(:,1)==28,:);
 
-%%{
+%{
 for i=1:size(B,1)
 euro=@(sigma)european_bs(S0,B(i,2),r,sigma,B(i,1)./252,'call')-B(i,3);
 B(i,3)=fzero(euro,0.5);
@@ -30,7 +30,7 @@ vol2=@(x)var2(1)+var2(2)*((x-var2(3))).^2;
 
 scatter(B(:,2),B(:,3));
 hold on;
-fplot(vol, [150 185]);
+%fplot(vol, [150 185]);
 hold on;
 %fplot(vol2, [150 185]);
 

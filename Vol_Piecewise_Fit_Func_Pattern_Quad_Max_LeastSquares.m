@@ -3,23 +3,24 @@ clear;
 S01=167.65;
 r1 = 0.06;
 
-A = importdata('AAPL3.txt','\t',1);
+A = importdata('AAPL.txt','\t',1);
 B1=A.data(:,:);
+B1=B1(B1(:,1)>=42,:);
 
 times1=unique(B1(:,1));
 matur1=4;
 a1=zeros(matur1,1);
 b1=zeros(matur1,1);
 c1=ones(matur1,1);
-sigmamax1=zeros(matur1,1);
+sigmamax1=0.8;
 
 M1 = 1000; % number of asset paths
-iterations1=100;
+iterations1=50;
 
 
 
 
-B1=B1(B1(:,1)<=28,:);
+
 
 %a1(1)=0.1963;b1(1)=17.9684;c1(1)=182.9531;
 for iter=1:matur1
@@ -28,12 +29,12 @@ T1 = times1(iter)/252;
 D1=252;
 L1 = T1*D1*2;
 
-fun = @(var)Localvol(var(1),var(2),var(3),var(4),iter,S01,r1,T1,D1,M1,L1,B1,a1,b1,c1,sigmamax1,iterations1);
+fun = @(var)Localvol(var(1),var(2),var(3),iter,S01,r1,T1,D1,M1,L1,B1,a1,b1,c1,sigmamax1,iterations1);
 
 A = [];b = [];Aeq = [];beq = [];nonlcon=[];
-lb = [0.15,0.00001,175,0.5];
-ub = [0.25,0.001,200,2];
-x0=[0.2-0.005*iter, 0.0001/(iter), 170+5*iter, 0.8];
+lb = [0.15,0.00001,175];
+ub = [0.25,0.001,200];
+x0=[0.2-0.005*iter, 0.0001/(iter), 170+5*iter];
 
 options = optimoptions('patternsearch','Display','off','MaxIter',10000,'UseParallel',true);
 %options = optimset('MaxFunEvals',100000,'MaxIter',100000,'Display','off');
@@ -42,7 +43,6 @@ disp(vars);
 a1(iter)=vars(1);
 b1(iter)=vars(2);
 c1(iter)=vars(3);
-sigmamax1(iter)=vars(4);
 
 format shortg;
 c = clock;
@@ -55,7 +55,7 @@ sigma0=0.2;
 iterations2=10;
 figure
 
-for iter=1:matur1
+for iter=1:3
 ax(iter) = subplot(2,matur1/2,iter);
 ti=times1(iter);
 C=B1(B1(:,1)==ti,2:3);
@@ -104,7 +104,7 @@ fplot(vol2, [150 185]);
 %}
 
 
-function Error_final=Localvol(at,bt,ct,sigmamaxt,matur,S0,r,T,D,M,L,B,a,b,c,sigmamax,iterations)
+function Error_final=Localvol(at,bt,ct,matur,S0,r,T,D,M,L,B,a,b,c,sigmamax,iterations)
 
 dt = T/L;
 Error=zeros(iterations,1);
@@ -124,7 +124,7 @@ S(:)=S(:)+S(:)*r*dt+sqrt(dt)*sigma(:).*S(:).*randn(M,1);
 for i=1:size(times,1)
 if dt*D*(k-1)<=times(i)
    %sigma=arrayfun(@(x) min(a(i)+b(i)*min(x,0)^2,sigmamax),(S(:,k)-c(i))/c(i));
-   sigma=arrayfun(@(x) min(a(i)+b(i)*(min(x-c(i),0))^2,sigmamax),(S(:,k)));
+   sigma=arrayfun(@(x) min(a(i)+b(i)*(min(x-c(i),0))^2,sigmamax),(S(:)));
    %sigma=arrayfun(@(x) a(i)+b(i)*x^2,(S(:,k)-c(i))/c(i));
    break;
 end
@@ -138,8 +138,7 @@ end
            Y(i,j) = max(S(i)-C(j,1),0);
        end
    end
-   disc=exp(-r*T);
-   Error(iter)=abs(sum(disc*mean(Y)-C(:,2)'));
+   Error(iter)=sum(abs(exp(-r*T)*mean(Y)-C(:,2)'));
    clear Y;
 
 end
@@ -147,21 +146,23 @@ Error_final=mean(Error);
 end
 
 
+
+
 function Euro_final=Pricer(a,b,c,sigmamax,S0,r,T,D,M,L,B,K,iterations)
 dt = T/L;
 times=unique(B(:,1));
 
 for iter=1:iterations
-S = S0*ones(M,L+1); % asset paths
+S = S0*ones(M,1); % asset paths
 sigma=a(1)*ones(M,1);
 
 for k = 2:L+1
-S(:,k)=S(:,k-1)+S(:,k-1)*r*dt+sqrt(dt)*sigma(:).*S(:,k-1).*randn(M,1);
+S(:)=S(:)+S(:)*r*dt+sqrt(dt)*sigma(:).*S(:).*randn(M,1);
 
 for i=1:size(times,1)
 if dt*D*(k-1)<=times(i)
    %sigma=arrayfun(@(x) min(a(i)+b(i)*min(x,0)^2,sigmamax),(S(:,k)-c(i))/c(i));
-   sigma=arrayfun(@(x) min(a(i)+b(i)*(min(x-c(i),0))^2,sigmamax(i)),(S(:,k)));
+   sigma=arrayfun(@(x) min(a(i)+b(i)*(min(x-c(i),0))^2,sigmamax),(S(:)));
    %sigma=arrayfun(@(x) a(i)+b(i)*x^2,(S(:,k)-c(i))/c(i));
    break;
 end
@@ -170,10 +171,10 @@ end
 end
 
 for i=1:M
-Y(i) = max(S(i,L+1)-K,0);
+Y(i) = max(S(i)-K,0);
 end
 
-Euro_Vol(iter)=exp(-r*dt*L)*mean(Y(:));
+Euro_Vol(iter)=exp(-r*T)*mean(Y(:));
 end
 
 Euro_final=mean(Euro_Vol);

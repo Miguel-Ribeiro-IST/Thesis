@@ -6,8 +6,8 @@ r1 = 0.06;
 
 
 matur1=2;
-M1 = 1000;
-iterations1=10;
+M1 = 10;
+iterations1=3;
 PriceVol="price";
 sigmamax1=5;
 iterations2=iterations1;
@@ -51,22 +51,13 @@ for iter=1:matur1
     options = optimoptions('patternsearch','Display','off','MaxIter',10000,'UseParallel',true);
     vars=patternsearch(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
     disp(vars);
-    error=Localvol(var(1),var(2),var(3),var(4),iter,S01,r1,T1,D1,M1,L1,B1tmp,a1,b1,c1,d1,sigmamax1,iterations1,times1,PriceVol);
     a1(iter)=vars(1);
     b1(iter)=vars(2);
     c1(iter)=vars(3);
     d1(iter)=vars(4);
     
-    time=toc;
-    if time>60
-        time=strcat(num2str(floor(time/60)),"min");
-    else
-        time=strcat(num2str(floor(time)),"sec");
-    end
-    format shortg;
-    c = clock;
-    disp(strcat("error=",num2str(error),strcat("   ",strcat(strcat(time,strcat("   ",strcat(num2str(c(4),'%02.f'),strcat(":",num2str(c(5),'%02.f')))))))))
-    fprintf('____________________________________________________\n\n')
+
+    Timer(Localvol(var(1),var(2),var(3),var(4),iter,S01,r1,T1,D1,M1,L1,B1tmp,a1,b1,c1,d1,sigmamax1,iterations1,times1,PriceVol),toc);
 end
 
 
@@ -140,7 +131,7 @@ parfor iter=1:iterations
         Z=exp(-r*T)*mean(Y);
         for i=1:size(B,1)
             euro=@(sigma)european_bs(S0,B(i,1),r,sigma,T,"call")-Z(i);
-            Z(i)=fzero(euro,0.2);
+            Z(i)=fzero(euro,0.25);
         end
         Error(iter)=sum((Z-B(:,2)').^2);
     end
@@ -175,10 +166,10 @@ for iter=1:iterations
     end
     
     if PriceVol=="price"
-        Euro(iter)=exp(-r*dt*L)*mean(Y(:));
+        Euro(iter)=exp(-r*T)*mean(Y(:));
     else
         euro=@(sigma)european_bs(S0,K,r,sigma,T,"call")-exp(-r*T)*mean(Y(:));
-        Euro(iter)=fzero(euro,0.2);
+        Euro(iter)=fzero(euro,0.25);
     end
 end
 
@@ -197,4 +188,16 @@ if putcall=="call"
 elseif putcall=="put"
     euro = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
 end
+end
+
+function Timer(error,time)
+if time>60
+    time=strcat(num2str(floor(time/60)),"min");
+else
+    time=strcat(num2str(floor(time)),"sec");
+end
+format shortg;
+c = clock;
+disp(strcat("error=",num2str(error),strcat("   ",strcat(strcat(time,strcat("   ",strcat(num2str(c(4),'%02.f'),strcat(":",num2str(c(5),'%02.f')))))))))
+fprintf('____________________________________________________\n\n')
 end

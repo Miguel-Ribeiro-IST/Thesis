@@ -1,17 +1,21 @@
 clear;
 
-r1 = 0.06;%%if edited, the data must be changed!
-S01=17099.4;
+
 A = importdata('Data_BNPP.txt','\t',1);
 B1=A.data(:,:);
+
+r1 = 0.06;%%if edited, the data must be changed!
+S01=17099.4;
+matur1=2;
+M1=10000;
+iterations=50;
+Mplot=100;
+beta=0;
 
 B1(:,2)=B1(:,2)/S01;
 S01=1;
 B1(:,1)=B1(:,1)/252;
 times1=unique(B1(:,1));
-matur1=6;
-
-
 B1=B1(B1(:,1)==times1(matur1),:);
 
 
@@ -21,9 +25,9 @@ for i=1:size(B1,1)
     %european_bs(S0,K,r,sigma0,T,putcall)
 end
 
-beta=1;
+
 fun=@(var)SABRcal(var(1),var(2),var(3),beta,S01,B1,r1);
-         %SABRcal(alpha,rho,nu,beta,S0,B,r)
+%SABRcal(alpha,rho,nu,beta,S0,B,r)
 lb = [0,-1,0];
 ub = [Inf,1,Inf];
 x0=[0.1,-0.5,0.1];
@@ -50,40 +54,49 @@ ti=times1(matur1);
 C=B1(B1(:,1)==ti,2:3);
 T1 = ti;
 L1 = T1*252*2;
-iterations=50;
-M1=10000;
+
 
 SABRVol=@(K)sigmaSABR(alpha,rho,nu,beta,K,S01*exp(r1*ti),ti);
 
-ax1 = subplot(1,3,1);
+ax1 = subplot(2,2,1);
 scatter(ax1,C(:,1),C(:,2),'.');
 hold on;
 %scatter(C(:,1),SABRVol(:),'x');
 fplot(ax1,SABRVol,[min(C(:,1)) max(C(:,1))])
 hold on;
 %scatter(ax(iter),C(:,1),Euro_Const(:));
-title(ax1,"calib fit");
 %}
 
 
-ax2 = subplot(1,3,2);
+ax2 = subplot(2,2,4);
 C=P1(P1(:,1)==ti,2:3);
+C2=B1(B1(:,1)==ti,2:3);
 
 for i=1:size(C,1)
-    Euro(i)=Pricer(alpha,rho,nu,beta,C(i,1),S01*exp(r1*ti),r1,T1,L1,M1,iterations);
+    Euro(i)=Pricer(alpha,rho,nu,beta,C(i,1),S01*exp(r1*ti),r1,T1,L1,M1,iterations,"price");
+    EuroVol(i)=Pricer(alpha,rho,nu,beta,C(i,1),S01*exp(r1*ti),r1,T1,L1,M1,iterations,"vol");
 end
 
 scatter(ax2,C(:,1),C(:,2),'.');
 hold on;
 scatter(ax2,C(:,1),Euro(:),'x');
 hold on;
-title(ax2,"MC sim")
+title(ax2,"MC Price")
 
-ax3 = subplot(1,3,3);
-title(ax3,"Simuls");
-Plotter(alpha,rho,nu,beta,S01*exp(r1*ti),r1,T1,L1,250,ax3)
+ax4 = subplot(2,2,3);
+scatter(ax4,C2(:,1),C2(:,2),'.');
+hold on;
+scatter(ax4,C2(:,1),EuroVol(:),'x');
+hold on;
+title(ax4,"MC Vol")
 
+ax3 = subplot(2,2,2);
+Plotter(alpha,rho,nu,beta,S01*exp(r1*ti),r1,T1,L1,Mplot,ax3)
 
+text1=strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(", paths=",num2str(M1))),strcat(", iterations=",num2str(iterations))),strcat(", maturity=",num2str(T1*252)));
+text2=strcat(strcat(strcat("\alpha=",num2str(alpha)),strcat(", \rho=",num2str(rho))),strcat(", \nu=",num2str(nu)));
+title(ax1,text1)
+title(ax3,text2)
 
 function Error=SABRcal(alpha,rho,nu,beta,S0,B,r)
 LS=0;
@@ -102,7 +115,7 @@ sigma=alpha./((f.*K).^((1-beta)./2).*(1+(1-beta).^2/24.*(log(f./K)).^2+(1-beta).
 end
 
 
-function Euro_final=Pricer(alpha,rho,nu,beta,K,f,r,T,L,M,iterations)
+function Euro_final=Pricer(alpha,rho,nu,beta,K,f,r,T,L,M,iterations,PriceVol)
 dt = T/L;
 parfor iter=1:iterations
     F = f*ones(M,1);
@@ -112,7 +125,7 @@ parfor iter=1:iterations
         Z1=randn(M,1);
         alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);
         v=alp.*(F.^(beta-1));
-        F(:)=F(:).*exp(v.*(rho*Z1+sqrt(1-rho)*randn(M,1))*sqrt(dt)-v.^2*dt/2);
+        F(:)=F(:).*exp(v.*(rho*Z1+sqrt(1-rho^2)*randn(M,1))*sqrt(dt)-v.^2*dt/2);
         
     end
     
@@ -122,32 +135,38 @@ parfor iter=1:iterations
     end
     
     
-    Euro(iter)=exp(-r*T)*mean(Y(:));
+    if PriceVol=="price"
+        Euro(iter)=exp(-r*T)*mean(Y(:));
+    else
+        euro=@(sigma)european_bs(f*exp(-r*T),K,r,sigma,T,"call")-exp(-r*T)*mean(Y(:));
+        Euro(iter)=fzero(euro,0.25);
+    end
     
 end
-
 Euro_final=mean(Euro);
 end
 
 
 function Plotter(alpha,rho,nu,beta,f,r,T,L,M,ax)
 dt = T/L;
-    F = f*ones(M,L);
-    alp=alpha*ones(M,1);
-    
-    for k = 1:L
-        Z1=randn(M,1);
-        alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);
-        v=alp.*(F(:,k).^(beta-1));
-        F(:,k+1)=F(:,k).*exp(v.*(rho*Z1+sqrt(1-rho)*randn(M,1))*sqrt(dt)-v.^2*dt/2);
-    end
-    
-        for k = 1:(L+1)
-          F(:,k)=F(:,k).*exp(-r*(T-dt*(k-1)));
-        end
-    
-    plot(ax,F(:,:)')
- 
+F = f*ones(M,L);
+alp=alpha*ones(M,1);
+
+for k = 1:L
+    Z1=randn(M,1);
+    alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);
+    v=alp.*(F(:,k).^(beta-1));
+    F(:,k+1)=F(:,k).*exp(v.*(rho*Z1+sqrt(1-rho)*randn(M,1))*sqrt(dt)-v.^2*dt/2);
+end
+
+for k = 1:(L+1)
+    F(:,k)=F(:,k).*exp(-r*(T-dt*(k-1)));
+end
+
+plot(ax,0:dt*252:T*252,F(:,:)')
+xlim([0 T*252])
+ylim([0 2])
+
 end
 
 function euro=european_bs(S0,K,r,sigma0,T,putcall)

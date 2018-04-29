@@ -7,7 +7,7 @@ r = 0.06;
 sigma = 0.4;
 L = 50; % number of time intervals
 dt = T/L;
-M = 100000; % number of asset paths
+M = 1000; % number of asset paths
 
 val=0;idx=0;
 Y = zeros(M,1);
@@ -63,7 +63,7 @@ for t=L:-1:2
 end
 
 
-M = 1000000; % number of asset paths
+M = 1000; % number of asset paths
 
 Y = zeros(M,L);
 S = S0*ones(M,L+1); % asset paths

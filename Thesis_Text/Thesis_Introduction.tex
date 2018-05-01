@@ -10,34 +10,35 @@ With the colossal sums traded daily in financial markets around the world, mathe
 
 \section{Derivatives}
 \label{section:derivatives}
-One of the subjects most studied by financial mathematicians is derivatives.
-In finance, a derivative is simply a contract whose value depends on other simpler financial instruments, known as \emph{underlying assets}, such as stock prices or interest rates.
+Derivatives are currently one of the subjects most studied by financial mathematicians.
+In finance, a \emph{derivative} is simply a contract whose value depends on other simpler financial instruments, known as \emph{underlying assets}, such as stock prices or interest rates.
 They can virtually take any form desirable, so long as there are two parties interested in signing it and all government regulations are met.
 
 
 The importance of derivatives has grown greatly in recent years. In fact, as of June 2017, derivatives were responsible for over \textdollar542 trillion worth of trades, in the Over-the-Counter (OTC) market alone~\cite{BIS}, as can be seen in \autoref{fig:OTC} (the OTC market refers to all deals signed outside of exchanges).
-This growth stalled after the 2008 global financial crisis due to new government regulations, implemented because of the role of derivatives in the market crashes~\cite{FT}. 
+This growth stalled after the 2008 global financial crisis due to new government regulations, implemented because of the role of derivatives in the market crash~\cite{FT}. 
 
 
 \begin{figure}[!htb]
     \centering
-      \includegraphics[width=.5\linewidth,trim={2pt 17pt 0 0},clip]{OTC.eps}
+      \includegraphics[width=.6\linewidth,trim={2pt 17pt 0 0},clip]{OTC.eps}
       \caption{Size of OTC derivatives market since May 1996.}\label{fig:OTC}
     \end{figure}
 
 \section{Options}
 \label{section:options}
-Of all kinds of derivatives, in this master thesis we will focus particularly on the most traded one: \emph{options}~\cite{Hull}.
+Of all kinds of derivatives, in this master thesis we will focus particularly on the most traded type~\cite{Hull}: \emph{options}.
 
-As the name implies, an option contract grants its buyer the \emph{option} to buy (in the case of a \emph{call} option) or sell (for \emph{put} options) its underlying asset at a future date, known as the \emph{maturity}, for a fixed price, known as the \emph{strike price}.
+As the name implies, an \emph{option} contract grants its buyer the option to buy (in the case of a \emph{call} type option) or sell (for \emph{put} options) its underlying asset at a future date, known as the \emph{maturity}, for a fixed price, known as the \emph{strike price}.
+In other words, when signing an option, buyers choose a price at which they want to buy/sell (call/put) some underlying asset and a future date to do this transaction. When this date arrives, if the transaction is favorable to the buyers, they exercise their right to execute it.
 
-The description above pertains only to the most traded type of option -\emph{European} options. In this thesis, unless stated otherwise, all options will be assumed European. There are, however, other types that enable exercising at dates other than maturity.
-The most well known example is American options, that enable their buyer to exercise at any point in type until the expiration.
-Other types, commonly known as \emph{exotic}, will be studied in more detail in the following sections.
+The description above pertains only to the most traded type of option - \emph{European} options. In this thesis, unless otherwise stated, all options will be assumed European. There are, however, other types that enable exercising at dates other than maturity.
+The most well known such example is \emph{American} options, contracts that enable their buyers to exercise their right to buy/sell the underlying asset at any point in time until the maturity date.
+Other types, commonly known as \emph{Exotic}, will be studied in more detail in the following sections.
 
 %The two main types of options are calls and puts. They grant their buyer the right to buy and sell the underlying asset, respectively, for a fixed price, known as the strike price, in the future.
 
-It's important to emphasize the fact that an option grants its buyer the right to do something. If \emph{exercising} the option would lead to further losses, its buyer can simply decide to let the expiration date pass. This is indeed the most attractive characteristic of options.
+It's important to emphasize the fact that an option grants its buyer the right to do something. If \emph{exercising} the option would lead to losses, the buyer can simply decide to let the maturity date pass, letting the option expire. This is indeed the most attractive characteristic of options.
 
 
 \iffalse
@@ -53,10 +54,11 @@ For this very reason, it should be clear that American options are significantly
 \subsection{Why Options are Important}
 \label{subsection:why options are important}
 Options are very useful tools to all investors. 
-To hedgers (i.e. investors that want to limit their exposure to risk), options provide safety by fixing the future price of their underlying asset (e.g. if hedgers want to protect themselves against a potential price crash affecting one of their assets, they can buy put options on them. Now, even if the value their asset decreases significantly, their losses are contained because they can always exercise the options and sell the asset at the option's higher strike price).
 
-To speculators (i.e. investors that want to take advantage of the uncertainty of future markets by speculating on their outcome), options grant access to much higher profits (e.g. if speculators strongly believe that the value of a given asset will greatly increase in the future, they can buy call options on that asset. If their prediction proves right, they can buy that asset for the option's lower strike price).
+To hedgers (i.e. investors that want to limit their exposure to risk), options provide safety by fixing a minimum future price on their underlying assets (e.g. if hedgers want to protect themselves against a potential price crash affecting one of their assets, they can buy put type options on it. With these, even if the value of their asset crashes, their losses will always be contained because they can exercise the options and sell the asset at the option's higher strike price).
 
-Due to all their advantages, and unlike some other types of derivatives, options have a cost. Finding the ideal price for an option is a fundamental concern to investors, since knowing its true value can give them a chance to take advantage of an under or overpriced option.
+Options are also very useful to speculators (i.e. investors that try to predict future market movements). The lower price of options (when compared to their underlying assets) grants this type of investors great leveraging capabilities and, with them, access to much higher profits if their predictions prove true. The opposite is also true and a wrong prediction can equally lead to greater losses.
+
+Due to all their advantages, and unlike some other types of derivatives, options have a price. Finding the ideal price for an option is a fundamental concern to investors, because knowing the appropriate value of an option can give them a chance to take advantage of under or overpriced options.
 Finding this price can be very difficult for some options, however. Though a lot of research has been done towards this goal, a great deal more is still required.
 

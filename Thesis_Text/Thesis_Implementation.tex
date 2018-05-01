@@ -10,7 +10,7 @@
 
 \chapter{Implementation}
 \label{chapter:implementation}
-To calibrate SABR, we can either follow the Monte-Carlo approach and simulate a large number of paths, assuming stochastic volatility with some starting parameters and minimizing the difference between model-generated prices and real-world option prices, or we can use eq. \eqref{SABRImpvol} to obtain the implied volatility and minimize the market implied volatility.
+To calibrate SABR, we can either follow the Monte-Carlo approach and simulate a large number of paths, assuming stochastic volatility with some starting parameters and minimizing the difference between model-generated prices and real-world option prices, or we can use eq. xxx to obtain the implied volatility and minimize the market implied volatility.
 \iffalse
 Because the stock price depends on a Brownian motion process, it follows that it is not differentiable. For this reason, it's impossible to exactly simulate such a process. An approximation is possible, however, using discrete jumps of length $\Delta t$ and using the Brownian motion property $W(t)\sim \sqrt{t}N(0,1)$~\cite{Mikosch}, with $N(0,1)$ being a normal distribution with 0 expected value and 1 variance.
 We can then simply discretize eq. \eqref{BS} into

@@ -8,7 +8,7 @@ B1=A.data(:,:);
 B1(:,2)=B1(:,2)/S01;
 S01=1;
 B1(:,1)=B1(:,1)/252;
-%B1=B1(B1(:,1)<=1 & B1(:,2)<=1.25 & B1(:,2)>=0.74,:);
+B1=B1(B1(:,1)<=0.5,:);
 
 P1=B1;
 for i=1:size(B1,1)
@@ -23,12 +23,6 @@ end
 %}
 
 
-xlabel('time(days)');
-ylabel('strike');
-zlabel('price');
-
-
-
 MinT=min(B1(:,1));
 MaxT=max(B1(:,1));
 %MinK=min(B1(:,2));
@@ -36,7 +30,7 @@ MaxT=max(B1(:,1));
 MinK=0.5;
 MaxK=1.70;
 SB=P1(P1(:,2)<=MaxK & P1(:,2)>=MinK & P1(:,1)>=MinT & P1(:,1)<=MaxT,:);
-dT=42/252;
+dT=10.5/252;
 dK=0.05*S01;
 Time=MinT:2*dT:MaxT;
 Strike=MinK:2*dK:MaxK;
@@ -61,7 +55,7 @@ end
 
 
 %}
-%{
+%%{
 for i=1:size(FgradT,1)
     for j=1:size(FgradT,2)
         if not(isnan(FgradT(i,j)))
@@ -71,7 +65,7 @@ for i=1:size(FgradT,1)
 end
 %}
 
-vol=2*(FgradT+r1*Y.*FgradK)./(Y.^2.*Fgrad2K);
+vol=sqrt(2*(FgradT+r1*Y.*FgradK)./(Y.^2.*Fgrad2K));
 
 
 %%{

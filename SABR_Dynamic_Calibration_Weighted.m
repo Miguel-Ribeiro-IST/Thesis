@@ -6,8 +6,8 @@ r1 = 0.06;
 
 
 matur1=4;
-M1 = 20000;
-iterations1=50;
+M1 = 10000;
+iterations1=25;
 beta=0.5;
 PriceVol="price";
 iterations2=iterations1;
@@ -40,7 +40,7 @@ tic
 fun = @(var)DynSABRvol(var(1),var(2),var(3),var(4),var(5),beta,S01,r1,times1,M1,D1,B1tmp,iterations1,PriceVol);
 lb = [0,-1,0,0,0];
 ub = [Inf,1,Inf,Inf,Inf];
-x0=[0.3,-0.5,0.1,1,1];
+x0=[0.24,0,1,10,10];
 A = [];b = [];Aeq = [];beq = [];nonlcon=[];
 options = optimoptions('patternsearch','Display','off','MaxIter',10000,'UseParallel',true);
 vars=patternsearch(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
@@ -178,7 +178,7 @@ end
 
 function Timer(error,time)
 if time>3600
-    time=strcat(strcat(strcat(num2str(floor(time/3600)),"hrs,"),num2str(floor(time-floor(time/3600)*3600))),"min");
+    time=strcat(strcat(strcat(num2str(floor(time/3600)),"hrs,"),num2str(floor((time-floor(time/3600)*3600)/60))),"min");
 elseif time>60
     time=strcat(strcat(strcat(num2str(floor(time/60)),"min,"),num2str(floor(time-floor(time/60)*60))),"sec");
 else

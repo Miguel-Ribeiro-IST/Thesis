@@ -178,7 +178,7 @@ end
 
 function Timer(error,time)
 if time>3600
-    time=strcat(strcat(strcat(num2str(floor(time/3600)),"hrs,"),num2str(floor(time-floor(time/3600)*3600))),"min");
+    time=strcat(strcat(strcat(num2str(floor(time/3600)),"hrs,"),num2str(floor((time-floor(time/3600)*3600)/60))),"min");
 elseif time>60
     time=strcat(strcat(strcat(num2str(floor(time/60)),"min,"),num2str(floor(time-floor(time/60)*60))),"sec");
 else

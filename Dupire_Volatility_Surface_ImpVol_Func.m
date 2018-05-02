@@ -30,7 +30,7 @@ dK=0.05*S01;
 
 
 func=Dupire(S01,r1,B1,MinT,MaxT,dT,MinK,MaxK,dK);
-
+func(0,[1 1]')
 %{
 ax1 = subplot(1,2,1);
 scatter3(ax1,SB(:,1),SB(:,2),SB(:,3),'.');

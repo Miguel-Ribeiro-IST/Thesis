@@ -3,86 +3,75 @@ A = importdata('Data_BNPP.txt','\t',1);
 B1=A.data(:,:);
 S01=17099.4;
 r1 = 0.06;
-
-
-matur1=2;
-M1 = 10;
-iterations1=3;
-PriceVol="price";
-sigmamax1=5;
-iterations2=iterations1;
-
-
-
 B1(:,2)=B1(:,2)/S01;
 S01=1;
-
-times1=unique(B1(:,1));
-a1=zeros(matur1,1);
-b1=zeros(matur1,1);
-c1=zeros(matur1,1);
-d1=zeros(matur1,1);
-
+B1(:,1)=B1(:,1)/252;
 P1=B1;
 for i=1:size(B1,1)
-    P1(i,3)=european_bs(S01,B1(i,2),r1,B1(i,3),B1(i,1)./252,"call");
+    P1(i,3)=european_bs(S01,B1(i,2),r1,B1(i,3),B1(i,1),"call");
 end
+times1=unique(B1(:,1));
 
 
+matur1=4;
+MinT=min(B1(:,1));
+MaxT=max(B1(:,1));
+MinK=0.5;
+MaxK=1.70;
+dT=10.5/252;
+dK=0.05*S01;
+PriceVol="vol";
+iterations=10;
+M1=10000;
+sigmamax=5;
 
+interpol=Dupire(S01,r1,B1,MinT,MaxT,dT,MinK,MaxK,dK);
 
-
-
-
+tic
 figure
 for iter=1:matur1
     ax(iter) = subplot(2,ceil(matur1/2),iter);
-    ti=times1(iter);
-    T1 = times1(iter)/252;
-    D1=252;
-    L1 = T1*D1*2;
+    T1 = times1(iter);
+    L1 = T1*252*2;
     
     if PriceVol=="price"
-        C=P1(P1(:,1)==ti,2:3);
+        C=P1(P1(:,1)==T1,2:3);
     else
-        C=B1(B1(:,1)==ti,2:3);
+        C=B1(B1(:,1)==T1,2:3);
     end
     
     for i=1:size(C,1)
-        Euro(i)=Pricer(a1,b1,c1,d1,sigmamax1,S01,r1,T1,D1,M1,L1,C(i,1),iterations2,times1,PriceVol);
+        Euro(i)=Pricer(S01,r1,T1,M1,L1,C(i,1),iterations,PriceVol,sigmamax,interpol);
     end
     
     scatter(ax(iter),C(:,1),C(:,2),'.');
     hold on;
     scatter(ax(iter),C(:,1),Euro(:),'x');
     hold on;
-    title(ax(iter),times1(iter))
+    title(ax(iter),times1(iter)*252)
     clear Euro
 end
 
+Timer(0,toc)
 beep
 
 
 
-function Euro_final=Pricer(a,b,c,d,sigmamax,S0,r,T,D,M,L,K,iterations,times,PriceVol)
+function Euro_final=Pricer(S0,r,T,M,L,K,iterations,PriceVol,sigmamax,interpol)
 dt = T/L;
 
-for iter=1:iterations
+parfor iter=1:iterations
     S = S0*ones(M,1);
-    sigma=a(1)*ones(M,1);
+    sigma=interpol(0,S0)*ones(M,1);
     
-    for k = 2:L+1
+    for k = 1:L
         S(:)=S(:)+S(:)*r*dt+sqrt(dt)*sigma(:).*S(:).*randn(M,1);
         
-        for i=1:size(times,1)
-            if dt*D*(k-1)<=times(i)
-                sigma=arrayfun(@(x) min(a(i)+(-b(i)*(abs(x-d(i))-(x-d(i)))+c(i)*(abs(x-d(i))+(x-d(i)))).*(x-d(i)),sigmamax),(S(:)));
-                break;
-            end
+        for i=1:M
+           sigma(i)=min(interpol(k*dt,S(i)),sigmamax);
         end
-        
     end
-    
+    Y=zeros(M,1);
     for i=1:M
         Y(i) = max(S(i)-K,0);
     end
@@ -121,7 +110,7 @@ for i=1:size(vol,1)
        end
    end
 end
-interp=scatteredInterpolant(V(:,1),V(:,2),V(:,3),'linear','nearest');
+interp=scatteredInterpolant(V(:,1),V(:,2),V(:,3),'linear','linear');
 end
 
 function euro=european_bs(S0,K,r,sigma0,T,putcall)
@@ -147,6 +136,11 @@ else
 end
 format shortg;
 c = clock;
+if error==0
+disp(strcat(time,strcat("   ",strcat(num2str(c(4),'%02.f'),strcat(":",num2str(c(5),'%02.f'))))))
+fprintf('____________________________________________________\n\n')
+else
 disp(strcat("error=",num2str(error),strcat("   ",strcat(strcat(time,strcat("   ",strcat(num2str(c(4),'%02.f'),strcat(":",num2str(c(5),'%02.f')))))))))
 fprintf('____________________________________________________\n\n')
+end
 end

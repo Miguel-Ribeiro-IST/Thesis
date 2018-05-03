@@ -30,7 +30,7 @@ fun=@(var)SABRcal(var(1),var(2),var(3),beta,S01,B1,r1,var(4),var(5));
 %SABRcal(alpha,rho,nu,beta,S0,B,r)
 lb = [0,-1,0,0,0];
 ub = [Inf,1,Inf,Inf,Inf];
-x0=[0.3,-0.5,0.1,1,1];
+x0=[0.3,-0.5,0.1,0.10,0.1];
 % fun=@(var)SABRcal(var(1),var(2),var(3),var(4),S01,B1,r1);
 % lb = [0,-1,0,0];
 % ub = [Inf,1,Inf,1];

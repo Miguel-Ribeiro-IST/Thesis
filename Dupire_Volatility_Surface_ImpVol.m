@@ -50,7 +50,7 @@ for i=1:size(vol,1)
        end
    end
 end
-interp=scatteredInterpolant(V(:,1),V(:,2),V(:,3),'linear','nearest');
+interp=scatteredInterpolant(V(:,1),V(:,2),V(:,3),'linear','none');
 interp2=interp(X,Y);
 
 %%{

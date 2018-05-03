@@ -18,22 +18,24 @@ end
 
 for i=1:size(B1,1)
       euro1=@(sigma)european_bs(S01,P1(i,2),r1,sigma,T1,"call")-P1(i,3);
-      euro2=@(sigma)european_bs(S01,P1(i,2),r1,sigma,T1,"call")-P1(i,3)*0.99998;
-      euro3=@(sigma)european_bs(S01,P1(i,2),r1,sigma,T1,"call")-P1(i,3)*1.00001;
+      euro2=@(sigma)european_bs(S01,P1(i,2),r1,sigma,T1,"call")-P1(i,3)*0.9999;
+      euro3=@(sigma)european_bs(S01,P1(i,2),r1,sigma,T1,"call")-P1(i,3)*1.0001;
       
       C1(i)=fzero(euro1,0.25);
       C2(i)=fzero(euro2,0.5);
       C3(i)=fzero(euro3,0.5);
 end
 
-    scatter(P1(:,2),C1(:),'.');
+
+    plot(P1(:,2),C2(:),'-x','Color','b');
     hold on;
-    scatter(P1(:,2),C2(:),'x');
+    plot(P1(:,2),C3(:),'-x','Color','b');
     hold on;
-    scatter(P1(:,2),C3(:),'+');
+    fill([P1(:,2)',fliplr(P1(:,2)')],[(C3(:))' fliplr((C2(:))')],'b')
+    alpha(0.50)
     hold on;
-    
-    european_bs(S01,0.5025,r1,3.1825e-16,T1,"call")
+    plot(P1(:,2),C1(:),'-o','Color','r');
+    hold on;
     
     
 function euro=european_bs(S0,K,r,sigma0,T,putcall)

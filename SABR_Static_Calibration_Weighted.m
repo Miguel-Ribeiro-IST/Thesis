@@ -6,10 +6,10 @@ r1 = 0.06;
 
 
 matur1=2;
-M1 = 10000;
+M1 = 20000;
 iterations1=50;
-beta=1;
-PriceVol="vol";
+beta=0;
+PriceVol="price";
 iterations2=iterations1;
 
 
@@ -38,8 +38,9 @@ end
 
 fun = @(var)SABRvol(var(1),var(2),var(3),beta,S01,r1,T1,M1,L1,B1tmp,iterations1,PriceVol);
 lb = [0,-1,0];
-ub = [Inf,1,Inf];
-x0=[0.24603     -0.44043        1.476];
+%ub = [Inf,1,Inf];
+ub = [20,1,20];
+x0=[0.20     -0.2        1.2];
 A = [];b = [];Aeq = [];beq = [];nonlcon=[];
 options = optimoptions('patternsearch','Display','off','MaxIter',10000,'UseParallel',true);
 vars=patternsearch(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
@@ -66,12 +67,12 @@ for i=1:size(C1,1)
     Eurovol(i)=Pricer(alpha,rho,nu,beta,S01,r1,T1,M1,L1,C2(i,1),iterations2,"vol");
 end
 
-ax1 = subplot(1,2,1);
+ax1 = subplot(1,2,2);
 scatter(ax1,C1(:,1),C1(:,2),'.');
 hold on;
 scatter(ax1,C1(:,1),Euro(:),'x');
 
-ax2 = subplot(1,2,2);
+ax2 = subplot(1,2,1);
 scatter(ax2,C2(:,1),C2(:,2),'.');
 hold on;
 scatter(ax2,C2(:,1),Eurovol(:),'x');
@@ -80,8 +81,8 @@ fplot(ax2,SABRVol,[min(C1(:,1)) max(C1(:,1))])
 
 text1=strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(", paths=",num2str(M1))),strcat(", iterations=",num2str(iterations1))),strcat(", maturity=",num2str(T1*252)));
 text2=strcat(strcat(strcat("\alpha=",num2str(alpha)),strcat(", \rho=",num2str(rho))),strcat(", \nu=",num2str(nu)));
-title(ax1,text1)
-title(ax2,text2)
+title(ax2,text1)
+title(ax1,text2)
 
 
 
@@ -111,14 +112,14 @@ parfor iter=1:iterations
     end
     
     if PriceVol=="price"
-        Error(iter)=sum(((exp(-r*T)*mean(Y)-B(:,2)').^2)./((S0-B(:,2)').^2+0.25));
+        Error(iter)=sum(((exp(-r*T)*mean(Y)-B(:,2)')./(B(:,2)'+0.5)).^2);
     else
         Z=exp(-r*T)*mean(Y);
         for i=1:size(B,1)
             euro=@(sigma)european_bs(S0,B(i,1),r,sigma,T,"call")-Z(i);
             Z(i)=fzero(euro,0.25);
         end
-        Error(iter)=sum(((Z-B(:,2)').^2)./((S0-B(:,2)').^2+0.25));
+        Error(iter)=sum(((Z-B(:,2)')./(B(:,2)')).^2);
     end
     
 end

@@ -3,6 +3,7 @@
 /Faisca/*
 /Template/*
 /Stock_Price_Files/*
+%.asv
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

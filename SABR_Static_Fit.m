@@ -4,14 +4,13 @@ clear; %clear all variables. This prevents multiple simulations from interfering
 A = importdata('Data_BNPP.txt','\t',1); 
 B1=A.data(:,:);
 
-
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
-r1 = 0.06;       %risk-free rate. Forward prices in data file assumed r=0.06
-S01=17099.4;     %initial stock price
-matur1=2;        %maturity at which we want to fit the data. If matur1=5, the fifth maturity in the file is chosen.
-M1=25000;         % number of paths to be simulated
-iterations=10;    %number of repetitions to be simulated (and then averaged)
-beta=0;          %parameter of the SABR model
+r1 = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
+S01=17099.4;        %initial stock price
+matur1=2;           %maturity at which we want to fit the data. If matur1=5, the fifth maturity in the file is chosen.
+M1=50000;           %number of paths to be simulated
+iterations=10;      %number of repetitions to be simulated (and then averaged)
+beta=1;             %parameter of the SABR model
 
 
 %%%%%%%%%%%%%      ORIGINAL DATA MODIFICATIONS     %%%%%%%%%%%%
@@ -23,6 +22,8 @@ T1=times1(matur1);      %selected maturity
 B1=B1(B1(:,1)==T1,:);   %only keep values of the maturity
 L1 = T1*252*2;          %number of steps in simulations
 
+
+%%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
 x0=[0.5,-0.5,0.5];   %parameter starting values [alpha, rho, nu]
 optimvars=Optimizer(beta,S01,B1,r1,x0);  %Obtain optimization variables
 alpha=optimvars(1);
@@ -31,7 +32,6 @@ nu=optimvars(3);
 
 %Plot optimization results
 Plotter(alpha,rho,nu,beta,S01,r1,T1,L1,M1,iterations,B1)
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -62,7 +62,7 @@ options = optimoptions('patternsearch','Display','off'); %procedure options
 optimvars=patternsearch(fun,x0,[],[],[],[],lb,ub,[],options); %define minimization procedure (patternsearch)
 
 %print optimization output
-disp(sprintf(strcat("alpha=",strcat(num2str(optimvars(1)),strcat(",    rho=",strcat(num2str(optimvars(2)),strcat(",    nu=",strcat(num2str(optimvars(3)),strcat("\nerror=",num2str(SABRcal(optimvars(1),optimvars(2),optimvars(3),beta,S0,B,r)))))))))));
+fprintf(strcat("alpha=",strcat(num2str(optimvars(1)),strcat(",    rho=",strcat(num2str(optimvars(2)),strcat(",    nu=",strcat(num2str(optimvars(3)),strcat("\nerror=",strcat(num2str(SABRcal(optimvars(1),optimvars(2),optimvars(3),beta,S0,B,r)),"\n")))))))));
 end
 
 
@@ -105,8 +105,9 @@ end
 function Total_Error=SABRcal(alpha,rho,nu,beta,S0,B,r)
 LS=0;
 for i=1:size(B,1)
-    %Function sigmaSABR outputs the error between model and data implied volatilities
     %LS is the least squares error
+    %Function sigmaSABR outputs the error between model and data implied
+    %volatilities using the original Hagan formula
     LS=LS+((B(i,3)-sigmaSABR(alpha,rho,nu,beta,B(i,2),S0*exp(r*B(i,1)),B(i,1)))^2);
     %sigmaSABR(alpha,rho,nu,beta,K,f,T)
 end
@@ -114,12 +115,20 @@ Total_Error=LS;
 end
 
 
-%%%%%%%%%%% CALCULATE SABR MODEL IMPLIED VOLATILITY   %%%%%%%%%%
+%%%%%%%%%%% CALCULATE SABR MODEL IMPLIED VOLATILITY FROM HAGAN  %%%%%%%%%%
 %%Find function in page 9 of file github.com/Miguel-Ribeiro-IST/Thesis/blob/master/References/Hagan_SABR.pdf
 function sigma=sigmaSABR(alpha,rho,nu,beta,K,f,T)
 z=nu./alpha.*(f.*K).^((1-beta)./2).*log(f./K);
 x=log((sqrt(1-2.*rho.*z+z.^2)+z-rho)./(1-rho));
-sigma=alpha./((f.*K).^((1-beta)./2).*(1+(1-beta).^2/24.*(log(f./K)).^2+(1-beta).^4./1920.*(log(f./K)).^4)).*(z./x).*(1+((1-beta).^2/24.*alpha.^2./(f.*K).^(1-beta)+1/4.*rho.*nu.*beta.*alpha./(f.*K).^((1-beta)./2)+(2-3*rho.^2)./24.*nu.^2).*T);
+if f==K
+    sigma=alpha./((f).^(1-beta)).*(1+T.*((1-beta)^2/24.*alpha^2/((f).^(2-2*beta))+1/4*rho.*beta.*alpha.*nu./((f).^(1-beta))+(2-3*rho^2)/24.*nu^2));
+elseif beta==0
+    sigma=alpha.*log(f./K)./(f-K).*(z./x).*(1+T.*(alpha.^2./(24.*f.*K)+(2-3*rho.^2)./24.*nu.^2));
+elseif beta==1
+    sigma=alpha.*(z./x).*(1+T.*(1/4*rho.*alpha.*nu+1/24*(2-3*rho.^2).*nu.^2));
+else
+    sigma=alpha./((f.*K).^((1-beta)./2).*(1+(1-beta).^2/24.*(log(f./K)).^2+(1-beta).^4./1920.*(log(f./K)).^4)).*(z./x).*(1+((1-beta).^2/24.*alpha.^2./(f.*K).^(1-beta)+1/4.*rho.*nu.*beta.*alpha./(f.*K).^((1-beta)./2)+(2-3*rho.^2)./24.*nu.^2).*T);
+end
 end
 
 
@@ -140,10 +149,10 @@ parfor iter=1:iterations    %Perform the "for" cycle in parallel
     
     for k = 1:L
         Z1=randn(M,1);         %vector of random variables
-        Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1)     %vector of random variables with correlation "rho" with vector Z1
-        alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);  %update volatilities vector
+        Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);     %vector of random variables with correlation "rho" with vector Z1
         v=alp.*(F.^(beta-1));                          %intermediate variable
         F(:)=F(:).*exp(v.*Z2*sqrt(dt)-v.^2*dt/2);      %update forwards vector
+        alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);  %update volatilities vector
     end
     
     Y=zeros(M,1);

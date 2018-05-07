@@ -1,146 +1,154 @@
-clear;
+clear; %clear all variables. This prevents multiple simulations from interfering with one another
+%Import data from file "Data_BNPP.txt" and assign it to matrix B. The file must be in the same folder
+%1st column - maturities, 2nd column - strikes, 3rd column - implied volatilities
 A = importdata('Data_BNPP.txt','\t',1);
-B1=A.data(:,:);
-S01=17099.4;
-r1 = 0.06;
-B1(:,2)=B1(:,2)/S01;
-S01=1;
-B1(:,1)=B1(:,1)/252;
-P1=B1;
-for i=1:size(B1,1)
-    P1(i,3)=european_bs(S01,B1(i,2),r1,B1(i,3),B1(i,1),"call");
-end
-times1=unique(B1(:,1));
+B=A.data(:,:);
+
+%%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
+S0=17099.4;        %initial stock price
+r = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
+matur=4;           %maturity until which we want to fit the data.
+                   %If matur=5, all maturities until the fifth maturity in the file are chosen.
+M=50000;           %number of paths to be simulated
+iterations=10;     %number of repetitions to be simulated (and then averaged)
+sigmamax=5;        %maximum value the local volatility can take
 
 
-matur1=4;
-MinT=min(B1(:,1));
-MaxT=max(B1(:,1));
-MinK=0.5;
-MaxK=1.70;
-dT=10.5/252;
-dK=0.05*S01;
-PriceVol="vol";
-iterations=10;
-M1=10000;
-sigmamax=5;
+%%%%%%%%%%%%%      ORIGINAL DATA MODIFICATIONS     %%%%%%%%%%%%
+B(:,2)=B(:,2)/S0;     %normalize strike prices
+S0=1;
+B(:,1)=B(:,1)/252;    %convert maturities from days to years
 
-interpol=Dupire(S01,r1,B1,MinT,MaxT,dT,MinK,MaxK,dK);
+
+%%%%%%%%%%   IMPLIED VOLATILITY INTERPOLATION MESH PARAMETERS   %%%%%%%%%
+MinT=min(B(:,1));   %minimum value for maturity in the mesh grid
+MaxT=max(B(:,1));   %maximum value for maturity in the mesh grid
+MinK=0.5;           %minimum value for strike in the mesh grid
+MaxK=1.70;          %minimum value for strike in the mesh grid
+dT=10.5/252;        %mesh grid size w.r.t. maturity
+dK=0.05*S0;         %mesh grid size w.r.t. strike
 
 tic
+interpol=Dupire(S0,r,B,MinT,MaxT,dT,MinK,MaxK,dK);
+
+Plotter(S0,r,B,M,iterations,matur,sigmamax,interpol)
+toc
+
+%%%%%%%%%%%%%%%%%%%%%    PLOT INTERPOLATION RESULTS    %%%%%%%%%%%%%%%%%%%%
+function Plotter(S0,r,B,M,iterations,matur,sigmamax,interpol)
 figure
-for iter=1:matur1
-    ax(iter) = subplot(2,ceil(matur1/2),iter);
-    T1 = times1(iter);
-    L1 = T1*252*2;
+times=unique(B(:,1));
+for iter=1:matur
+    ax(iter) = subplot(2,ceil(matur/2),iter);
+    T = times(iter);
+    L = T*252*2;
     
-    if PriceVol=="price"
-        C=P1(P1(:,1)==T1,2:3);
-    else
-        C=B1(B1(:,1)==T1,2:3);
-    end
-    
+        C=B(B(:,1)==T,2:3);
+        
     for i=1:size(C,1)
-        Euro(i)=Pricer(S01,r1,T1,M1,L1,C(i,1),iterations,PriceVol,sigmamax,interpol);
+        Volatility(i)=Pricer(S0,r,T,M,L,C(i,1),iterations,"vol",sigmamax,interpol);
     end
     
     scatter(ax(iter),C(:,1),C(:,2),'.');
     hold on;
-    scatter(ax(iter),C(:,1),Euro(:),'x');
+    scatter(ax(iter),C(:,1),Volatility(:),'x');
     hold on;
-    title(ax(iter),times1(iter)*252)
-    clear Euro
+    title(ax(iter),strcat(strcat(strcat(num2str(T*252)," days  ("),num2str(T*252/21))," months)"))
+    clear Volatility
+end
+text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
+vars1=strcat(strcat(strcat("sigmamax=",num2str(sigmamax)),strcat(",  paths=",num2str(M))),strcat(",  iterations=",num2str(iterations)));
+title(ax(1),{vars1,text1})
 end
 
-Timer(0,toc)
-beep
 
+%%% CALCULATE MONTE CARLO PRICE/IMPLIED VOLATILITY OF EUROPEAN OPTION UNDER SABR %%%
+function Result_Avg=Pricer(S0,r,T,M,L,K,iterations,PriceVol,sigmamax,interpol)
+dt = T/L;      %time steps
 
-
-function Euro_final=Pricer(S0,r,T,M,L,K,iterations,PriceVol,sigmamax,interpol)
-dt = T/L;
-
-parfor iter=1:iterations
-    S = S0*ones(M,1);
-    sigma=interpol(0,S0)*ones(M,1);
+%%NOTE:
+%%%%We don't need to simulate an entire matrix of stock prices for all time steps and for all paths.
+%%%%We just need to simulate one vector of stock prices for all paths and update it at each time step
+parfor iter=1:iterations               %Perform the "for" cycle in parallel
+    S = S0*ones(M,1);                  %define initial vector of stock prices
+    sigma=interpol(0,S0)*ones(M,1);    %define the initial vector of volatilities
     
     for k = 1:L
-        S(:)=S(:)+S(:)*r*dt+sqrt(dt)*sigma(:).*S(:).*randn(M,1);
+        S(:)=S(:)+S(:)*r*dt+sqrt(dt)*sigma(:).*S(:).*randn(M,1);   %GBM formula
         
         for i=1:M
+           %At each step, calculate the new local volatility value for each path (maximized by threshold "sigmamax")
            sigma(i)=min(interpol(k*dt,S(i)),sigmamax);
         end
     end
+    
     Y=zeros(M,1);
     for i=1:M
-        Y(i) = max(S(i)-K,0);
+        Y(i) = max(S(i)-K,0);      %Calculate the payoff of all paths (assuming calls)
     end
     
     if PriceVol=="price"
-        Euro(iter)=exp(-r*T)*mean(Y(:));
+        Result(iter)=exp(-r*T)*mean(Y(:)); %Output the discounted expected payoff
     else
-        euro=@(sigma)european_bs(S0,K,r,sigma,T,"call")-exp(-r*T)*mean(Y(:));
-        Euro(iter)=fzero(euro,0.25);
+        volatility=@(sigma)european_bs(S0,K,r,sigma,T,"call")-exp(-r*T)*mean(Y(:));
+        Result(iter)=fzero(volatility,0.25);   %Calculate the expected implied volatility
     end
 end
 
-Euro_final=mean(Euro);
+Result_Avg=mean(Result);
 end
 
+
+%%%%%%%%%%%%%%     OBTAIN THE LOCAL VOLATILITY SURFACE    %%%%%%%%%%
+%%Find function in page 844 of file github.com/Miguel-Ribeiro-IST/Thesis/blob/master/References/Wilmott.pdf
 function interp=Dupire(S0,r,B,MinT,MaxT,dT,MinK,MaxK,dK)
-B=B(B(:,2)<=MaxK & B(:,2)>=MinK & B(:,1)>=MinT & B(:,1)<=MaxT,:);
+B=B(B(:,2)<=MaxK & B(:,2)>=MinK & B(:,1)>=MinT & B(:,1)<=MaxT,:);  %Restrict implied volatility data to the selected interpolation limits
+
+%Produce mesh w.r.t. time and strike
 Time=MinT:2*dT:MaxT;
 Strike=MinK:2*dK:MaxK;
 [X,Y] = meshgrid(Time,Strike);
+
+%Generate interpolating surface of the implied volatilities (linear interpolation, no extrapolation)
 S=scatteredInterpolant(B(:,1),B(:,2),B(:,3),'linear','none');
-SgradK=(S(X,Y+dK)-S(X,Y-dK))/(2*dK);
-Sgrad2K=(S(X,Y+dK)+S(X,Y-dK)-2*S(X,Y))/(dK^2);
-SgradT=(S(X+dT,Y)-S(X,Y))/(dT);
+
+%Calculate surface gradients
+SgradK=(S(X,Y+dK)-S(X,Y-dK))/(2*dK);             %first-derivative w.r.t. K
+Sgrad2K=(S(X,Y+dK)+S(X,Y-dK)-2*S(X,Y))/(dK^2);   %second-derivative w.r.t. K
+SgradT=(S(X+dT,Y)-S(X,Y))/(dT);                  %first-derivative w.r.t. T
 SXY=S(X,Y);
 
+%Generate local volatility surface
 d1=(log(S0./Y)+(r+0.5*SXY.^2).*X)./(SXY.*sqrt(X));
 vol=sqrt((SXY.^2+2*X.*SXY.*SgradT+2*r*Y.*X.*SXY.*SgradK)./((1+Y.*d1.*sqrt(X).*SgradK).^2+Y.^2.*X.*SXY.*(Sgrad2K-d1.*(SgradK).^2.*sqrt(X))));
 
-
+%Generate matrix with the local volatility values on the mesh nodes, to be interpolated
 V=[];
 for i=1:size(vol,1)
    for j=1:size(vol,2)
-       if ~isnan(vol(i,j))
+       if ~isnan(vol(i,j))                 %some mesh nodes will have no data (vol(i,j)=NaN). These values should be rejected
            V=[V;[X(i,j),Y(i,j),vol(i,j)]];
        end
    end
 end
-interp=scatteredInterpolant(V(:,1),V(:,2),V(:,3),'linear','linear');
+
+%Generate local volatility surface
+interp=scatteredInterpolant(V(:,1),V(:,2),V(:,3),'linear','nearest');
 end
 
-function euro=european_bs(S0,K,r,sigma0,T,putcall)
-d1 = (log(S0/K) + (r + 0.5*sigma0^2)*T)/(sigma0*sqrt(T));
-d2 = d1 - sigma0*sqrt(T);
+
+
+%%%%%%%%%%%%%%  CALCULATE BLACK-SCHOLES PRICE  %%%%%%%%%%%%%%%%%%%%
+%If option is a call: putcall="call"
+%If option is a put: putcall="put"
+function price=european_bs(S0,K,r,sigma,T,putcall)
+d1 = (log(S0/K) + (r + 0.5*sigma^2)*T)/(sigma*sqrt(T));
+d2 = d1 - sigma*sqrt(T);
 N1 = normcdf(d1);
 N2 = normcdf(d2);
 if putcall=="call"
-    euro = S0*N1 - K*exp(-r*T)*N2;
+    price = S0*N1 - K*exp(-r*T)*N2;
 elseif putcall=="put"
-    euro = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
-end
-end
-
-
-function Timer(error,time)
-if time>3600
-    time=strcat(strcat(strcat(num2str(floor(time/3600)),"hrs,"),num2str(floor((time-floor(time/3600)*3600)/60))),"min");
-elseif time>60
-    time=strcat(strcat(strcat(num2str(floor(time/60)),"min,"),num2str(floor(time-floor(time/60)*60))),"sec");
-else
-    time=strcat(num2str(floor(time)),"sec");
-end
-format shortg;
-c = clock;
-if error==0
-disp(strcat(time,strcat("   ",strcat(num2str(c(4),'%02.f'),strcat(":",num2str(c(5),'%02.f'))))))
-fprintf('____________________________________________________\n\n')
-else
-disp(strcat("error=",num2str(error),strcat("   ",strcat(strcat(time,strcat("   ",strcat(num2str(c(4),'%02.f'),strcat(":",num2str(c(5),'%02.f')))))))))
-fprintf('____________________________________________________\n\n')
+    price = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
 end
 end

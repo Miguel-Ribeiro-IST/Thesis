@@ -6,8 +6,8 @@ r1 = 0.06;
 
 
 matur1=4;
-M1 = 1000;
-iterations1=10;
+M1 = 100;
+iterations1=3;
 beta=0.5;
 PriceVol="vol";
 iterations2=iterations1;
@@ -140,10 +140,9 @@ for iter=1:iterations
         rho=rho0*exp(-a*dt*k);
         nu=nu0*exp(-b*dt*k);
         Z1=randn(M,1);
-        alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);
         v=alp.*(F.^(beta-1));
         F(:)=F(:).*exp(v.*(rho*Z1+sqrt(1-rho^2)*randn(M,1))*sqrt(dt)-v.^2*dt/2);
-        
+        alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);
     end
     
     Y=zeros(M,1);

@@ -1,37 +1,37 @@
 clear; %clear all variables. This prevents multiple simulations from interfering with one another
-%Import data from file "Data_BNPP.txt" and assign it to matrix B1. The file must be in the same folder
+%Import data from file "Data_BNPP.txt" and assign it to matrix B. The file must be in the same folder
 %1st column - maturities, 2nd column - strikes, 3rd column - implied volatilities
-A = importdata('Data_BNPP.txt','\t',1); 
-B1=A.data(:,:);
+A = importdata('Data_BNPP.txt','\t',1);
+B=A.data(:,:);
 
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
-r1 = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
-S01=17099.4;        %initial stock price
-matur1=2;           %maturity at which we want to fit the data. If matur1=5, the fifth maturity in the file is chosen.
-M1=50000;           %number of paths to be simulated
-iterations=10;      %number of repetitions to be simulated (and then averaged)
-beta=1;             %parameter of the SABR model
+S0=17099.4;        %initial stock price
+r = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
+matur=2;           %maturity at which we want to fit the data. If matur=5, the fifth maturity in the file is chosen.
+M=50000;           %number of paths to be simulated
+iterations=10;     %number of repetitions to be simulated (and then averaged)
+beta=0.5;          %parameter of the SABR model
 
 
 %%%%%%%%%%%%%      ORIGINAL DATA MODIFICATIONS     %%%%%%%%%%%%
-B1(:,2)=B1(:,2)/S01;    %normalize strike prices
-S01=1;
-B1(:,1)=B1(:,1)/252;    %convert maturities from days to years
-times1=unique(B1(:,1));
-T1=times1(matur1);      %selected maturity
-B1=B1(B1(:,1)==T1,:);   %only keep values of the maturity
-L1 = T1*252*2;          %number of steps in simulations
+B(:,2)=B(:,2)/S0;     %normalize strike prices
+S0=1;
+B(:,1)=B(:,1)/252;    %convert maturities from days to years
+times=unique(B(:,1));
+T=times(matur);       %selected maturity
+B=B(B(:,1)==T,:);     %only keep values of the maturity
+L = T*252*2;          %number of steps in simulations
 
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
 x0=[0.5,-0.5,0.5];   %parameter starting values [alpha, rho, nu]
-optimvars=Optimizer(beta,S01,B1,r1,x0);  %Obtain optimization variables
+optimvars=Optimizer(beta,S0,B,r,x0);  %Obtain optimization variables
 alpha=optimvars(1);
 rho=optimvars(2);
 nu=optimvars(3);
 
 %Plot optimization results
-Plotter(alpha,rho,nu,beta,S01,r1,T1,L1,M1,iterations,B1)
+Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -94,9 +94,9 @@ hold on;
 scatter(ax2,B(:,2),Price(:),'x');
 
 %Show fit results in plot titles
-text1=strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(", paths=",num2str(M))),strcat(", iterations=",num2str(iterations))),strcat(", maturity=",num2str(T*252)));
+text=strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(", paths=",num2str(M))),strcat(", iterations=",num2str(iterations))),strcat(", maturity=",num2str(T*252)));
 text2=strcat(strcat(strcat("\alpha=",num2str(alpha)),strcat(", \rho=",num2str(rho))),strcat(", \nu=",num2str(nu)));
-title(ax1,{text1,'Volatilities'})
+title(ax1,{text,'Volatilities'})
 title(ax2,{text2,'Prices'})
 end
 
@@ -141,15 +141,14 @@ dt = T/L;      %time steps
 
 %%NOTE:
 %%%%We don't need to simulate an entire matrix of forwards for all time steps and for all paths.
-%%%%We just need to simulate a vector of forwards for all paths and update it at each time step
-    
+%%%%We just need to simulate one vector of forwards for all paths and update it at each time step
 parfor iter=1:iterations    %Perform the "for" cycle in parallel
     F = f*ones(M,1);        %define initial vector of forwards
     alp=alpha*ones(M,1);    %define the initial vector of volatilities
     
     for k = 1:L
-        Z1=randn(M,1);         %vector of random variables
-        Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);     %vector of random variables with correlation "rho" with vector Z1
+        Z1=randn(M,1);                                 %vector of random variables
+        Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);            %vector of random variables with correlation "rho" with vector Z1
         v=alp.*(F.^(beta-1));                          %intermediate variable
         F(:)=F(:).*exp(v.*Z2*sqrt(dt)-v.^2*dt/2);      %update forwards vector
         alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);  %update volatilities vector
@@ -160,12 +159,11 @@ parfor iter=1:iterations    %Perform the "for" cycle in parallel
         Y(i) = max(F(i)-K,0);  %Calculate the payoff of all paths (assuming calls)
     end
     
-    
     if PriceVol=="price"
         Result(iter)=exp(-r*T)*mean(Y(:));  %Output the discounted expected payoff
     else
         volatility=@(sigma)european_bs(f*exp(-r*T),K,r,sigma,T,"call")-exp(-r*T)*mean(Y(:));
-        Result(iter)=fzero(volatility,0.25);  %Calculate the expectedimplied volatility
+        Result(iter)=fzero(volatility,0.25);  %Calculate the expected implied volatility
     end
     
 end
@@ -176,14 +174,14 @@ end
 %%%%%%%%%%%%%%  CALCULATE BLACK-SCHOLES PRICE  %%%%%%%%%%%%%%%%%%%%
 %If option is a call: putcall="call"
 %If option is a put: putcall="put"
-function euro=european_bs(S0,K,r,sigma0,T,putcall)
-d1 = (log(S0/K) + (r + 0.5*sigma0^2)*T)/(sigma0*sqrt(T));
-d2 = d1 - sigma0*sqrt(T);
+function price=european_bs(S0,K,r,sigma,T,putcall)
+d1 = (log(S0/K) + (r + 0.5*sigma^2)*T)/(sigma*sqrt(T));
+d2 = d1 - sigma*sqrt(T);
 N1 = normcdf(d1);
 N2 = normcdf(d2);
 if putcall=="call"
-    euro = S0*N1 - K*exp(-r*T)*N2;
+    price = S0*N1 - K*exp(-r*T)*N2;
 elseif putcall=="put"
-    euro = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
+    price = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
 end
 end

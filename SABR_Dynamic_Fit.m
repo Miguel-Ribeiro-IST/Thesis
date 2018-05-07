@@ -1,96 +1,102 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%   FOR COMMENTS ON THE CODE, CHECK SIMILAR FILE SABR_Static_Fit.m   %%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 clear;
-
-
 A = importdata('Data_BNPP.txt','\t',1);
-B1=A.data(:,:);
-
-r1 = 0.06;%%if edited, the data must be changed!
-S01=17099.4;
-matur1=4;
-M1=100;
-iterations=5;
-Mplot=100;
-beta=1;
-
-B1(:,2)=B1(:,2)/S01;
-S01=1;
-B1(:,1)=B1(:,1)/252;
-times1=unique(B1(:,1));
-B1=B1(B1(:,1)<=times1(matur1),:);
+B=A.data(:,:);
 
 
-P1=B1;
-for i=1:size(B1,1)
-    P1(i,3)=european_bs(S01,B1(i,2),r1,B1(i,3),B1(i,1),"call");
-    %european_bs(S0,K,r,sigma0,T,putcall)
+S0=17099.4;
+r = 0.06;
+matur=4;           %maturity until which we want to fit the data.
+                   %If matur=5, all maturities until the fifth maturity in the file are chosen.
+M=50000;
+iterations=10;
+beta=0.5;
+
+
+B(:,2)=B(:,2)/S0;
+S0=1;
+B(:,1)=B(:,1)/252;
+times=unique(B(:,1));
+B=B(B(:,1)<=times(matur),:);
+
+x0=[0.2,-0.1,0.1,1,0.1];
+
+optimvars=Optimizer(beta,S0,B,r,x0);
+alpha=optimvars(1);
+rho0=optimvars(2);
+nu0=optimvars(3);
+a=optimvars(4);
+b=optimvars(5);
+
+
+Plotter(alpha,rho0,nu0,a,b,beta,S0,r,B,M,iterations,matur)
+
+
+
+function optimvars=Optimizer(beta,S0,B,r,x0)
+fun=@(var)SABRcal(var(1),var(2),var(3),var(4),var(5),beta,S0,B,r);
+lb = [0,-1,0,0,0];
+ub = [Inf,1,Inf,Inf,Inf];
+
+options = optimoptions('patternsearch','Display','off');
+optimvars=patternsearch(fun,x0,[],[],[],[],lb,ub,[],options);
+
+fprintf(strcat("alpha=",strcat(num2str(optimvars(1)),strcat(",    rho0=",strcat(num2str(optimvars(2)),strcat(",    nu0=",strcat(num2str(optimvars(3)),strcat(",    a=",strcat(num2str(optimvars(4)),strcat(",    b=",strcat(num2str(optimvars(5)),strcat("\nerror=",strcat(num2str(SABRcal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),beta,S0,B,r)),"\n")))))))))))));
 end
 
 
-fun=@(var)SABRcal(var(1),var(2),var(3),beta,S01,B1,r1,var(4),var(5));
-%SABRcal(alpha,rho,nu,beta,S0,B,r)
-lb = [0,-1,0,0,0];
-ub = [Inf,1,Inf,Inf,Inf];
-x0=[0.3,-0.5,0.1,0.10,0.1];
-% fun=@(var)SABRcal(var(1),var(2),var(3),var(4),S01,B1,r1);
-% lb = [0,-1,0,0];
-% ub = [Inf,1,Inf,1];
-% x0=[0.5,0.5,0.5,0.5];
-
-A = [];b = [];Aeq = [];beq = [];nonlcon=[];
-%options = optimoptions('patternsearch','Display','off','MaxIter',10000,'UseParallel',true);
-%vars=patternsearch(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
-options = optimoptions('simulannealbnd','Display','off');
-vars=simulannealbnd(fun,x0,lb,ub,options);
-
-%options = optimoptions('fmincon','Display','off','FinDiffRelStep',[0.01,0.01,0.01,0.01,0.01]);
-%vars=fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon,options);
-disp(vars);
-error=SABRcal(vars(1),vars(2),vars(3),beta,S01,B1,r1,vars(4),vars(5));
-% error=SABRcal(vars(1),vars(2),vars(3),var(4),S01,B1,r1);
-% beta=var(4);
-disp(strcat("      error=",num2str(error)));
-
-alpha=vars(1);
-rho=vars(2);
-nu=vars(3);
-a=vars(4);
-b=vars(5);
-
-
+function Plotter(alpha,rho0,nu0,a,b,beta,S0,r,B,M,iterations,matur)
 figure
-for iter=1:matur1
-    ax(iter) = subplot(2,ceil(matur1/2),iter);
-    ti=times1(iter);
+times=unique(B(:,1));
+for iter=1:matur
+    ax(iter) = subplot(2,ceil(matur/2),iter);
+    T=times(iter);
     
-    C=B1(B1(:,1)==ti,2:3);
+    C=B(B(:,1)==T,2:3);
     
+    SABRVol=@(K)sigmaSABR(alpha,rho0,nu0,a,b,beta,K,S0*exp(r*T),T);
     
-    SABRVol=@(K)sigmaSABR(alpha,rho,nu,beta,K,S01*exp(r1*ti),ti,a,b);
+    for i=1:size(C,1)
+        Volatility(i)= Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,C(i,1),iterations,"vol");
+    end
     
     scatter(ax(iter),C(:,1),C(:,2),'.');
     hold on;
+    scatter(ax(iter),C(:,1),Volatility(:),'x');
+    hold on;
     fplot(ax(iter),SABRVol,[min(C(:,1)) max(C(:,1))])
     hold on;
-    title(ax(iter),times1(iter)*252)
+    title(ax(iter),strcat(strcat(strcat(num2str(T*252)," days  ("),num2str(T*252/21))," months)"))
+    clear Volatility
+end
+text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
+vars1=strcat(strcat(strcat("\beta=",num2str(beta)),strcat(",  paths=",num2str(M))),strcat(",  iterations=",num2str(iterations)));
+text2=strcat(strcat(strcat(num2str(times(2)*252)," days  ("),num2str(times(2)*252/21))," months)");
+vars2=strcat(strcat(strcat(strcat(strcat(strcat(strcat("\alpha=",num2str(alpha)),strcat(",  \rho0=",num2str(rho0))),strcat(",  \nu0=",num2str(nu0))),",  a="),num2str(a)),",  b="),num2str(b));
+title(ax(1),{vars1,text1})
+title(ax(2),{vars2,text2})
 end
 
 
-function Error=SABRcal(alpha,rho,nu,beta,S0,B,r,a,b)
+function Total_Error=SABRcal(alpha,rho,nu,a,b,beta,S0,B,r)
 LS=0;
 for i=1:size(B,1)
-    LS=LS+(B(i,3)-sigmaSABR(alpha,rho,nu,beta,B(i,2),S0*exp(r*B(i,1)),B(i,1),a,b))^2;
+    LS=LS+((B(i,3)-sigmaSABR(alpha,rho,nu,a,b,beta,B(i,2),S0*exp(r*B(i,1)),B(i,1))))^2;
 end
-Error=LS;
+Total_Error=LS;
 end
 
 
 
-function sigma=sigmaSABR(alpha,rho,nu,beta,K,f,T,a,b)
+function sigma=sigmaSABR(alpha,rho0,nu0,a,b,beta,K,f,T)
 w=alpha^(-1)*f^(1-beta);
-n1=@(T)2*nu*rho/(T^2*(a+b)^2)*(exp(-(a+b)*T)-(1-(a+b)*T));
-n22=@(T)3*nu^2*rho^2/(T^4*(a+b)^4)*(exp(-2*(a+b)*T)-8*exp(-(a+b)*T)+(7+2*(a+b)*T*(-3+(a+b)*T)));
-v12=@(T)6*nu^2/(2*b*T)^3*(((2*b*T)^2/2-2*b*T+1)-exp(-2*b*T));
-v22=@(T)6*nu^2/(2*b*T)^3*(2*(exp(-2*b*T)-1)+2*b*T*(exp(-2*b*T)+1));
+n1=@(T)2*nu0*rho0/(T^2*(a+b)^2)*(exp(-(a+b)*T)-(1-(a+b)*T));
+n22=@(T)3*nu0^2*rho0^2/(T^4*(a+b)^4)*(exp(-2*(a+b)*T)-8*exp(-(a+b)*T)+(7+2*(a+b)*T*(-3+(a+b)*T)));
+v12=@(T)6*nu0^2/(2*b*T)^3*(((2*b*T)^2/2-2*b*T+1)-exp(-2*b*T));
+v22=@(T)6*nu0^2/(2*b*T)^3*(2*(exp(-2*b*T)-1)+2*b*T*(exp(-2*b*T)+1));
 %rhot=@(t)rho*exp(-a*t);
 %nut=@(t)nu*exp(-b*t);
 
@@ -102,18 +108,22 @@ sigma=1/w*(1+A1(T)*log(K./f)+A2(T)*(log(K./f)).^2+B(T)*T);
 end
 
 
-function Euro_final=Pricer(alpha,rho,nu,beta,K,f,r,T,L,M,iterations,PriceVol)
+function Result_Avg=Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,L,K,iterations,PriceVol)
 dt = T/L;
+f=S0*exp(r*T);
+
 parfor iter=1:iterations
     F = f*ones(M,1);
     alp=alpha*ones(M,1);
     
     for k = 1:L
+        rho=rho0*exp(-a*dt*(k-1));
+        nu=nu0*exp(-b*dt*(k-1));
         Z1=randn(M,1);
-        alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);
+        Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);
         v=alp.*(F.^(beta-1));
-        F(:)=F(:).*exp(v.*(rho*Z1+sqrt(1-rho^2)*randn(M,1))*sqrt(dt)-v.^2*dt/2);
-        
+        F(:)=F(:).*exp(v.*Z2.*sqrt(dt)-v.^2*dt/2);
+        alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);
     end
     
     Y=zeros(M,1);
@@ -121,50 +131,26 @@ parfor iter=1:iterations
         Y(i) = max(F(i)-K,0);
     end
     
-    
     if PriceVol=="price"
-        Euro(iter)=exp(-r*T)*mean(Y(:));
+        Result(iter)=exp(-r*T)*mean(Y(:));
     else
-        euro=@(sigma)european_bs(f*exp(-r*T),K,r,sigma,T,"call")-exp(-r*T)*mean(Y(:));
-        Euro(iter)=fzero(euro,0.25);
+        volatility=@(sigma)european_bs(S0,K,r,sigma,T,"call")-exp(-r*T)*mean(Y(:));
+        Result(iter)=fzero(volatility,0.25);
     end
-    
 end
 
-Euro_final=mean(Euro);
+Result_Avg=mean(Result);
 end
 
 
-function Plotter(alpha,rho,nu,beta,f,r,T,L,M,ax)
-dt = T/L;
-F = f*ones(M,L);
-alp=alpha*ones(M,1);
-
-for k = 1:L
-    Z1=randn(M,1);
-    alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);
-    v=alp.*(F(:,k).^(beta-1));
-    F(:,k+1)=F(:,k).*exp(v.*(rho*Z1+sqrt(1-rho)*randn(M,1))*sqrt(dt)-v.^2*dt/2);
-end
-
-for k = 1:(L+1)
-    F(:,k)=F(:,k).*exp(-r*(T-dt*(k-1)));
-end
-
-plot(ax,0:dt*252:T*252,F(:,:)')
-xlim([0 T*252])
-ylim([0 2])
-
-end
-
-function euro=european_bs(S0,K,r,sigma0,T,putcall)
-d1 = (log(S0/K) + (r + 0.5*sigma0^2)*T)/(sigma0*sqrt(T));
-d2 = d1 - sigma0*sqrt(T);
+function price=european_bs(S0,K,r,sigma,T,putcall)
+d1 = (log(S0/K) + (r + 0.5*sigma^2)*T)/(sigma*sqrt(T));
+d2 = d1 - sigma*sqrt(T);
 N1 = normcdf(d1);
 N2 = normcdf(d2);
 if putcall=="call"
-    euro = S0*N1 - K*exp(-r*T)*N2;
+    price = S0*N1 - K*exp(-r*T)*N2;
 elseif putcall=="put"
-    euro = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
+    price = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
 end
 end

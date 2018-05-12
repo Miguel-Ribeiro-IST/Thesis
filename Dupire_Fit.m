@@ -9,8 +9,8 @@ S0=17099.4;        %initial stock price
 r = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
                    %If matur=5, all maturities until the fifth maturity in the file are chosen.
-M=50000;           %number of paths to be simulated
-iterations=10;     %number of repetitions to be simulated (and then averaged)
+M=100000;           %number of paths to be simulated
+iterations=3/;     %number of repetitions to be simulated (and then averaged)
 sigmamax=5;        %maximum value the local volatility can take
 
 
@@ -133,7 +133,7 @@ for i=1:size(vol,1)
 end
 
 %Generate local volatility surface
-interp=scatteredInterpolant(V(:,1),V(:,2),V(:,3),'linear','nearest');
+interp=scatteredInterpolant(V(:,1),V(:,2),V(:,3),'linear','linear');
 end
 
 

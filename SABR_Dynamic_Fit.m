@@ -11,8 +11,8 @@ S0=17099.4;
 r = 0.06;
 matur=4;           %maturity until which we want to fit the data.
                    %If matur=5, all maturities until the fifth maturity in the file are chosen.
-M=50000;
-iterations=10;
+M=50;
+iterations=2;
 beta=0.5;
 
 
@@ -75,7 +75,7 @@ end
 text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
 vars1=strcat(strcat(strcat("\beta=",num2str(beta)),strcat(",  paths=",num2str(M))),strcat(",  iterations=",num2str(iterations)));
 text2=strcat(strcat(strcat(num2str(times(2)*252)," days  ("),num2str(times(2)*252/21))," months)");
-vars2=strcat(strcat(strcat(strcat(strcat(strcat(strcat("\alpha=",num2str(alpha)),strcat(",  \rho0=",num2str(rho0))),strcat(",  \nu0=",num2str(nu0))),",  a="),num2str(a)),",  b="),num2str(b));
+vars2=strcat(strcat(strcat(strcat(strcat(strcat(strcat("\alpha=",num2str(alpha)),strcat(",  \rho_0=",num2str(rho0))),strcat(",  \nu_0=",num2str(nu0))),",  a="),num2str(a)),",  b="),num2str(b));
 title(ax(1),{vars1,text1})
 title(ax(2),{vars2,text2})
 end

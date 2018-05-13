@@ -2,39 +2,88 @@
 \label{chapter:implementation}
 \section{Option Pricing}
 \label{section:Option Pricing}
-The theoretical models presented in chapter \ref{chapter:background} attempt to model the movements of real-world stock prices. With the predictions obtained, we should be able to better replicate real option prices than if we assumed a simple constant volatility.
+The theoretical models presented in Chapter \ref{chapter:background} attempt to model the movements of real-world stock prices. With the predictions obtained, we should be able to better replicate real option prices than if we assumed a simple constant volatility.
 
 Currently, the two most used methods to computationally price options are known as \emph{finite differences}~\cite{Hull} and \emph{Monte Carlo}~\cite{Glasserman}.
 
-Finite differences is an extremely fast procedure when used to price either European or American-type options, making it very appealing. However, when used to price other option types whose value depends on the stock prices until maturity (e.g. Asian options), the algorithm becomes very slow, rendering it almost useless.
-The implementation of both Heston and SABR models (presented before) using finite differences can be found in de Graaf~\cite{deGraaf}.
+Finite differences is an extremely fast procedure when used to price either European or American-type options, making it very appealing in these circumstances. However, when used to price other option types whose value depends on the stock prices until maturity (e.g. Asian options), the algorithm becomes very slow, rendering it almost useless.
+The implementation of both Heston and SABR models (presented before) using finite differences can be found in deGraaf~\cite{deGraaf}.
 
 
-With the Monte Carlo method, the algorithm simulates a very large number of stock price paths, under each model's assumptions. The option payoff is then calculated for each of these paths and averaged, providing a fair estimate of the option's value. This algorithm can also be easily adapted to price exotic options, making it very attractive in such cases.
+With the Monte Carlo method, the algorithm simulates a very large number of stock price paths (e.g. 100,000 simulations), under the selected model's assumptions. The option payoff is then calculated for each of these paths and averaged, providing a fair estimate of the option's value. This algorithm can also be easily adapted to price exotic options, making it very attractive in such cases.
 In the past, simulating all the stock paths took prohibitively long computation times and this method was often discarded for this reason. However, with the recent advancements in computer hardware and new algorithmic developments, such as GPU implementation, this method has become quite popular.
-For these reasons, the Monte Carlo method will be the method implemented for the validation of the models presented before.
+For these reasons, the Monte Carlo method will be used for the validation of the models presented before.
 
 
 \subsection{Simulating stock prices}
 \label{subsection:Simulating stock prices}
-As stated, implement the Monte Carlo algorithm, one needs to simulate the stock price paths. However, by analyzing eq.\eqref{GBM}, we can see that these stock prices depend on a Brownian motion process (also known as a Wiener process) which, due to its self-similarity, is not differentiable~\cite{Mikosch}. It follows that stock price paths could never be exactly simulated.
+As stated, to implement the Monte Carlo algorithm one needs to simulate stock price paths. However, by analyzing eq.\eqref{GBM}, we can see that the stock prices depend on a Brownian motion process (also known as a Wiener process) which, due to its self-similarity, is not differentiable~\cite{Mikosch}. It follows that stock price paths can never be exactly simulated.
 
-\hl{put this in background section?} Though exact simulation is impossible, we can approximate the movement of stock price paths using the Euler–Maruyama discretization for stochastic differential equations of the type
-\begin{equation}
-dX=a(X)dt+b(X)dW,
+\subsubsection{Euler–Maruyama discretization}
+\hl{put this in background section?} Though exact simulation is impossible, we can approximate the movement of stock price paths using the Euler–Maruyama discretization, which can be applied to stochastic differential equations of the type
+\begin{equation}\label{SDE}
+dX(t)=a(X(t))dt+b(X(t))dW(t),
 \end{equation}
-\noindent where $a(X)$ and $b(X)$ are some given functions and $dW$ defines a Brownian motion process.
-We begin by partitioning the interval $[0,T]$ into $N$ subintervals of width $\Delta t=T/N$. We then define recursively
+\noindent where $a(X)$ and $b(X)$ are some given functions and $\{W(t),\ t>0\}$ defines a one-dimensional Brownian motion process.
+To apply this discretization, we begin by partitioning the simulation interval $[0,T]$ into $N$ subintervals of width $\Delta t=T/N$ and then recursively define
 \begin{equation}
-X_{n+1}=X_n+a(X_n)\Delta t+b(Y_n)\Delta W_n,
+X_{n+1}=X_n+a(X_n)\Delta t+b(X_n)\Delta W_n,
 \end{equation}
-\noindent with $\Delta W_n=W_{t+\Delta t}-W_{t}$.
-Using the known properties of Brownian motion processes, we can generate $\Delta W_n$ with $\Delta W_n\sim \sqrt{\Delta t}N(0,1)$, where $N(0,1)$ defines a standard normal distribution.
+\noindent for $n=1,\ldots,N$ where $\Delta W_n=W_{t+\Delta t}-W_{t}$.
+Using the known properties of Brownian motion processes, we can produce $\Delta W_n\sim \sqrt{\Delta t}Z$, where $Z\sim N(0,1)$ defines a standard normal distribution.
 
-Applying this discretization to the Geometric Brownian motion followed by stock price paths (as seen in eq.\eqref{stochvol}), we arrive at
+Applying this discretization to the Geometric Brownian motion followed by stock price paths (as seen in eq.\eqref{GBM}), we arrive at
 \begin{equation}
-S(t+\Delta t)=S(t)+rS(t)\Delta t+\sqrt{\Delta t}\sigma(t)S(t)N(0,1).
+S(t+\Delta t)=S(t)+rS(t)\Delta t+\sigma S(t)\sqrt{\Delta t}Z.
 \end{equation}
+
+Due to its simplicity, the Euler–Maruyama discretization method is the most common in the simulation of stock price paths.
+
+
+\subsubsection{Milstein Discretization}
+For stochastic volatility models, such as Heston and SABR, where the volatility itself follows a stochastic differential equation (as in eq.\eqref{SDE}), the Euler–Maruyama discretization may not be sufficiently accurate. In these cases, we can easily apply the more precise Milstein method~\cite{Milstein}, defined as
+\begin{equation}
+X_{n+1}=X_n+a(X_n)\Delta t+b(X_n)\Delta W_n+\frac{1}{2}b(X_n)b'(X_n)((\Delta W_n)^2-\Delta t),
+\end{equation}
+\noindent where $b'(X_n)$ denotes the derivative of $b(X_n)$ w.r.t. $X_n$. Note that when $b'(X_n)=0$, the Milstein method collapses to the simpler Euler–Maruyama discretization.
+
+Applying this discretization to the Heston model, we arrive at
+\begin{equation}
+S(t+\Delta t)=S(t)+rS(t)\Delta t+S(t)\sqrt{\nu(t)}\sqrt{\Delta t}Z_1+\frac{1}{2}\nu(t)S(t)\Delta t(Z_1^2-1),
+\end{equation}
+\begin{equation}
+\nu(t+\Delta t)=\nu(t)+\kappa(\overline{\nu}-\nu(t))\Delta t+\eta\sqrt{\nu(t)\Delta t}Z_2+\frac{\eta^2}{4}\Delta t(Z_2^2-1),
+\end{equation}
+\noindent where $Z_1$ and $Z_2$ are two normal random variables with a correlation of $\rho$.
+
+
+Applying the Milstein discretization to the SABR model results in
+\begin{equation}
+F(t+\Delta t)=F(t)+\sigma(t)F^\beta(t)\sqrt{\Delta t}Z_1+\frac{\beta}{2}\sigma^2(t)F^{2\beta-1}(t)\Delta t(Z_1^2-1),
+\end{equation}
+\begin{equation}
+\sigma(t+\Delta t)=\sigma(t)+\nu\sigma(t)\sqrt{\Delta t}Z_2+\frac{\nu^2}{2}\sigma(t)\Delta t(Z_2^2-1),
+\end{equation}
+\noindent where again $Z_1$ and $Z_2$ are two normal random variables with a correlation of $\rho$.
+
+To generate two correlated normal variables $Z_1$ and $Z_2$, we can extract $Z_1$ from a standard normal distribution and produce $Z_2$ from
+\begin{equation}\label{normcorr}
+Z_2=\rho Z_1+\sqrt{1-\rho^2}W,
+\end{equation}
+\noindent where $W$ is a normal random variable, uncorrelated with $Z_1$.
+
+Because it is more precise, the Milstein method will be used in the implementation of both Heston and SABR stochastic volatility models. The simpler Euler–Maruyama discretization will be assumed for Dupire's local volatility as well as for constant volatility.
+
+
+\subsection{Pricing options from simulations}
+To price options, we generate $M$ paths by recursively calculating $S_i(t)$ (or $F_i(t)$ in the case of SABR), for $i=1,\ldots,M$, using either discretization method. When the stock price at the maturity is obtained (i.e. $S_i(T)$ or, in the case of SABR, $F_i(T)=S_i(T)$), the option payoff for each path is calculated from eq.\eqref{callput}. Discounting these values to the present, we obtain the (call) option value
+\begin{equation}
+C(K,T)=e^{-rT}\frac{1}{M}\sum_{i=1}^M\max\left(S_i(T)-K,0\right).
+\end{equation}
+
+It is important to note that, the smaller our subintervals $\Delta t$ are, the better our discretization methods replicate real Brownian motion processes. However, by decreasing $\Delta t$ we increase the number of intervals and with it the number of calculations needed to obtain each $S_i(T)$. The compromise between computation time and precision must be handled appropriately.
+
+
 
 
 \iffalse
@@ -63,4 +112,16 @@ By simulating a large number of paths, some underlying tendencies might become a
  
 \section{Model Calibration}
 \label{section:Model Calibration}
+Both SABR and Heston stochastic volatility models contain variables that we need to calibrate in order to appropriately replicate market option prices.
+
+One possible method to calibrate these models is to start with some guess at each parameter's value and run the Monte Carlo algorithm, obtaining the option prices for some given maturities and strikes. We would then compare these prices with the market data and calculate the difference between them using some error measure (e.g. least-squares). We would then slightly modify each parameter individually, run the pricer again and check if the error decreases, accepting the parameter's new value in such a case.
+Though this methodology appears simple, there are two problems with it. First, it should be noted that the Monte Carlo algorithm may take quite some time to run, and has to be executed once for each parameter change. If our initial guess is far from the optimal parameters' values, too many steps are required and the optimizer would simply take too long to converge. Secondly, this algorithm may get stuck in some local minimum, and may not reach the global optimum. Some stochastic minimization procedures (e.g. simulated annealing) may be used in this case, but the computation times would increase further.
+
+This lengthy optimization method is required when no closed-form solutions exist for our model. The main reason why Heston and SABR are so popular is the fact that they do have closed-form solutions that we can rapidly calculate and use to minimize the difference between model and market option prices. These solutions are presented in eqs.\eqref{CH},\eqref{sabr} and \eqref{dynsabr}.
+Though the same local minimum problem may also occur with these formulas, because they are so easy to compute, we can apply a stochastic minimization procedure without increasing the computation times too greatly.
+
+Because our parameters are bounded, our minimization procedure should accept boundaries. It should also preferably be fast, though this is not the main concern in this work.
+
+
+
 To calibrate SABR, we can either follow the Monte-Carlo approach and simulate a large number of paths, assuming stochastic volatility with some starting parameters and minimizing the difference between model-generated prices and real-world option prices, or we can use eq. xxx to obtain the implied volatility and minimize the market implied volatility.

@@ -26,7 +26,7 @@ With eqs.\eqref{callput} in mind, it should be clear that the value of these two
 &P(K,T)=e^{-rT}\mathbb{E}\left[\max\left(K-S(T),0\right)\right]=e^{-rT}\mathbb{E}\left[\left(K-S(T)\right)\mathbbm{1}_{\left\{S(T)<K\right\}}\right],
 \end{split}
 \end{equation}
-\noindent with $C(K,T)$ and $P(K,T)$ being the values of call and put options, respectively. $\mathbb{E}[\cdot]$ and $\mathbbm{1}_{\{\cdot\}}$ correspond to the expected value and indicator functions, respectively.
+\noindent with $C(K,T)$ and $P(K,T)$ being the values of call and put options, respectively, and with $\mathbb{E}[\cdot]$, $\mathbbm{1}_{\{\cdot\}}$ corresponding to the expected value and indicator functions, respectively.
 
 
 
@@ -227,15 +227,16 @@ We now present two of the most used stochastic volatility models - \emph{Heston}
 
 
 \subsubsection{Heston Model}
-One of the most popular stochastic volatility models is known as \emph{Heston model}. It was developed in 1993 by Steven Heston~\cite{Heston} and it states that our stock prices satisfy the relations
+One of the most popular stochastic volatility models is known as \emph{Heston model}. It was developed in 1993 by Steven Heston~\cite{Heston} and it states that stock prices satisfy the relations
 \begin{equation}
-dS=\mu Sdt+\sqrt{\nu}SdW_1,
+dS=rSdt+\sqrt{\nu}SdW_1,
 \end{equation}
 \begin{equation}
-d\nu=\kappa(\overline{\nu}-\nu)dt+\chi\sqrt{\nu}dW_2,
+d\nu=\kappa(\overline{\nu}-\nu)dt+\eta\sqrt{\nu}dW_2,
 \end{equation}
-\noindent with $\nu$ corresponding to the variance (i.e. $\nu=\sigma^2$) and where $W_1$ and $W_2$ have a correlation of $\rho$. \hl{Note that our stock price is now governed by a drift parameter $\mu$, unlike the usual risk-free measure drift of $r$, as seen in eq.} \eqref{GBM}. \hl{A transformation into the risk-free measure, using Gisarnov's theorem, is possible but the original model used the drift parameter $\mu$.}
-The parameters $\kappa$, $\overline{\nu}$ and $\chi$ are, respectively, the mean-reversion rate (i.e. how fast the volatility converges to its mean value), the long-term variance (i.e. the mean value of variance) and the volatility of volatility (i.e. how erratic is the volatility evolution).
+\noindent with $\nu$ corresponding to the stock price variance (i.e. $\nu=\sigma^2$) and where $W_1$ and $W_2$ have a correlation of $\rho$. The original model used a drift parameter $\mu$ instead of the usual risk-free measure drift $r$, but a measure transformation, using Gisarnov's theorem, can be easily implemented~\cite{Crisostomo}.
+
+The parameters $\kappa$, $\overline{\nu}$ and $\eta$ are, respectively, the mean-reversion rate (i.e. how fast the volatility converges to its mean value), the long-term variance (i.e. the mean value of variance) and the volatility of volatility (i.e. how erratic is the volatility evolution).
 
 \hl{Feller condition}
 
@@ -258,7 +259,7 @@ P_2=\frac{1}{2}+\frac{1}{\pi}\int_0^\infty\operatorname{Re}\left(\frac{e^{-iu\lo
 
 Now we just have to find the appropriate characteristic function $\phi(\theta;u,t)$ in order to evaluate the integrals in eqs.\eqref{P1} and \eqref{P2} and find the option price with eq.\eqref{CH}. In the original article, Heston derived this very characteristic function~\cite{Heston} but it presented some discontinuities for large maturities and wasn't easily derivable. These shortcomings led some other authors to propose several modified versions of this function. Most recently, Cui \textit{et al.}~\citep{Cui} presented a characteristic function that not only doesn't have the previously mentioned discontinuities but is also easily derivable, given by
 \begin{equation}
-\phi(\theta;u,t)=\exp\left\{iu\left(\log S_0+rt\right)-\frac{t\kappa\overline{\nu}\rho iu}{\chi}-\nu_0A+\frac{2\kappa\overline{\nu}}{\chi^2}D\right\},
+\phi(\theta;u,t)=\exp\left\{iu\left(\log S(0)+rt\right)-\frac{t\kappa\overline{\nu}\rho iu}{\eta}-\nu_0A+\frac{2\kappa\overline{\nu}}{\eta^2}D\right\},
 \end{equation}
 \noindent with $A$ and $D$ given by
 \begin{equation}
@@ -275,16 +276,16 @@ A_1=(u^2+iu)\sinh\frac{dt}{2},
 A_2=e^{dt/2}\left(\frac{d+\xi}{2}+\frac{d-\xi}{2}e^{-dt}\right),
 \end{equation}
 \begin{equation}
-d=\sqrt{\xi^2+\chi^2(u^2+iu)},
+d=\sqrt{\xi^2+\eta^2(u^2+iu)},
 \end{equation}
 \begin{equation}
-\xi=\kappa-\chi\rho iu.
+\xi=\kappa-\eta\rho iu.
 \end{equation}
 
 With this result, the calibration of the Heston model can be easily processed. We simply have to find the model parameters $\theta$ that minimize the difference between the model generated option prices, $C_H(\theta;K,T)$, and the market prices, $\overline{C}$. This calibration will be explored in detail in the next sections.
 
 \iffalse
-Calibrating the parameters  $\rho$, $\kappa$, $\overline{\nu}$ and $\chi$ is absolutely critical. A model with badly calibrated parameters would output wrong predictions, rendering it completely useless.
+Calibrating the parameters  $\rho$, $\kappa$, $\overline{\nu}$ and $\eta$ is absolutely critical. A model with badly calibrated parameters would output wrong predictions, rendering it completely useless.
 This calibration requires a fair amount of past market data and is by far the most complex and computationally demanding section of this model. We will deal with it in the next section.
 \fi
 
@@ -301,17 +302,17 @@ dF=\sigma F^\beta dW_1,
 d\sigma=\nu\sigma dW_2,
 \end{equation}
 \noindent with $F$ being the forward price (related to the spot price $S$ by $F(t)=S(t)e^{r(T-t)}$).
-We further define $\alpha=\sigma(0)$ as the starting volatility, $f=F(0)=S_0e^{rT}$ as the starting forward price. Finally, as before, the two Brownian motion processes $W_1$ and $W_2$ have a correlation of $\rho$.
+We further define $\alpha=\sigma(0)$ as the starting volatility, $f=F(0)=S(0)e^{rT}$ as the starting forward price. Finally, as before, the two Brownian motion processes $W_1$ and $W_2$ have a correlation of $\rho$.
 
 \iffalse
 It should be noted that we are now using the \hl{forward measure}, so in eq.\eqref{dF} we use $F$, the \emph{forward price}, instead of the usual spot price $S$ from eq.  \ref{GBM}. These two quantities are related by $S(t)=e^{-r(T-t)}F(t)$, so we can easily obtain one from the other.
 \fi
 
 
-In the original article, the authors claim that $\beta$ can be fitted from historical market data, but usually investors choose this value arbitrarily, depending on the type of assets traded. Typical values used are $\beta=1$ (stochastic lognormal model), usually for foreign exchange options, $\beta=0$ (stochastic normal model), typical for interest rate options where forwards $f$ can be negative, and $\beta=0.5$ (stochastic CIR model), also common for interest rate options.
+In the original article, the authors claim that $\beta$ can be fitted from historical market data, but usually investors choose this value arbitrarily, depending on the type of assets traded. Typical values used are $\beta=1$ (stochastic lognormal model), usually for foreign exchange options, $\beta=0$ (stochastic normal model), typical for interest rate options where forwards $F(t)$ can be negative, and $\beta=0.5$ (stochastic CIR model), also common for interest rate options.
 
 One of the main reasons why SABR is so popular is due to the quasi-closed-form solutions that greatly simplify its calibration. With the corrections done by Oblój~\cite{Obloj} on Hagan's original formula, it can be shown that the implied volatilities of options priced under the SABR model are given by
-\begin{equation}
+\begin{equation}\label{sabr}
 \begin{split}
 \sigma_{SABR}(K,f,T)\approx&\frac{1}{\displaystyle\left[1+\frac{(1-\beta)^2}{24}\log^2\left(\frac{f}{K}\right)+\frac{(1-\beta)^4}{1920}\log^4\left(\frac{f}{K}\right)\right]}.\left(\frac{\nu\log\left(f/K\right)}{x(z)}\right)\\
 &.\left\{1+T\left[\frac{(1-\beta)^2}{24}\frac{\alpha^2}{(Kf)^{1-\beta}}+\frac{1}{4}\frac{\rho\beta\nu\alpha}{(Kf)^{(1-\beta)/2}}+\frac{2-3\rho^2}{24}\nu^2\right]\right\},
@@ -338,7 +339,7 @@ d\sigma=\nu(t)\sigma dW_2,
 \noindent with the correlation between $W_1$ and $W_2$ now given by $\rho(t)$.
 
 To calibrate this new model, Hagan \textit{et al.} derived again a quasi-closed-form solution for the implied volatility. Osajima later simplified this expression with asymptotic expansions~\cite{Osajima}. The resulting formula is given by
-\begin{equation}
+\begin{equation}\label{dynsabr}
 \sigma_{DynSABR}(K,f,T)=\frac{1}{\omega}\left(1+A_1(T)\log\left(\frac{K}{f}\right)+A_2(T)\log^2\left(\frac{K}{f}\right)+B(T)T\right),
 \end{equation}
 \noindent where $\omega=f^{1-\beta}/\alpha$ and $A_1(T)$, $A_2(T)$ and $B(T)$ are given by

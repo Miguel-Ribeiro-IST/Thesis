@@ -29,7 +29,7 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
-x0=[8,0.05,0.08,-0.15,0.8];   %parameter starting values [kappa,nubar,nu0,rho,chi]
+x0=[5,0.05,0.05,-0.25,0.5];   %parameter starting values [kappa,nubar,nu0,rho,chi]
 
 optimvars=Optimizer(B,S0,r,x0);
 kappa=optimvars(1);
@@ -69,9 +69,10 @@ Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,P,M,iterations,matur)
 %M=number of simulated paths
 %iterations=number of repetitions of the simulations (to reduce error)
 %B=input data file
-%x0=optimization starting parameters 
+%x0=optimization starting parameters
 
 function result=HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,PriceVol)
+warning('off','all');
 F=S0.*exp(r.*T);
 fun1=@(u)real(exp(-1i.*u.*log(K))./(1i.*u.*F).*CharFuncHeston(u-1i,T,S0,r,kappa,nubar,nu0,rho,chi));
 fun2=@(u)real(exp(-1i.*u.*log(K))./(1i.*u).*CharFuncHeston(u,T,S0,r,kappa,nubar,nu0,rho,chi));
@@ -79,7 +80,7 @@ P1=1/2+1/pi.*integral(fun1,0,100);
 P2=1/2+1/pi.*integral(fun2,0,100);
 call=S0.*P1-exp(-r.*T).*K.*P2;
 if PriceVol=="price"
-result=call;
+    result=call;
 else
     volatility=@(sigma)european_bs(S0,K,r,sigma,T,"call")-call;
     result=fzero(volatility,0.25);  %Calculate the expected implied volatility
@@ -100,21 +101,29 @@ end
 
 %%%%%%%%%%%%%      DEFINE MINIMIZATION PROCEDURE      %%%%%%%%%%%%%%%
 function optimvars=Optimizer(P,S0,r,x0)
+warning('off','all');
 fun=@(var)Hestoncal(var(1),var(2),var(3),var(4),var(5),S0,P,r); %function to be optimized.
 %Hestoncal(kappa,nubar,nu0,rho,chi,S0,P,r)
 lb = [0.0001,0.0001,0.0001,-1,0.0001];       %parameter lower bounds
-ub = [10,2,2,1,2];    %parameter upper bounds
+ub = [25,3,3,1,5];    %parameter upper bounds
 
 
 %options = optimoptions('patternsearch','Display','off'); %procedure options
 %optimvars=patternsearch(fun,x0,[],[],[],[],lb,ub,@Feller_Condition,options); %define minimization procedure (patternsearch)
 %optimvars=patternsearch(fun,x0,[],[],[],[],lb,ub,options); %define minimization procedure (patternsearch)
 
-options = optimoptions('simulannealbnd','Display','off'); %procedure options
-optimvars=simulannealbnd(fun,x0,lb,ub,options); %define minimization procedure (patternsearch)
+%options = optimoptions('simulannealbnd','Display','off'); %procedure options
+%optimvars=simulannealbnd(fun,x0,lb,ub,options); %define minimization procedure (patternsearch)
+
+rng default % For reproducibility
+opts = optimoptions(@fmincon,'Display','off','Algorithm','sqp');
+problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts);
+%ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds','Display','off');
+ms = GlobalSearch('StartPointsToRun','bounds','Display','off');
+[optimvars,f] = run(ms,problem);
 
 %print optimization output
-fprintf(strcat("kappa=",strcat(num2str(optimvars(1)),strcat(",    nubar=",strcat(num2str(optimvars(2)),strcat(",    nu0=",strcat(num2str(optimvars(3)),strcat(strcat(strcat(",    rho=",num2str(optimvars(4))),(strcat(",    chi=",num2str(optimvars(5))))),strcat("\nerror=",strcat(num2str(Hestoncal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),S0,P,r)),"\n"))))))))));
+fprintf(strcat("kappa=",strcat(num2str(optimvars(1)),strcat(",    nubar=",strcat(num2str(optimvars(2)),strcat(",    nu0=",strcat(num2str(optimvars(3)),strcat(strcat(strcat(",    rho=",num2str(optimvars(4))),(strcat(",    chi=",num2str(optimvars(5))))),strcat("\nerror=",strcat(num2str(f),"\n"))))))))));
 end
 
 function [c, ceq] = Feller_Condition(var)
@@ -123,7 +132,7 @@ ceq = [];
 end
 
 
-   
+
 %%%  CALCULATE LEAST SQUARES ERROR BETWEEN MODEL AND DATA  IMPLIED VOL  %%%
 function Total_Error=Hestoncal(kappa,nubar,nu0,rho,chi,S0,P,r)
 LS=0;
@@ -132,7 +141,7 @@ for i=1:size(P,1)
     %Function sigmaSABR outputs the error between model and data implied
     %volatilities using the original Hagan formula
     %LS=LS+((P(i,3)-HestonPrice(P(i,2),P(i,1),S0,r,kappa,nubar,nu0,rho,chi,"price"))^2);
-    LS=LS+(((P(i,3)-HestonPrice(P(i,2),P(i,1),S0,r,kappa,nubar,nu0,rho,chi,"vol"))./P(i,3))^2);
+    LS=LS+(((P(i,3)-HestonPrice(P(i,2),P(i,1),S0,r,kappa,nubar,nu0,rho,chi,"vol"))./P(i,3)^2)^2);
     %sigmaSABR(alpha,rho,nu,beta,K,f,T)
 end
 Total_Error=LS;

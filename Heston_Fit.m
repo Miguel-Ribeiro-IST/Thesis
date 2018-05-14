@@ -18,6 +18,7 @@ B(:,2)=B(:,2)/S0;     %normalize strike prices
 S0=1;
 B(:,1)=B(:,1)/252;    %convert maturities from days to years
 times=unique(B(:,1));
+B=B(B(:,2)>=0.7 ,:);     %only keep values of the maturity
 %T=times(matur);       %selected maturity
 %B=B(B(:,1)==T,:);     %only keep values of the maturity
 %L = T*252*2;          %number of steps in simulations
@@ -29,9 +30,12 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
-x0=[5,0.05,0.05,-0.25,0.5];   %parameter starting values [kappa,nubar,nu0,rho,chi]
+x0=[5,0.05,0.08,-0.35,1.5];   %parameter starting values [kappa,nubar,nu0,rho,chi]
 
+tic
 optimvars=Optimizer(B,S0,r,x0);
+toc
+
 kappa=optimvars(1);
 nubar=optimvars(2);
 nu0=optimvars(3);
@@ -105,7 +109,7 @@ warning('off','all');
 fun=@(var)Hestoncal(var(1),var(2),var(3),var(4),var(5),S0,P,r); %function to be optimized.
 %Hestoncal(kappa,nubar,nu0,rho,chi,S0,P,r)
 lb = [0.0001,0.0001,0.0001,-1,0.0001];       %parameter lower bounds
-ub = [25,3,3,1,5];    %parameter upper bounds
+ub = [100,5,5,1,5];    %parameter upper bounds
 
 
 %options = optimoptions('patternsearch','Display','off'); %procedure options
@@ -117,10 +121,13 @@ ub = [25,3,3,1,5];    %parameter upper bounds
 
 rng default % For reproducibility
 opts = optimoptions(@fmincon,'Display','off','Algorithm','sqp');
+%problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts,'nonlcon',@Feller_Condition);
 problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts);
-%ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds','Display','off');
-ms = GlobalSearch('StartPointsToRun','bounds','Display','off');
-[optimvars,f] = run(ms,problem);
+
+ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds-ineqs','Display','off');
+[optimvars,f] = run(ms,problem,100);
+%ms = GlobalSearch('StartPointsToRun','bounds-ineqs','Display','off');
+%[optimvars,f] = run(ms,problem);
 
 %print optimization output
 fprintf(strcat("kappa=",strcat(num2str(optimvars(1)),strcat(",    nubar=",strcat(num2str(optimvars(2)),strcat(",    nu0=",strcat(num2str(optimvars(3)),strcat(strcat(strcat(",    rho=",num2str(optimvars(4))),(strcat(",    chi=",num2str(optimvars(5))))),strcat("\nerror=",strcat(num2str(f),"\n"))))))))));
@@ -141,7 +148,7 @@ for i=1:size(P,1)
     %Function sigmaSABR outputs the error between model and data implied
     %volatilities using the original Hagan formula
     %LS=LS+((P(i,3)-HestonPrice(P(i,2),P(i,1),S0,r,kappa,nubar,nu0,rho,chi,"price"))^2);
-    LS=LS+(((P(i,3)-HestonPrice(P(i,2),P(i,1),S0,r,kappa,nubar,nu0,rho,chi,"vol"))./P(i,3)^2)^2);
+    LS=LS+(((P(i,3)-HestonPrice(P(i,2),P(i,1),S0,r,kappa,nubar,nu0,rho,chi,"vol"))./P(i,3))^2);
     %sigmaSABR(alpha,rho,nu,beta,K,f,T)
 end
 Total_Error=LS;

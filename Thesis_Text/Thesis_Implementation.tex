@@ -76,13 +76,14 @@ Because it is more precise, the Milstein method will be used in the implementati
 
 
 \subsection{Pricing options from simulations}
+\hl{this should come before the discretization methods?}
 To price options, we generate $M$ paths by recursively calculating $S_i(t)$ (or $F_i(t)$ in the case of SABR), for $i=1,\ldots,M$, using either discretization method. When the stock price at the maturity is obtained (i.e. $S_i(T)$ or, in the case of SABR, $F_i(T)=S_i(T)$), the option payoff for each path is calculated from eq.\eqref{callput}. Discounting these values to the present, we obtain the (call) option value
 \begin{equation}
 C(K,T)=e^{-rT}\frac{1}{M}\sum_{i=1}^M\max\left(S_i(T)-K,0\right).
 \end{equation}
 
 It is important to note that, the smaller our subintervals $\Delta t$ are, the better our discretization methods replicate real Brownian motion processes. However, by decreasing $\Delta t$ we increase the number of intervals and with it the number of calculations needed to obtain each $S_i(T)$. The compromise between computation time and precision must be handled appropriately.
-
+ \hl{put some image here to exemplify the different time steps dt}
 
 
 
@@ -99,29 +100,59 @@ S(t+\Delta t)=S(t)+rS(t)\Delta t+\sqrt{\Delta t}\sigma S(t)N(0,1),
       \includegraphics[width=0.9\columnwidth]{GBM.eps}
       \caption{Example of three GBM processes, using the parameters $r=\SI{0.06}{\per\year}$, $\sigma=0.05$, $S(0)=\SI{1}[\EUR]{}$ and time steps $\Delta t=10^{-3}\SI{}{\year}$.}\label{fig:GBM}
     \end{figure}
-
-
-
-
     
 By simulating a large number of paths, some underlying tendencies might become apparent, which will prove useful in option pricing.
 
 
  American options, however, pose a much greater challenge.  Unlike European options, no analytic pricing model currently exists for this type of derivatives. Several numerical models have been proposed in the past in an attempt to solve this problem~\cite{Wilmott1,Hull}, such as the Longstaff-Schwartz algorithm~\citep{Longstaff}, which we shall approach in later sections of the present thesis.
 \fi 
+
+ 
+ 
  
 \section{Model Calibration}
 \label{section:Model Calibration}
-Both SABR and Heston stochastic volatility models contain variables that we need to calibrate in order to appropriately replicate market option prices.
+Both SABR and Heston stochastic volatility models contain variables that need to be calibrated in order to appropriately replicate market option prices.
 
-One possible method to calibrate these models is to start with some guess at each parameter's value and run the Monte Carlo algorithm, obtaining the option prices for some given maturities and strikes. We would then compare these prices with the market data and calculate the difference between them using some error measure (e.g. least-squares). We would then slightly modify each parameter individually, run the pricer again and check if the error decreases, accepting the parameter's new value in such a case.
-Though this methodology appears simple, there are two problems with it. First, it should be noted that the Monte Carlo algorithm may take quite some time to run, and has to be executed once for each parameter change. If our initial guess is far from the optimal parameters' values, too many steps are required and the optimizer would simply take too long to converge. Secondly, this algorithm may get stuck in some local minimum, and may not reach the global optimum. Some stochastic minimization procedures (e.g. simulated annealing) may be used in this case, but the computation times would increase further.
-
-This lengthy optimization method is required when no closed-form solutions exist for our model. The main reason why Heston and SABR are so popular is the fact that they do have closed-form solutions that we can rapidly calculate and use to minimize the difference between model and market option prices. These solutions are presented in eqs.\eqref{CH},\eqref{sabr} and \eqref{dynsabr}.
-Though the same local minimum problem may also occur with these formulas, because they are so easy to compute, we can apply a stochastic minimization procedure without increasing the computation times too greatly.
-
-Because our parameters are bounded, our minimization procedure should accept boundaries. It should also preferably be fast, though this is not the main concern in this work.
+Calibrating the models' parameters means we find the optimal values for these parameters such that difference between the prices of market options and options priced under the models' assumptions is minimized. This difference should be measured with a cost function such as
+\begin{equation}\label{cost}
+\mathrm{Cost}(\theta)=\sum_{i=1}^n\sum_{j=1}^m\left(\frac{C_{\mathrm{model}}(\theta,T_i,K_j)-C_{\mathrm{market}}(T_i,K_j)}{C_{\mathrm{market}}(T_i,K_j)}\right)^2,
+\end{equation}
+\noindent where we denote $\theta$ as the model's parameter set, $C_{\mathrm{model}}(\cdot)$ and $C_{\mathrm{market}}(\cdot)$ the model and market option prices, respectively, for maturities $T_i,(i=1,\ldots,n)$ and strikes $K_j,(j=1,\ldots,m)$.
 
 
+There are several possible algorithms to find the minimum value for the cost function shown in eq.\eqref{cost}. In general, most algorithms require some starting guess at the parameters' optimal values, $\theta'$, calculating then the cost function for these values, $\mathrm{Cost}(\theta')$. The initial values of the parameters are then slightly modified to some new values, $\theta^{*}$ and the cost function is recalculated, $\mathrm{Cost}(\theta^{*})$. If the error decreases after the modifications (i.e. $\mathrm{Cost}(\theta^{*})<\mathrm{Cost}(\theta')$), the new parameter values are assumed - otherwise they are discarded. This procedure is repeated until new changes in the parameters no longer decrease the cost function.
+\hl{put "Algorithm" here?}
+
+The main problem with this algorithm is the fact that the cost function may be nonlinear, meaning that it might present several local minima. This is problematic because the procedure will only progress in directions where the cost function gradient is negative. Thus, the optimizer will get stuck in these points and the global minimum will not be reached.
+The minimum found by the algorithm should then be heavily dependent on our initial starting point, which is very undesirable.
+Two possible workarounds exist around this problem: we could run the optimizer for several starting points until several (local) optima are found and choose the smallest one. We could also use stochastic optimization algorithms such as simulated annealing. With these, the optimizer usually follows the direction in which the cost function gradient is negative but there is a chance that a random new direction is chosen. Thus, if the optimizer gets stuck at a local minimum, it may be able to escape from it until, ideally, the global optimum is found.
+Both workarounds will be studied in chapter \ref{chapter:results}.
+
+
+The algorithm described before requires a very large number model pricer instances to be called. At each iteration, the pricer needs to run once for all maturities and strikes for which we have market data. This is problematic if the pricer takes too long to run and we should attempt to find ways to price options as fast as possible.
+
+To price options, we could
+
+
+One possible method to calibrate both Heston and SABR is to start with some initial guess at the parameters' values and run the Monte Carlo pricer, to obtain the option prices for the chosen parameters. We would then compare these model prices with those presented in the market and calculate the difference between them using some error measure, such as least-squares.
+
+We would then iteratively modify the initial values of the parameters, and run the pricer again for each new value, accepting those that reduce the error function and rejecting the others.
+Though this methodology appears simple, two potential problems can be pointed out. First, it should be noted that the Monte Carlo algorithm will take some time to run, and has to be executed once for each parameter change. A large number of steps may be required and the computation times add up, making the algorithm impractically slow. Secondly, the optimization algorithm may get stuck in some local minimum, not reaching the global optimum. Some stochastic optimization procedures (e.g. simulated annealing) may be used in this case, but the computation times would increase further.
+This optimization algorithm can be sped up using GPU implementation, as has been done by Fernandez \textit{et al.}~\cite{Fernandez} for the Heston model.
+
+\hl{globalsearch/multistart != stochastic optimization}
+
+
+The main reason why Heston and SABR are so popular is the fact that both models have closed-form solutions (shown in eqs.\eqref{CH},\eqref{sabr} and \eqref{dynsabr}) that we can rapidly calculate. These solutions enable us to directly price the model options without the need to run the slow Monte Carlo pricer. The optimization algorithm should then converge quite fast. In these cases, we can use stochastic optimization algorithms to reach the global optimum, without much concern for the increased computation times.
+
+Choosing the right stochastic optimization algorithm is important. Because our parameters are bounded,the chosen algorithm should accept parameter boundaries. It should also preferably be fast, though this is not the main concern in this work.
+
+\subsection{Optimization algorithms}
+\subsubsection{Global Search}
+
+\subsubsection{Stochastic Optimization (Simulated Annealing)}
+
+\subsection{Monte Carlo upgrades}
 
 To calibrate SABR, we can either follow the Monte-Carlo approach and simulate a large number of paths, assuming stochastic volatility with some starting parameters and minimizing the difference between model-generated prices and real-world option prices, or we can use eq. xxx to obtain the implied volatility and minimize the market implied volatility.

@@ -2,16 +2,16 @@
 \label{chapter:background}
 \section{Call and Put Options}
 As stated before, call and put options enable their buyer to respectively buy and sell the underlying stock at the maturity for the fixed strike price.
-In the case of a call option, if at the maturity the market price of its underlying asset is greater than the strike, investors can exercise the option and buy the asset for the fixed strike price. Then they can immediately go to the market and sell the asset for its higher value. Thus, in this case, the payoff of the option would be the difference between these two prices. On the other hand, if at the maturity the price of the asset decreases past the strike, the investor should let the option expire, since the asset is available in the market for a price lower than the strike. In this case, the payoff of the option would be zero.
+In the case of a call option, if at the maturity the market price of its underlying asset is greater than the strike, investors can exercise the option and buy the asset for the fixed lower strike price. They can then immediately go to the market and sell the asset for its higher value. Thus, in this case, the payoff of the option would be the difference between the asset's price and the option's strike price. On the other hand, if at the maturity the price of the asset decreases past the strike, the investor should let the option expire, since the asset is available in the market for a price lower than the strike. In this case, the payoff of the option would be zero.
 The same reasoning can be made for put type options.
 The payoff function of these two types of options can then simply be deduced as
 \begin{equation}\label{callput}
 \begin{split}
-&\text{Payoff}_\text{call}=\max\left(S(T)-K,0\right);\\
-&\text{Payoff}_\text{put}=\max\left(K-S(T),0\right),
+&\text{Payoff}_\text{call}(K,T)=\max\left(S(T)-K,0\right);\\
+&\text{Payoff}_\text{put}(K,T)=\max\left(K-S(T),0\right),
 \end{split}
 \end{equation}
-\noindent where $K$ is the strike price and $S(T)$ is the asset price, $S(t)$, at the maturity, $T$. These functions are represented in \autoref{fig:Payoff}.
+\noindent where $K$ is the option's strike price and $S(T)$ is the asset's price, $S(t)$, at the maturity, $T$. These functions are represented in \autoref{fig:Payoff}.
 
 \begin{figure}[!htb]
     \centering
@@ -26,7 +26,7 @@ With eqs.\eqref{callput} in mind, it should be clear that the value of these two
 &P(K,T)=e^{-rT}\mathbb{E}\left[\max\left(K-S(T),0\right)\right]=e^{-rT}\mathbb{E}\left[\left(K-S(T)\right)\mathbbm{1}_{\left\{S(T)<K\right\}}\right],
 \end{split}
 \end{equation}
-\noindent with $C(K,T)$ and $P(K,T)$ being the values of call and put options, respectively, and with $\mathbb{E}[\cdot]$, $\mathbbm{1}_{\{\cdot\}}$ corresponding to the expected value and indicator functions, respectively.
+\noindent with $C(K,T)$ and $P(K,T)$ being the values of call and put options, respectively, and with $\mathbb{E}[\cdot]$, $\mathbbm{1}_{\{\cdot\}}$ corresponding to the expected value and indicator functions, respectively. The parameter $r$ denotes the risk-free interest rate, which we will describe in the next subsection.
 
 
 
@@ -47,11 +47,11 @@ This model states that the price of an European call or put option, whose underl
 
 \hl{underlying asset=stocks}
  
-The risk-free interest rate, $r$, is the interest an investor would receive from any risk-free investment (e.g. treasury bills). An investor should never invest in risky products whose expected return is lower than this interest, since there's the alternative of obtaining a higher payoff without the disadvantage of taking risks. In general, this rate changes slightly with time and is unknown, but Black \textit{et al.}, in their original model (eq.\eqref{BS2}), assumed that it remains constant throughout the option's duration and that it is known. Some later developments dealt with this shortcoming, providing models to replicate the behavior of interest rates~\cite{HJM}, but because option prices do not significantly depend on this value~\cite{Wilmott3}, in the remainder of this thesis we shall assume it is constant and known.
+The risk-free interest rate, $r$, is the interest an investor would receive from any risk-free investment (e.g. treasury bills). An investor should never invest in risky products whose expected return is lower than this interest, since there's the alternative of obtaining a higher (expected) payoff without the disadvantage of taking risks. In general, this rate changes slightly with time and is unknown, but Black \textit{et al.}, in their original model (eq.\eqref{BS2}), assumed that it remains constant throughout the option's duration and that it is known. Some later developments dealt with this shortcoming, providing models to replicate the behavior of interest rates~\cite{HJM}, but because option prices do not significantly depend on this value~\cite{Wilmott3}, in the remainder of this thesis we shall make the same assumptions as Black \textit{et al.}
 
-Finally, the volatility, $\sigma$, is a measure of uncertainty and will be studied in more detail in section \ref{section:volatility}.
+Finally, the stock price volatility, $\sigma$, is a measure of uncertainty and will be studied in more detail in section \ref{section:volatility}.
 
-One important assumption of the Black-Scholes-Merton model is that stock prices follow a stochastic process, known as Geometric Brownian Motion (GBM), which can be defined as
+One important assumption of the Black-Scholes-Merton model is that stock prices follow a stochastic process, known as Geometric Brownian Motion, which can be defined as
 \begin{equation}\label{GBM}
 dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \end{equation}
@@ -125,7 +125,7 @@ The reason behind this odd market behavior is related to the simple demand-suppl
     \subfigure[Smile]{\includegraphics[height=0.20\linewidth]{Smile.png}}
     \subfigure[Skew]{\includegraphics[height=0.20\linewidth]{Skew.png}}
   \end{subfigmatrix}
-  \caption[Example of an implied volatility smile (left) and skew (right).]{Example of an implied volatility smile and skew.\hl{source=Hull}}
+  \caption[Example of an implied volatility smile and skew.]{Example of an implied volatility smile (left) and skew (right).\hl{source=Hull}}
   \label{fig:smileskew}
 \end{figure}
 

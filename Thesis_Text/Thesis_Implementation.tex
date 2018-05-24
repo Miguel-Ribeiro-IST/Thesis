@@ -173,12 +173,42 @@ Generate $\theta_{0,i},\ \ i=1,\ldots,N$\tcc*[r]{Multiple starting points}
 One of the advantages of this algorithm is the fact that, because each simple algorithm execution is independent of the others (assuming no meta-heuristics are used), we can perform them in parallel, further increasing convergence speed.
 As a disadvantage, we can point out the fact that, for functions with too many local minima, a large number of simple algorithm runs may be required, decreasing the calibration speed.
 
+\hl{we need to select a number of initial samples}
+
 \hl{this function is in MATLAB}
 
 \subsubsection{CMA-ES Optimizer}
-The CMA-ES optimizer belongs to the class of evolutionary algorithms. These methods are based on the principle of biological evolution: at each iteration of the algorithm (generation), new candidate solutions (individuals) are generated from a given random distribution (mutation) obtained using the data of the previous solutions (parents). Of these newly generated solutions (individuals), we select the ones where the cost function is minimized (with the best fitness) to generate the candidate solutions of the next iterations (become parents of the next generations) and reject the others.
+The CMA-ES optimizer belongs to the class of evolutionary algorithms. These methods are based on the principle of biological evolution: at each iteration (generation), new candidate solutions (individuals) are generated from a given random distribution (mutation) obtained using the data (genes) of the previous solutions (parents). Of these newly generated solutions (individuals), we select the ones where the cost function is minimized (with the best fitness) to generate the candidate solutions of the next iterations (to become the parents of the next generation) and reject the others.
 
-As for the CMA-ES in particular, the algorithm iteratively generates a multivariate normal distribution, modifying its mean and covariance matrix at each step.
+
+
+As for the CMA-ES in particular, the algorithm takes $\lambda$ samples from a multivariate normal distribution in the sample space
+\begin{equation}
+N(\mathbf{x;m,C})=\frac{1}{\sqrt{(2\pi)^D|\mathrm{det}\mathbf{C}|}}\mathrm{exp}\left(-\frac{1}{2}(\mathbf{x}-\mathbf{m})^T\mathbf{C}^{-1}(\mathbf{x}-\mathbf{m})\right),
+\end{equation}
+\noindent where $\mathbf{m}$ and $\mathbf{C}$ correspond to the distribution's mean vector and covariance matrix and $D$ is the number of dimensions of the distribution (i.e. number of parameters).
+These $\lambda$ samples will be our candidate solutions.
+
+We classify each of these points according to their fitness (i.e. the cost function's value for a given point). We then select the $\mu$ samples with the lowest cost, discarding the others. These new points will be the parents of the next generation.
+
+With these $\mu$ points, we generate a new mean and covariance matrix for the multivariate normal distribution. The new mean is produced from a weighted average of the points, with the weights proportional to each point's fitness.
+The method for the covariance matrix generation is rather complex and depends not only on the $\mu$ best samples but also on the values of previous covariance matrices. Because giving a detailed overview of the CMA algorithm is not in the scope of this thesis, we do not provide all the necessary equations for the covariance matrix generation. For a more detailed explanation see Hansen \cite{Hansen}.
+\hl{include equations? in appendix?}
+
+
+This process is repeated until a given stopping criterion is met.
+
+The number of candidate solutions generated at each step, $\lambda$, and the ones that remain after classification, $\mu$, can be chosen at will, but an appropriate heuristic is to choose $\lambda=\left\lfloor4+3\log D\right\rfloor+1$ and $\mu=\left\lfloor\lambda/2\right\rfloor+1$.
+
+The complexity of the covariance matrix generation method makes CMA a very fast and robust optimization algorithm, enabling it to find the global optimum of functions with many local minima~\cite{DilaoCMA}.
+Furthermore, one of the advantages of this method is the fact that it is almost parameter free. We only need to provide an initial guess for the creation of the first mean vector and covariance matrix and the algorithm converges to a solution.
+As for disadvantages, there may be cases where the convergence of this algorithm is slow, and the Multi-Start may be used as an alternative when a fast convergence is required.
+
+
+\iffalse
+ at each iteration we generate $\lambda$ new candidate solutions, keeping only the best $\mu$ of those for the next iteration.
+
+the algorithm iteratively generates a multivariate normal distribution, modifying its mean and covariance matrix at each step.
 
 We start with a $D$-dimensional normal distribution, centered around an initial guess $\theta^{(0)}$ (obtained \textit{a priori}), with a unit covariance matrix $C$ (i.e. $C=I$, the identity matrix), where $D$ denotes the number of variables of the selected model.
 
@@ -187,93 +217,7 @@ We then take $M$ samples from this distribution: $\theta^{(1)}_i\ i=1,\ldots,M$,
 A new normal distribution is then created. Its mean is calculated from a weighted average of the remaining $N$ points, with each weight inversely proportional to the point's cost. The covariance matrix is also generated from the remaining weighted $N$ points. However, to produce a faster convergence, the matrices from previous iterations are used additionally, i.e. we give some weight to the matrix generated from the selected points but we grant also weight to the previous matrices, assigning more weight to the most recent.
 
 The previous steps are repeated for a number of iterations.
-
-\hl{this algorithm finds the global optimum}
-
-\hl{empirical rules to choose M, N, etc for CMA-ES}
-
-
-\hl{citar Dilao} \cite{DilaoCMA}
-
-
-
-
-
-\iffalse
-\subsubsection{Polling Optimizer}
-This powerful optimizer uses an adaptive mesh to find the minimum value of a function.
-The algorithm starts at the provided initial guess $\theta_0=\left[\theta_{0,1},\ldots,\theta_{0,D}\right]$, where $D$ corresponds to the number of parameters. The cost function, $\mathrm{Cost}(\theta_0)$, is calculated for this point.
-
-The algorithm then proceeds to generate $2D$ new points in the neighborhood of this initial point, where a displacement $\Delta\theta_i$ is added/subtracted to the initial point
-\begin{equation}
-\theta'_{i,\pm}=\theta_0\pm\left[0,\ldots,\Delta\theta_i,\ldots,0\right],\ \ \ i=1,\ldots,D,
-\end{equation}
-\noindent where, for simplicity, $\theta'_{i,\pm}$ denotes both $\theta'_{i,+}$ and $\theta'_{i,-}$.
-
-The cost function is calculated for all these new points, $\mathrm{Cost}(\theta'_{i,\pm})$. If any of them have a lower cost than the original point, $\mathrm{Cost}(\theta_0)$, the point with the lowest cost function is accepted and the polling restarts i.e. we generate again $2D$ new points centered around this optimal point.
-
-We repeat the previous step until all the $2D$ generated points present a higher cost function. When this happens, the displacement is reduced to half its value, $\Delta\theta_i/2$ and we restart the polling procedure for the optimal point found before.
-
-The optimization stops when the cost of any of the generated points decreases past a threshold.
-
-This method is systematized in Algorithm \ref{PolOpt}.
-
-\begin{algorithm}[H]\label{PolOpt}
-\DontPrintSemicolon
- Define $\theta=\theta_0=\left[\theta_{0,1},\ldots,\theta_{0,D}\right]$\tcc*[r]{Initial guess}
- \While{$\mathrm{Cost}(\theta)>\mathrm{Threshold}$}{
- Calculate $\mathrm{Cost}(\theta)$\;
- \For{i=1,\ldots,D}{ 
- Generate $\theta_{i,\pm}=\theta\pm\left[0,\ldots,\Delta\theta_i,\ldots,0\right]$\;
- Calculate $\mathrm{Cost}(\theta_{i,\pm})$\;
- }
- \eIf{$\mathrm{Cost}(\theta_{i,\pm})<\mathrm{Cost}(\theta),\ \ \forall\theta_{i,\pm}$}
- {$\theta=\underset{\theta_{i,\pm}}{\arg\min}\left\{\mathrm{Cost}(\theta_{i,\pm})\right\}$}
- {$\Delta\theta_i=\Delta\theta_i/2$}
- }
- Optimal parameters: $\theta^{*}=\theta$\;
- \caption{Deterministic Optimizer}
-\end{algorithm}
-\ 
-
-
-
-In general, most procedures require some initial guess at the parameters' optimal values, $\theta_0$. The cost function for these values, $\mathrm{Cost}(\theta)$, is calculated. A new parameter vector, $\theta'$, is then generated in the neighborhood of the starting point and the cost function is recalculated, $\mathrm{Cost}(\theta')$. If the error decreases with this new vector (i.e. $\mathrm{Cost}(\theta')<\mathrm{Cost}(\theta)$), the new parameter values are assumed - otherwise they are discarded. This procedure is repeated until the cost function decreases below a threshold.
-This algorithm is called deterministic because if we run the optimization twice with the same initial guess, the minima found in both instances will be the same.
-
-
-
-
-
-
-%Two possible alternative optimizers exist to avoid this problem, which we will refer to as \emph{multi-start optimizer} and \emph{stochastic optimizer}.
-
-
-
-
-\subsubsection{Simulated Annealing Optimizer}
-As for the simulated annealing optimizer, the algorithm  starts with the initial guess, $\theta_0$, and calculates its cost function $\mathrm{Cost}(\theta)$. A new vector, $theta'$, is picked in the neighborhood of the first and its cost function, $\mathrm{Cost}(\theta')$, is calculated. 
-There is a chance, defined by an acceptance probability function $P(\mathrm{Cost}(\theta),\mathrm{Cost}(\theta'))$, that the new vector is accepted, even if the cost function increases.
-If this chance does not occur, the algorithm remains in the same point. 
-
-The advantage of this optimizer is the fact that if the algorithm gets stuck at a local minimum, it may be able to escape from it until, ideally, the global optimum is found. An appropriate acceptance probability function must be found for the optimization.
-
-This method is represented in Algorithm \ref{StochOpt}.
-
-\begin{algorithm}[H]\label{StochOpt}
-\DontPrintSemicolon
- Define $\theta=\theta_0$\tcc*[r]{Initial guess}
- \While{$\mathrm{Cost}(\theta)>\mathrm{Threshold}$}{
- Generate $\theta'$\tcc*[r]{New parameter vector}
-  \If(\tcc*[f]{Acceptance Probability Function}){$P(\mathrm{Cost}(\theta),\mathrm{Cost}(\theta'))<\mathrm{random}(0,1)$}{Set $\theta=\theta'$\;}  
- }
- Optimal parameters: $\theta^{*}=\theta$\;
- \caption{Stochastic Optimizer}
-\end{algorithm}
-\ 
 \fi
-
-
 
 
 

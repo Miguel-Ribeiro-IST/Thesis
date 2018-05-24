@@ -9,9 +9,9 @@ S0=17099.4;        %initial stock price
 r = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
                    %If matur=5, all maturities until the fifth maturity in the file are chosen.
-M=100000;           %number of paths to be simulated
-iterations=3/;     %number of repetitions to be simulated (and then averaged)
-sigmamax=5;        %maximum value the local volatility can take
+M=10000;           %number of paths to be simulated
+iterations=5;      %number of repetitions to be simulated (and then averaged)
+sigmamax=2;        %maximum value the local volatility can take
 
 
 %%%%%%%%%%%%%      ORIGINAL DATA MODIFICATIONS     %%%%%%%%%%%%
@@ -28,11 +28,11 @@ MaxK=1.70;          %minimum value for strike in the mesh grid
 dT=10.5/252;        %mesh grid size w.r.t. maturity
 dK=0.05*S0;         %mesh grid size w.r.t. strike
 
-tic
+
 interpol=Dupire(S0,r,B,MinT,MaxT,dT,MinK,MaxK,dK);
 
 Plotter(S0,r,B,M,iterations,matur,sigmamax,interpol)
-toc
+
 
 %%%%%%%%%%%%%%%%%%%%%    PLOT INTERPOLATION RESULTS    %%%%%%%%%%%%%%%%%%%%
 function Plotter(S0,r,B,M,iterations,matur,sigmamax,interpol)

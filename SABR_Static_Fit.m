@@ -7,11 +7,11 @@ B=A.data(:,:);
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;        %initial stock price
 r = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
-matur=2;           %maturity at which we want to fit the data. If matur=5, the fifth maturity in the file is chosen.
-M=50000;           %number of paths to be simulated
-iterations=10;     %number of repetitions to be simulated (and then averaged)
+matur=4;           %maturity at which we want to fit the data. If matur=5, the fifth maturity in the file is chosen.
+M=100;           %number of paths to be simulated
+iterations=5;     %number of repetitions to be simulated (and then averaged)
 beta=0.5;          %parameter of the SABR model
-
+OptMethod="MultiStart6 ";
 
 %%%%%%%%%%%%%      ORIGINAL DATA MODIFICATIONS     %%%%%%%%%%%%
 B(:,2)=B(:,2)/S0;     %normalize strike prices
@@ -25,14 +25,14 @@ L = T*252*2;          %number of steps in simulations
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
 x0=[0.5,-0.5,0.5];   %parameter starting values [alpha, rho, nu]
-optimvars=Optimizer(beta,S0,B,r,x0);  %Obtain optimization variables
+optimvars=Optimizer(beta,S0,B,r,x0,OptMethod);  %Obtain optimization variables
 alpha=optimvars(1);
 rho=optimvars(2);
 nu=optimvars(3);
 
 %Plot optimization results
-Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B)
-
+Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B,OptMethod)
+beep
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%       FUNCTIONS       %%%%%%%%%%%%%%%%%%%%%%%
@@ -51,23 +51,43 @@ Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B)
 %x0=optimization starting parameters
 
 %%%%%%%%%%%%%      DEFINE MINIMIZATION PROCEDURE      %%%%%%%%%%%%%%%
-function optimvars=Optimizer(beta,S0,B,r,x0)
+function optimvars=Optimizer(beta,S0,B,r,x0,MultiStoch)
 fun=@(var)SABRcal(var(1),var(2),var(3),beta,S0,B,r); %function to be optimized.
 %alpha=var(1), rho=var(2), nu=var(3);
 %SABRcal(alpha,rho,nu,beta,S0,B,r)
 lb = [0,-1,0];       %parameter lower bounds
-ub = [Inf,1,Inf];    %parameter upper bounds
+ub = [2,1,5];    %parameter upper bounds
 
-options = optimoptions('patternsearch','Display','off'); %procedure options
-optimvars=patternsearch(fun,x0,[],[],[],[],lb,ub,[],options); %define minimization procedure (patternsearch)
+if MultiStoch=="SimAnn"
+    options = optimoptions('simulannealbnd','Display','off'); %procedure options
+    optimvars=simulannealbnd(fun,x0,lb,ub,options); %define minimization procedure (simulated annealing)
+    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),beta,S0,B,r);
+    
+elseif MultiStoch=="MultiStart"
+    rng default % For reproducibility
+    opts = optimoptions(@fmincon,'Display','off','Algorithm','sqp');
+    %problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts,'nonlcon',@Feller_Condition);
+    
+    problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts);
+    
+    ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds-ineqs','Display','off');
+    [optimvars,f] = run(ms,problem,500);
+    %ms = GlobalSearch('StartPointsToRun','bounds-ineqs','Display','off');
+    %[optimvars,f] = run(ms,problem);
+    
+elseif MultiStoch=="PatternSearch"
+    options = optimoptions('patternsearch','Display','off'); %procedure options
+    optimvars=patternsearch(fun,x0,[],[],[],[],lb,ub,[],options); %define minimization procedure (patternsearch)
+    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),beta,S0,B,r);
+end
 
 %print optimization output
-fprintf(strcat("alpha=",strcat(num2str(optimvars(1)),strcat(",    rho=",strcat(num2str(optimvars(2)),strcat(",    nu=",strcat(num2str(optimvars(3)),strcat("\nerror=",strcat(num2str(SABRcal(optimvars(1),optimvars(2),optimvars(3),beta,S0,B,r)),"\n")))))))));
+fprintf(strcat("alpha=",strcat(num2str(optimvars(1)),strcat(",    rho=",strcat(num2str(optimvars(2)),strcat(",    nu=",strcat(num2str(optimvars(3)),strcat("\nerror=",strcat(num2str(f),"\n")))))))));
 end
 
 
 %%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
-function Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B)
+function Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B,OptMethod)
 for i=1:size(B,1)
     P(i)=european_bs(S0,B(i,2),r,B(i,3),B(i,1),"call");  %obtain the BS price from each of the data's implied volatilities
     %european_bs(S0,K,r,sigma0,T,putcall)
@@ -93,8 +113,9 @@ scatter(ax2,B(:,2),P(:),'.');
 hold on;
 scatter(ax2,B(:,2),Price(:),'x');
 
+
 %Show fit results in plot titles
-text=strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(", paths=",num2str(M))),strcat(", iterations=",num2str(iterations))),strcat(", maturity=",num2str(T*252)));
+text=strcat(strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(", paths=",num2str(M))),strcat(", iterations=",num2str(iterations))),strcat(", maturity=",num2str(T*252))),strcat(", method=",OptMethod));
 text2=strcat(strcat(strcat("\alpha=",num2str(alpha)),strcat(", \rho=",num2str(rho))),strcat(", \nu=",num2str(nu)));
 title(ax1,{text,'Volatilities'})
 title(ax2,{text2,'Prices'})
@@ -108,7 +129,7 @@ for i=1:size(B,1)
     %LS is the least squares error
     %Function sigmaSABR outputs the error between model and data implied
     %volatilities using the original Hagan formula
-    LS=LS+((B(i,3)-sigmaSABR(alpha,rho,nu,beta,B(i,2),S0*exp(r*B(i,1)),B(i,1)))^2);
+    LS=LS+(((B(i,3)-sigmaSABR(alpha,rho,nu,beta,B(i,2),S0*exp(r*B(i,1)),B(i,1)))./B(i,3))^2);
     %sigmaSABR(alpha,rho,nu,beta,K,f,T)
 end
 Total_Error=LS;

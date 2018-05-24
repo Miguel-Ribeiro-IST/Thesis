@@ -12,11 +12,12 @@ r = 0.06;
 matur=4;           %maturity until which we want to fit the data.
 %If matur=5, all maturities until the fifth maturity in the file are chosen.
 
+
+beta=0.5;
+OptAlg="CMA"; %PatternSearch GeneticAlgorithm SimulatedAnnealing MultiStart
+SimPoints=false;
 M=100;
 iterations=1;
-beta=0.5;
-OptAlg="MultiStart"; %PatternSearch GeneticAlgorithm SimulatedAnnealing MultiStart
-SimPoints=false;
 
 
 B(:,2)=B(:,2)/S0;
@@ -35,7 +36,7 @@ a=optimvars(4);
 b=optimvars(5);
 
 
-Plotter(alpha,rho0,nu0,a,b,beta,S0,r,B,M,iterations,matur,SimPoints)
+Plotter(alpha,rho0,nu0,a,b,beta,S0,r,B,M,iterations,matur,SimPoints,OptAlg)
 
 
 
@@ -59,7 +60,7 @@ elseif OptAlg=="MultiStart"
     problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts);
     
     ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds-ineqs','Display','off');
-    [optimvars,f] = run(ms,problem,10);
+    [optimvars,f] = run(ms,problem,25);
     %ms = GlobalSearch('StartPointsToRun','bounds-ineqs','Display','off');
     %[optimvars,f] = run(ms,problem);
     
@@ -83,7 +84,7 @@ fprintf(strcat(strcat(strcat("alpha=",strcat(num2str(optimvars(1)),strcat(",    
 end
 
 
-function Plotter(alpha,rho0,nu0,a,b,beta,S0,r,B,M,iterations,matur)
+function Plotter(alpha,rho0,nu0,a,b,beta,S0,r,B,M,iterations,matur,SimPoints,OptAlg)
 figure
 times=unique(B(:,1));
 for iter=1:matur
@@ -94,22 +95,28 @@ for iter=1:matur
     
     SABRVol=@(K)sigmaSABR(alpha,rho0,nu0,a,b,beta,K,S0*exp(r*T),T);
     
+    if SimPoints
     for i=1:size(C,1)
         Volatility(i)= Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,C(i,1),iterations,"vol");
     end
-    
-    scatter(ax(iter),C(:,1),C(:,2),'.');
-    hold on;
     scatter(ax(iter),C(:,1),Volatility(:),'x');
     hold on;
+    end
+    scatter(ax(iter),C(:,1),C(:,2),'.');
+    hold on;
+
     fplot(ax(iter),SABRVol,[min(C(:,1)) max(C(:,1))])
     hold on;
     title(ax(iter),strcat(strcat(strcat(num2str(T*252)," days  ("),num2str(T*252/21))," months)"))
     clear Volatility
 end
 text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
-vars1=strcat(strcat(strcat("\beta=",num2str(beta)),strcat(",  paths=",num2str(M))),strcat(",  iterations=",num2str(iterations)));
-text2=strcat(strcat(strcat(num2str(times(2)*252)," days  ("),num2str(times(2)*252/21))," months)");
+if SimPoints
+    vars1=strcat(strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(",  paths=",num2str(M))),strcat(",  iterations=",num2str(iterations))),",  method="),OptAlg);
+else
+    vars1=strcat(strcat("\beta=",num2str(beta)),strcat(",  method=",OptAlg));
+end
+    text2=strcat(strcat(strcat(num2str(times(2)*252)," days  ("),num2str(times(2)*252/21))," months)");
 vars2=strcat(strcat(strcat(strcat(strcat(strcat(strcat("\alpha=",num2str(alpha)),strcat(",  \rho_0=",num2str(rho0))),strcat(",  \nu_0=",num2str(nu0))),",  a="),num2str(a)),",  b="),num2str(b));
 title(ax(1),{vars1,text1})
 title(ax(2),{vars2,text2})

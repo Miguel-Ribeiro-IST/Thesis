@@ -8,10 +8,16 @@ B=A.data(:,:);
 S0=17099.4;        %initial stock price
 r = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity at which we want to fit the data. If matur=5, the fifth maturity in the file is chosen.
-M=100;           %number of paths to be simulated
-iterations=5;     %number of repetitions to be simulated (and then averaged)
 beta=0.5;          %parameter of the SABR model
-OptMethod="MultiStart6 ";
+OptMethod="CMA";
+SimPoints=false;
+ShowPrices=false;
+x0=[0.5,-0.5,0.5];   %parameter starting values [alpha, rho, nu]
+lb = [0,-1,0];       %parameter lower bounds
+ub = [2,1,5];    %parameter upper bounds
+M=1000;           %number of paths to be simulated
+iterations=5;     %number of repetitions to be simulated (and then averaged)
+
 
 %%%%%%%%%%%%%      ORIGINAL DATA MODIFICATIONS     %%%%%%%%%%%%
 B(:,2)=B(:,2)/S0;     %normalize strike prices
@@ -23,16 +29,19 @@ B=B(B(:,1)==T,:);     %only keep values of the maturity
 L = T*252*2;          %number of steps in simulations
 
 
+
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
-x0=[0.5,-0.5,0.5];   %parameter starting values [alpha, rho, nu]
-optimvars=Optimizer(beta,S0,B,r,x0,OptMethod);  %Obtain optimization variables
+%%{
+
+optimvars=Optimizer(beta,S0,B,r,x0,OptMethod,lb,ub);  %Obtain optimization variables
 alpha=optimvars(1);
 rho=optimvars(2);
 nu=optimvars(3);
 
 %Plot optimization results
-Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B,OptMethod)
+Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B,OptMethod,SimPoints,ShowPrices)
 beep
+%}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%       FUNCTIONS       %%%%%%%%%%%%%%%%%%%%%%%
@@ -51,14 +60,12 @@ beep
 %x0=optimization starting parameters
 
 %%%%%%%%%%%%%      DEFINE MINIMIZATION PROCEDURE      %%%%%%%%%%%%%%%
-function optimvars=Optimizer(beta,S0,B,r,x0,MultiStoch)
+function optimvars=Optimizer(beta,S0,B,r,x0,MultiStoch,lb,ub)
 fun=@(var)SABRcal(var(1),var(2),var(3),beta,S0,B,r); %function to be optimized.
 %alpha=var(1), rho=var(2), nu=var(3);
 %SABRcal(alpha,rho,nu,beta,S0,B,r)
-lb = [0,-1,0];       %parameter lower bounds
-ub = [2,1,5];    %parameter upper bounds
 
-if MultiStoch=="SimAnn"
+if MultiStoch=="SimulatedAnnealing"
     options = optimoptions('simulannealbnd','Display','off'); %procedure options
     optimvars=simulannealbnd(fun,x0,lb,ub,options); %define minimization procedure (simulated annealing)
     f=SABRcal(optimvars(1),optimvars(2),optimvars(3),beta,S0,B,r);
@@ -71,13 +78,18 @@ elseif MultiStoch=="MultiStart"
     problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts);
     
     ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds-ineqs','Display','off');
-    [optimvars,f] = run(ms,problem,500);
+    optimvars = run(ms,problem,10);
     %ms = GlobalSearch('StartPointsToRun','bounds-ineqs','Display','off');
     %[optimvars,f] = run(ms,problem);
+    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),beta,S0,B,r);
     
 elseif MultiStoch=="PatternSearch"
     options = optimoptions('patternsearch','Display','off'); %procedure options
     optimvars=patternsearch(fun,x0,[],[],[],[],lb,ub,[],options); %define minimization procedure (patternsearch)
+    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),beta,S0,B,r);
+    
+elseif MultiStoch=="CMA"
+    optimvars=purecmaes(fun,x0);
     f=SABRcal(optimvars(1),optimvars(2),optimvars(3),beta,S0,B,r);
 end
 
@@ -87,38 +99,56 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
-function Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B,OptMethod)
-for i=1:size(B,1)
-    P(i)=european_bs(S0,B(i,2),r,B(i,3),B(i,1),"call");  %obtain the BS price from each of the data's implied volatilities
-    %european_bs(S0,K,r,sigma0,T,putcall)
-    
-    %Obtain Monte Carlo prices and implied volatilities
-    Price(i)=Pricer(alpha,rho,nu,beta,B(i,2),S0*exp(r*T),r,T,L,M,iterations,"price");
-    Volatility(i)=Pricer(alpha,rho,nu,beta,B(i,2),S0*exp(r*T),r,T,L,M,iterations,"vol");
-    %Pricer(alpha,rho,nu,beta,K,f,r,T,L,M,iterations,PriceVol)
+function Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B,OptMethod,SimPoints,ShowPrices)
+SABRVol=@(K)sigmaSABR(alpha,rho,nu,beta,K,S0*exp(r*T),T);   %SABR implied volatility as a function of K
+if SimPoints && ShowPrices
+    ax1 = subplot(1,2,1);
+else ax1 = subplot(1,1,1);
 end
 
-%Plot implied volatilities from data, from Monte-Carlo and the SABR implied volatility function
-SABRVol=@(K)sigmaSABR(alpha,rho,nu,beta,K,S0*exp(r*T),T);   %SABR implied volatility as a function of K
-ax1 = subplot(1,2,1);
 scatter(ax1,B(:,2),B(:,3),'.');
-hold on;
-scatter(ax1,B(:,2),Volatility(:),'x');
 hold on;
 fplot(ax1,SABRVol,[min(B(:,2)) max(B(:,2))],'k')
 
-%Plot prices from data and from Monte-Carlo
-ax2 = subplot(1,2,2);
-scatter(ax2,B(:,2),P(:),'.');
-hold on;
-scatter(ax2,B(:,2),Price(:),'x');
+
+if SimPoints
+    for i=1:size(B,1)
+        if ShowPrices
+            P(i)=european_bs(S0,B(i,2),r,B(i,3),B(i,1),"call");  %obtain the BS price from each of the data's implied volatilities
+            %european_bs(S0,K,r,sigma0,T,putcall)
+            %Obtain Monte Carlo prices and implied volatilities
+            Price(i)=Pricer(alpha,rho,nu,beta,B(i,2),S0*exp(r*T),r,T,L,M,iterations,"price");
+        end
+        
+        Volatility(i)=Pricer(alpha,rho,nu,beta,B(i,2),S0*exp(r*T),r,T,L,M,iterations,"vol");
+        %Pricer(alpha,rho,nu,beta,K,f,r,T,L,M,iterations,PriceVol)
+        %Plot prices from data and from Monte-Carlo
+    end
+    hold on;
+    scatter(ax1,B(:,2),Volatility(:),'x');
+    
+    if ShowPrices
+        ax2 = subplot(1,2,2);
+        scatter(ax2,B(:,2),P(:),'.');
+        hold on;
+        scatter(ax2,B(:,2),Price(:),'x');
+        
+        %Show fit results in plot titles
+        text=strcat(strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(", paths=",num2str(M))),strcat(", iterations=",num2str(iterations))),strcat(", maturity=",num2str(T*252))),strcat(", method=",OptMethod));
+        text2=strcat(strcat(strcat("\alpha=",num2str(alpha)),strcat(", \rho=",num2str(rho))),strcat(", \nu=",num2str(nu)));
+        title(ax1,{text,'Volatilities'})
+        title(ax2,{text2,'Prices'})
+    end
+else
+    text=strcat(strcat(strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(", paths=",num2str(M))),strcat(", iterations=",num2str(iterations))),strcat(", maturity=",num2str(T*252))),strcat(", method=",OptMethod)),strcat(strcat(strcat(", \alpha=",num2str(alpha)),strcat(", \rho=",num2str(rho))),strcat(", \nu=",num2str(nu))));
+    title(ax1,{text,'Volatilities'})
+end
+
+%Plot implied volatilities from data, from Monte-Carlo and the SABR implied volatility function
 
 
-%Show fit results in plot titles
-text=strcat(strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(", paths=",num2str(M))),strcat(", iterations=",num2str(iterations))),strcat(", maturity=",num2str(T*252))),strcat(", method=",OptMethod));
-text2=strcat(strcat(strcat("\alpha=",num2str(alpha)),strcat(", \rho=",num2str(rho))),strcat(", \nu=",num2str(nu)));
-title(ax1,{text,'Volatilities'})
-title(ax2,{text2,'Prices'})
+
+
 end
 
 
@@ -205,4 +235,97 @@ if putcall=="call"
 elseif putcall=="put"
     price = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
 end
+end
+
+
+
+function xmin=purecmaes(fun,x0)   % (mu/mu_w, lambda)-CMA-ES
+% --------------------  Initialization --------------------------------
+% User defined input parameters (need to be edited)
+%  fun=@(var)SABRcal(var(1),var(2),var(3),beta,S0,Data,r);
+%strfitnessfct = 'frosenbrock';  % name of objective/fitness function
+N = size(x0,2);               % number of objective variables/problem dimension
+%xmean = rand(N,1);    % objective variables initial point
+xmean=x0';
+sigma = 0.3;          % coordinate wise standard deviation (step size)
+stopfitness = 1e-10;  % stop if fitness < stopfitness (minimization)
+stopeval = 1e3*N^2;   % stop after stopeval number of function evaluations
+
+% Strategy parameter setting: Selection
+lambda = 4+floor(3*log(N));  % population size, offspring number
+mu = lambda/2;               % number of parents/points for recombination
+weights = log(mu+1/2)-log(1:mu)'; % muXone array for weighted recombination
+mu = floor(mu);
+weights = weights/sum(weights);     % normalize recombination weights array
+mueff=sum(weights)^2/sum(weights.^2); % variance-effectiveness of sum w_i x_i
+
+% Strategy parameter setting: Adaptation
+cc = (4+mueff/N) / (N+4 + 2*mueff/N);  % time constant for cumulation for C
+cs = (mueff+2) / (N+mueff+5);  % t-const for cumulation for sigma control
+c1 = 2 / ((N+1.3)^2+mueff);    % learning rate for rank-one update of C
+cmu = min(1-c1, 2 * (mueff-2+1/mueff) / ((N+2)^2+mueff));  % and for rank-mu update
+damps = 1 + 2*max(0, sqrt((mueff-1)/(N+1))-1) + cs; % damping for sigma
+% usually close to 1
+% Initialize dynamic (internal) strategy parameters and constants
+pc = zeros(N,1); ps = zeros(N,1);   % evolution paths for C and sigma
+B = eye(N,N);                       % B defines the coordinate system
+D = ones(N,1);                      % diagonal D defines the scaling
+C = B * diag(D.^2) * B';            % covariance matrix C
+invsqrtC = B * diag(D.^-1) * B';    % C^-1/2
+eigeneval = 0;                      % track update of B and D
+chiN=N^0.5*(1-1/(4*N)+1/(21*N^2));  % expectation of
+%   ||N(0,I)|| == norm(randn(N,1))
+% -------------------- Generation Loop --------------------------------
+counteval = 0;  % the next 40 lines contain the 20 lines of interesting code
+while counteval < stopeval
+    
+    % Generate and evaluate lambda offspring
+    for k=1:lambda
+        arx(:,k) = xmean + sigma * B * (D .* randn(N,1)); % m + sig * Normal(0,C)
+        %arfitness(k) = feval(strfitnessfct, arx(:,k)); % objective function call
+        arfitness(k) = fun(arx(:,k)); % objective function call
+        counteval = counteval+1;
+    end
+    
+    % Sort by fitness and compute weighted mean into xmean
+    [arfitness, arindex] = sort(arfitness); % minimization
+    xold = xmean;
+    xmean = arx(:,arindex(1:mu))*weights;   % recombination, new mean value
+    
+    % Cumulation: Update evolution paths
+    ps = (1-cs)*ps ...
+        + sqrt(cs*(2-cs)*mueff) * invsqrtC * (xmean-xold) / sigma;
+    hsig = norm(ps)/sqrt(1-(1-cs)^(2*counteval/lambda))/chiN < 1.4 + 2/(N+1);
+    pc = (1-cc)*pc ...
+        + hsig * sqrt(cc*(2-cc)*mueff) * (xmean-xold) / sigma;
+    
+    % Adapt covariance matrix C
+    artmp = (1/sigma) * (arx(:,arindex(1:mu))-repmat(xold,1,mu));
+    C = (1-c1-cmu) * C ...                  % regard old matrix
+        + c1 * (pc*pc' ...                 % plus rank one update
+        + (1-hsig) * cc*(2-cc) * C) ... % minor correction if hsig==0
+        + cmu * artmp * diag(weights) * artmp'; % plus rank mu update
+    
+    % Adapt step size sigma
+    sigma = sigma * exp((cs/damps)*(norm(ps)/chiN - 1));
+    
+    % Decomposition of C into B*diag(D.^2)*B' (diagonalization)
+    if counteval - eigeneval > lambda/(c1+cmu)/N/10  % to achieve O(N^2)
+        eigeneval = counteval;
+        C = triu(C) + triu(C,1)'; % enforce symmetry
+        [B,D] = eig(C);           % eigen decomposition, B==normalized eigenvectors
+        D = sqrt(diag(D));        % D is a vector of standard deviations now
+        invsqrtC = B * diag(D.^-1) * B';
+    end
+    
+    % Break, if fitness is good enough or condition exceeds 1e14, better termination methods are advisable
+    if arfitness(1) <= stopfitness || max(D) > 1e7 * min(D)
+        break;
+    end
+    
+end % while, end generation loop
+
+xmin = arx(:, arindex(1))'; % Return best point of last iteration.
+% Notice that xmean is expected to be even
+% better.
 end

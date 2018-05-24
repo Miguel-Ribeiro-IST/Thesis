@@ -8,8 +8,7 @@ B=A.data(:,:);
 S0=17099.4;        %initial stock price
 r = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity at which we want to fit the data. If matur=5, the fifth maturity in the file is chosen.
-OptAlg="MultiStart"; %PatternSearch GeneticAlgorithm SimulatedAnnealing MultiStart
-
+OptAlg="CMA"; %PatternSearch GeneticAlgorithm SimulatedAnnealing MultiStart
 SimPoints=false;
 M=10000;           %number of paths to be simulated
 iterations=5;     %number of repetitions to be simulated (and then averaged)
@@ -46,7 +45,7 @@ rho=optimvars(4);
 chi=optimvars(5);
 
 
-Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,P,M,iterations,matur,SimPoints,lb,ub)
+Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,P,M,iterations,matur,SimPoints,OptAlg,lb,ub)
 beep
 %HestonPrice(1.1,0.5,S0,r,kappa,nubar,nu0,rho,chi)
 
@@ -132,10 +131,10 @@ elseif OptAlg=="MultiStart"
     %problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts,'nonlcon',@Feller_Condition);
     problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts);
     
-    %ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds-ineqs','Display','off');
-    %[optimvars,f] = run(ms,problem,10);
-    ms = GlobalSearch('StartPointsToRun','bounds-ineqs','Display','off');
-    [optimvars,f] = run(ms,problem);
+    ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds-ineqs','Display','off');
+    [optimvars,f] = run(ms,problem,10);
+    %ms = GlobalSearch('StartPointsToRun','bounds-ineqs','Display','off');
+    %[optimvars,f] = run(ms,problem);
     
 elseif OptAlg=="PatternSearch"
     options = optimoptions('patternsearch','Display','off'); %procedure options
@@ -183,7 +182,7 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
-function Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,P,M,iterations,matur,SimPoints,lb,ub)
+function Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,P,M,iterations,matur,SimPoints,OptAlg,lb,ub)
 figure
 times=unique(B(:,1));
 for iter=1:matur
@@ -214,7 +213,11 @@ for iter=1:matur
     clear Volatility
 end
 text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
-vars1=strcat(strcat("paths=",num2str(M)),strcat(",  iterations=",num2str(iterations)));
+if SimPoints
+vars1=strcat(strcat(strcat(strcat("paths=",num2str(M)),strcat(",  iterations=",num2str(iterations))),",  method="),OptAlg);
+else 
+    vars1=strcat("method=",OptAlg);
+end
 text2=strcat(strcat(strcat(num2str(times(2)*252)," days  ("),num2str(times(2)*252/21))," months)");
 vars2=strcat("\kappa=",strcat(num2str(kappa),strcat(", \nu_{mean}=",strcat(num2str(nubar),strcat(", \nu_0=",strcat(num2str(nu0),strcat(strcat(strcat(", \rho=",num2str(rho)),(strcat(", \chi=",num2str(chi)))))))))));
 title(ax(1),{vars1,text1})

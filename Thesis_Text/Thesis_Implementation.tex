@@ -142,19 +142,23 @@ The main reason why Heston and SABR models are so popular is the fact that both 
 
 \subsection{Optimization Algorithms}
 There are several possible algorithms to find the minimum value for the cost function shown in eq.\eqref{cost}.
-Our main concern when choosing the best algorithms for calibration is the nonlinearity of the cost function. This is problematic because several local minima might exist and an inappropriate algorithm may get stuck in these points, causing the globally optimal solution to not be found.
+Our main concern when choosing the best algorithms for calibration is the nonlinearity of the cost function. This is problematic because several local minima might exist and an unsuitable algorithm may get stuck in these points, causing the globally optimal solution to not be found.
 
 With this issue in mind, we selected two powerful algorithms known as \emph{Multi-Start}~\cite{Ugray} and \emph{CMA-ES}~\cite{Hansen2} (short for Covariance Matrix Adaptation Evolution Strategy), which we will summarize below. It should be noted that we will only provide a general idea of how each optimizer works. For detailed descriptions, the original sources should be consulted.
 
 \hl{how to deal with parameter boundaries? (All these algorithms enable the use of bounds which are required for our model parameters (e.g. the correlation parameter, $\rho$, in both Heston and SABR is obviously contained between $-1$ and $1$). Furthermore, they all require an initial guess at the values of the parameters, $\theta_0$, from which they will try to converge.)}
 
 \subsubsection{Multi-Start Optimizer}
-The Multi-Start optimizer is actually a combination of multiple simpler optimizers.
-The algorithm starts by generating a set of different starting points. These points can be generated at random (i.e. by sampling from a uniform distribution) or using some complex meta-heuristic such as scatter search~\cite{Ugray}.
+The Multi-Start optimizer is actually a combination of multiple simple (and fast) optimizers.
 
-The algorithm then applies a simple optimizer to each of these starting points, finding a (local) minimum for all of them. Examples of such simple optimizers are the \emph{Active Set Method}, \emph{Sequential Quadratic Programming}, among others. We call these optimizers simple because they are only expected to converge to the (local) optimum closest to their starting point though at a very fast rate.
 
-After local minima are found for all the selected starting points, the point where the cost function is minimized is chosen as optimal solution.
+The algorithm starts by generating a set of $N$ different starting points. These points can be generated at random (i.e. by sampling from a uniform distribution) or using some complex meta-heuristic such as scatter search~\cite{Ugray}.
+
+\hl{we will implement randomized sampling}
+
+It then applies a weak optimizer to each of these starting points, finding a (local) minimum for all of them. Examples of such simple optimizers are the \emph{Active Set Method}, \emph{Sequential Quadratic Programming}, among others. These optimizers are weak because they are only expected to converge to the (local) optimum closest to their starting point. They are, however, very fast to compute.
+
+After a local minimum is found for each of the selected starting points, the minimum where the cost function is minimized is chosen as optimal solution.
 
 This procedure is depicted in Algorithm \ref{MSOpt}.
 
@@ -162,18 +166,19 @@ This procedure is depicted in Algorithm \ref{MSOpt}.
 \DontPrintSemicolon
 Generate $\theta_{0,i},\ \ i=1,\ldots,N$\tcc*[r]{Multiple starting points}
  \For{$i=1,\ldots,N$}{
-  Run simple optimization algorithm with initial guess $\theta_{0,i}$\;
-  Calculate $\mathrm{Cost}(\theta_i')$ for the obtained minimum $\theta_i'$\;
+  Run weak optimization algorithm with starting point $\theta_{0,i}$\;
+  Calculate $\mathrm{Cost}(\theta_i')$ for the minimum found, $\theta_i'$\;
  }
  Optimal parameters: $\theta^{*}=\underset{\theta_i'}{\arg\min}\left\{\mathrm{Cost}(\theta_i')\right\}$\;
  \caption{Multi-Start Optimizer}
 \end{algorithm}
 \ 
 
-One of the advantages of this algorithm is the fact that, because each simple algorithm execution is independent of the others (assuming no meta-heuristics are used), we can perform them in parallel, further increasing convergence speed.
-As a disadvantage, we can point out the fact that, for functions with too many local minima, a large number of simple algorithm runs may be required, decreasing the calibration speed.
+One of the advantages of the Multi-Start is the fact that, because the weak algorithms are independent of one another (assuming no meta-heuristics are used), we can run them in parallel, further increasing calibration speed.
+As a disadvantage, we can point out the fact that, for highly nonlinear functions, a large number of starting points may be required, decreasing the calibration speed.
 
-\hl{we need to select a number of initial samples}
+As a sidenote, we should point out that, for a large enough starting sample set, $N$, the global minimum will be found with probability 1, even for highly nonlinear objective functions. Though the proof is trivial, this remark is important, because we need a compromise between a large starting set that will take too long to compute and a small data set that might become stuck at some local minimum.
+
 
 \hl{this function is in MATLAB}
 
@@ -191,33 +196,33 @@ These $\lambda$ samples will be our candidate solutions.
 
 We classify each of these points according to their fitness (i.e. the cost function's value for a given point). We then select the $\mu$ samples with the lowest cost, discarding the others. These new points will be the parents of the next generation.
 
-With these $\mu$ points, we generate a new mean and covariance matrix for the multivariate normal distribution. The new mean is produced from a weighted average of the points, with the weights proportional to each point's fitness.
-The method for the covariance matrix generation is rather complex and depends not only on the $\mu$ best samples but also on the values of previous covariance matrices. Because giving a detailed overview of the CMA algorithm is not in the scope of this thesis, we do not provide all the necessary equations for the covariance matrix generation. For a more detailed explanation see Hansen \cite{Hansen}.
-\hl{include equations? in appendix?}
-
-
-This process is repeated until a given stopping criterion is met.
-
 The number of candidate solutions generated at each step, $\lambda$, and the ones that remain after classification, $\mu$, can be chosen at will, but an appropriate heuristic is to choose $\lambda=\left\lfloor4+3\log D\right\rfloor+1$ and $\mu=\left\lfloor\lambda/2\right\rfloor+1$.
 
-The complexity of the covariance matrix generation method makes CMA a very fast and robust optimization algorithm, enabling it to find the global optimum of functions with many local minima~\cite{DilaoCMA}.
-Furthermore, one of the advantages of this method is the fact that it is almost parameter free. We only need to provide an initial guess for the creation of the first mean vector and covariance matrix and the algorithm converges to a solution.
+With these $\mu$ points, we generate a new mean and covariance matrix for the multivariate normal distribution. We then repeat this process until a stopping criterion is met, such as a given number of iterations are executed or the error decreases past some value.
+
+At each iteration, the new mean is produced from a weighted average of the points, with the weights proportional to each point's fitness.
+The method for the covariance matrix generation is rather complex and depends not only on the $\mu$ best samples but also on the values of previous covariance matrices. All the basic equations required for the implementation of this optimizer can be found in Appendix \ref{chapter:CMAESAlg}. For a more detailed explanation, as well as other aspects of the algorithm, see Hansen \cite{Hansen}.
+
+
+This method is summarized in Algorithm \ref{CMAES}.
+
+\begin{algorithm}[H]\label{CMAES}
+\DontPrintSemicolon
+Define mean vector $\mathbf{m}=\theta_0$\tcc*[r]{Initial guess}
+Define covariance matrix $\mathbf{C}=I$\;
+\While{Termination criterion not met}{
+  Sample $\lambda$ points from multivariate normal distribution $N(\mathbf{x;m,C})$\;
+  Calculate the cost for all generated points and keep the $\mu$ best, discarding the rest\;
+  Update the mean vector and covariance matrix with eqs.\eqref{mean} and \eqref{covariance}\;
+ }
+ Optimal parameters: $\theta^{*}=\mathbf{m}$\;
+ \caption{CMA-ES Optimizer}
+\end{algorithm}
+\
+
+The complexity of the covariance matrix adaptation process makes CMA-ES a very robust optimization algorithm, enabling it to find the global optimum of highly nonlinear functions~\cite{DilaoCMA}.
+Furthermore, the CMA-ES is almost parameter free. It simply requires an initial guess, to generate the starting mean vector, and the algorithm should converge.
 As for disadvantages, there may be cases where the convergence of this algorithm is slow, and the Multi-Start may be used as an alternative when a fast convergence is required.
-
-
-\iffalse
- at each iteration we generate $\lambda$ new candidate solutions, keeping only the best $\mu$ of those for the next iteration.
-
-the algorithm iteratively generates a multivariate normal distribution, modifying its mean and covariance matrix at each step.
-
-We start with a $D$-dimensional normal distribution, centered around an initial guess $\theta^{(0)}$ (obtained \textit{a priori}), with a unit covariance matrix $C$ (i.e. $C=I$, the identity matrix), where $D$ denotes the number of variables of the selected model.
-
-We then take $M$ samples from this distribution: $\theta^{(1)}_i\ i=1,\ldots,M$, which will be our first candidate solutions. We calculate the cost function for all of these points and rank them from best to worst. We keep only the $N$ best points (i.e. with the lowest cost) and discard the others.
-
-A new normal distribution is then created. Its mean is calculated from a weighted average of the remaining $N$ points, with each weight inversely proportional to the point's cost. The covariance matrix is also generated from the remaining weighted $N$ points. However, to produce a faster convergence, the matrices from previous iterations are used additionally, i.e. we give some weight to the matrix generated from the selected points but we grant also weight to the previous matrices, assigning more weight to the most recent.
-
-The previous steps are repeated for a number of iterations.
-\fi
 
 
 

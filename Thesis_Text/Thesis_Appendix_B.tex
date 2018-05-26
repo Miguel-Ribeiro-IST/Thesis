@@ -11,7 +11,10 @@
 \chapter{CMA-ES Algorithm Formulas}
 \label{chapter:CMAESAlg}
 
-Here we present the formulas required for the calculation of the mean vector and the covariance matrix, to be used on the multivariate normal distribution, at each iteration of the CMA-ES optimization algorithm.
+Here we present the formulas required for the calculation of the mean vector, $\mathbf{m}$, and the covariance matrix, $\mathbf{C}$, to be used, at each iteration of the CMA-ES optimization algorithm, on the multivariate normal distribution
+\begin{equation}
+N(\mathbf{x;m,C})=\frac{1}{\sqrt{(2\pi)^D|\mathrm{det}\mathbf{C}|}}\mathrm{exp}\left(-\frac{1}{2}(\mathbf{x}-\mathbf{m})^T\mathbf{C}^{-1}(\mathbf{x}-\mathbf{m})\right).
+\end{equation}
 
 \section{The Optimization Algorithm}
 \subsection{Initialization}
@@ -42,7 +45,7 @@ We are finally able to calculate the new mean vector and covariance matrix using
 \begin{equation}
 \left\langle\mathbf{y}^{(k)}\right\rangle_w=\sum_{i=1}^\mu\omega_i\mathbf{y}^{(k)}_{i:\lambda},
 \end{equation}
-\begin{equation}
+\begin{equation}\label{mean}
 \mathbf{m}^{(k)}=\mathbf{m}^{(k-1)}+\sigma^{(k-1)}\left\langle\mathbf{y}^{(k)}\right\rangle_w=\sum_{i=1}^\mu\omega_i\mathbf{x}^{(k)}_{i:\lambda},
 \end{equation}
 \begin{equation}
@@ -54,7 +57,7 @@ We are finally able to calculate the new mean vector and covariance matrix using
 \begin{equation}
 \mathbf{p}^{(k)}_c=(1-c_c)\mathbf{p}^{(k-1)}_c+h_\sigma^{(k)}\sqrt{c_c(2-c_c)\mu_{\mathrm{eff}}}\left\langle\mathbf{y}^{(k)}\right\rangle_w,
 \end{equation}
-\begin{equation}
+\begin{equation}\label{covariance}
 \mathbf{C}^{(k)}=\left(1-c_1-c_\mu\right)\mathbf{C}^{(k-1)}+c_1\left(\mathbf{p}_c^{(k)}\left(\mathbf{p}_c^{(k)}\right)^T+\delta\left(h_\sigma^{(k)}\right)\mathbf{C}^{(k-1)}\right)+c_\mu\sum_{i=1}^\mu\omega_i\mathbf{y}^{(k)}_{i:\lambda}\left(\mathbf{y}^{(k)}_{i:\lambda}\right)^T,
 \end{equation}
 \noindent where we iterate $k$ until the termination criterion is met and using
@@ -91,7 +94,7 @@ E^*=\frac{\sqrt{2}\Gamma\left(\frac{D+1}{2}\right)}{\Gamma\left(\frac{D}{2}\righ
 \begin{equation}
 \left(\mathbf{C}^{(k)}\right)^{-1/2}=\mathbf{B}\left(\mathbf{D}^{(k)}\right)^{-1}\mathbf{B}^T,
 \end{equation}
-\noindent where $D$ corresponds to the number of parameters of the model (i.e. the dimensions of the search space).
+\noindent where $D$ corresponds to the number of parameters of the model (i.e. the dimensions of the search space) and we define $\mathbf{p}_\sigma^{(0)}=\mathbf{p}_c^{(0)}=0$.
 
 
 

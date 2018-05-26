@@ -308,6 +308,7 @@ We further define $\alpha=\sigma(0)$ as the starting volatility, $f=F(0)=S(0)e^{
 It should be noted that we are now using the \hl{forward measure}, so in eq.\eqref{dF} we use $F$, the \emph{forward price}, instead of the usual spot price $S$ from eq.  \ref{GBM}. These two quantities are related by $S(t)=e^{-r(T-t)}F(t)$, so we can easily obtain one from the other.
 \fi
 
+\hl{SABR is not mean-reverting}
 
 In the original article, the authors claim that $\beta$ can be fitted from historical market data, but usually investors choose this value arbitrarily, depending on the type of assets traded. Typical values used are $\beta=1$ (stochastic lognormal model), usually for foreign exchange options, $\beta=0$ (stochastic normal model), typical for interest rate options where forwards $F(t)$ can be negative, and $\beta=0.5$ (stochastic CIR model), also common for interest rate options.
 

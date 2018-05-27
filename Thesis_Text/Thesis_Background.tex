@@ -33,10 +33,10 @@ With eqs.\eqref{callput} in mind, it should be clear that the value of these two
 
 
     
-\section{Black-Scholes-Merton Formulae}
-\label{section:Black-Scholes-Merton Formulae}
+\section{Black-Scholes Formulae}
+\label{section:Black-Scholes Formulae}
 Due to their high importance, options have been studied in great detail in the past.
-Probably the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price options - the famous Black-Scholes-Merton model~\cite{Scholes} - still in use in present days~\cite{Wilmott3}.
+Probably the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price options - the famous Black-Scholes (BS) model~\cite{Scholes} - still in use in present days~\cite{Wilmott3}.
 
 This model states that the price of an European call or put option, whose underlying asset is a \emph{stock}, follows the partial differential equation (PDE)
 
@@ -52,7 +52,7 @@ The risk-free interest rate, $r$, is the interest an investor would receive from
 
 As for the stock price volatility, $\sigma$, because we will explore it deeply in the next sections, suffice it to say for now that it is a measure of the future stock price movement's uncertainty.
 
-One important assumption of the Black-Scholes-Merton model is that stock prices follow a stochastic process, known as Geometric Brownian Motion, which can be defined as
+One important assumption of the BS model is that stock prices follow a stochastic process, known as Geometric Brownian Motion, which can be defined as
 \begin{equation}\label{GBM}
 dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \end{equation}
@@ -90,7 +90,7 @@ Volatility is a measure of the uncertainty of future stock price movements. In o
 
 \hl{put image of varying volatilities here}
 
-Of all the parameters in the Black-Scholes formula (eq.\eqref{BS2}), volatility is the only one we can't easily measure from market data.
+Of all the parameters in the BS formula (eq.\eqref{BS2}), volatility is the only one we can't easily measure from market data.
 Furthermore, unlike the interest rate, volatility has a great impact on the behavior of stock prices and, consequently, on the price of options~\cite{Wilmott3}.
 These two factors make volatility one of the most important subjects in all of mathematical finance and thus the focus of much research.
 
@@ -100,8 +100,8 @@ It should be noted that there are several types of volatility, depending on what
 
 \subsection{Implied Volatility}
 \label{section:impliedvolatility}
-\emph{Implied volatility} can be described as the value of stock price volatility that, when input into the Black-Scholes pricer in eq.\eqref{callputBS}, outputs a value equal to the market price of a given option.
-In other words, it would be the stock price volatility that the seller/buyer of the option used when pricing it (assuming the Black-Scholes model was used - eq.\eqref{callputBS}).
+\emph{Implied volatility} can be described as the value of stock price volatility that, when input into the BS pricer in eq.\eqref{callputBS}, outputs a value equal to the market price of a given option.
+In other words, it would be the stock price volatility that the seller/buyer of the option used when pricing it (assuming the BS model was used - eq.\eqref{callputBS}).
 
 Because eq.\eqref{callputBS} is not invertible, we need to use some numerical method (e.g. Newton's method) to find the value of implied volatility that matches the market and model prices, i.e. we must find, numerically, the solution to the equation
 \begin{equation}\label{impvolform}
@@ -111,16 +111,12 @@ C(\sigma_{imp},S(t),t)-\overline{C}=0,
 
 Because eq.\eqref{callputBS} is monotonic in the volatility, we can obtain the implied volatility of an option from its price and vice versa. This duality is so fundamental that investors often disclose options by providing their implied volatility instead of their price~\cite{Wilmott}.
 
-One interesting property of implied volatility is that, in the real-world, it depends on the strike price and the maturity, which should not occur in the "Black-Scholes world". If investors really used the this model to price their options, two options with the same underlying asset should have the same implied volatility, regardless of their strike prices or maturities (i.e. the same underlying asset doesn't have two different volatilities at the same time).
-However, when observing real market data, this is indeed what is observed.
+One important property of implied volatility is that, in the real-world, it depends on the strike price and the maturity. This should not occur in the "Black-Scholes world". Because the volatility is a property of the stock, if investors really used the the BS model to price their options, two options on the same stock should have the same implied volatility, regardless of their strike prices or maturities (i.e. the same stock can't have two different volatilities at the same time).
+However, when observing real market data, this is in fact what is observed.
 
 The implied volatilities' dependence on the strike price is a function that can take one of two forms, known as \emph{smile} and \emph{skew}.
-An implied volatility smile shows greater values of $\sigma_{imp}$ for options with strikes farther from the current stock price. The minimum occurs where the strike equals the current stock price. A skew, on the other hand, only shows greater $\sigma_{imp}$ in one of the directions (i.e. for strikes either bigger or smaller than the current stock price). Both phenomena are represented in \autoref{fig:smileskew}.
+An implied volatility smile shows higher volatilities for options with strikes different from the current stock price (the shape of a smile). A skew, on the other hand, only presents higher volatilities in one of the directions (i.e. for strikes either bigger or smaller than the current stock price). Both phenomena are represented in \autoref{fig:smileskew}.
 
-Because of their higher implied volatility, we can conclude that options with strikes different from the current stock price are overpriced.
-The reason behind this odd market behavior is related to the simple demand-supply rule~\cite{Wilmott3}. On the one hand, some investors are risk-averse and want to hedge their losses in case of a market crash (as explained in subsection \ref{subsection:why options are important}). They don't mind paying a higher price for an option if this means they would be relatively safe from potentially devastating market crashes. For this reason, the prices of (call) options with lower strikes increase, driving their implied volatility up. On the other hand, other investors are risk-seekers and want to take advantage of possible sudden price increases, buying the stocks for the lower strike prices. They don't mind paying higher prices for the options and this drives the prices of high strike options (and, consequently, their implied volatility) up. This fear-greed duality gives rise to the observed volatility smile.
-   
-    
 \begin{figure}[!htb]
   \begin{subfigmatrix}{2}
     \subfigure[Smile]{\includegraphics[height=0.20\linewidth]{Smile.png}}
@@ -130,17 +126,24 @@ The reason behind this odd market behavior is related to the simple demand-suppl
   \label{fig:smileskew}
 \end{figure}
 
+
+Because of their higher implied volatility, we can conclude that options with strikes different from the current stock price are overpriced.
+The reason behind this odd market behavior is related to the simple demand-supply rule~\cite{Wilmott3}. On the one hand, some investors are risk-averse and want to hedge their losses in case of a market crash (as explained in subsection \ref{subsection:why options are important}). They don't mind paying a higher price for an option if this means they would be relatively safe from potentially devastating market crashes. For this reason, the prices of (call) options with lower strikes increase, driving their implied volatility up. On the other hand, other investors are risk-seekers and want to take advantage of possible sudden price movements, buying the stocks for the lower strike prices. They don't mind paying higher prices for the options and this drives the prices of high strike options (and, consequently, their implied volatility) up. This fear-greed duality gives rise to the observed volatility smile. In the case of the volatility skew, only one of the two fenomena described occurs.
+
+
+
+The presence of a smile instead of a skew, and vice-versa, is determined by the type of product serving as underlying asset. For example, Forex market options usually exhibit volatility smiles whereas index and commodities options usually present a volatility skew.
+
 The dependence of the implied volatility on the maturity date is more complex, but in general it decreases with $T$.
 
 It can also be shown that the implied volatility is the same for calls and puts~\cite{Hull}.
 
 \subsection{Local Volatility}
 \label{subsection:localvolatility}
-In their original work, Black \textit{et al.} assumed that volatility is constant throughout the whole contract. From market data, it can be clearly seen that this is not the case. There may be times where new information reaches the market and trading increases, driving volatility up. On the other hand, if investors are waiting for some new information to reach the market (e.g. the results of an election) trading may stall, and volatilities go down. 
+In their original work, Black \textit{et al.} assumed that volatility is constant throughout the whole contract. From market data, it can be clearly seen that this is not the case. There may be times where new information reaches the market  (e.g. the results of an election) and trading increases, driving volatility up. It is equally true that shortly before this information is known, trading may stall, and volatilities go down. 
 
-The model in eq.\eqref{callputBS} is therefore not enough to completely grasp real-world trading. We should have a model where volatility is dynamic, measuring the uncertainty on the stock price at any point in time.
-However, as we saw in subsection \ref{section:impliedvolatility} for implied volatility, the market's view of volatility also changes with the strike price. A volatility model that merely depends on time is thus insufficient.
-
+The BS model is therefore clearly incapable of completely grasping real-world trading. We should have a model where volatility is dynamic, measuring the uncertainty on the stock price at any point in time.
+However, as we saw in subsection \ref{section:impliedvolatility}, the market's view of volatility also depends on the strike price.
 The volatility should therefore be a function of both time and strike price: $\sigma(K,t)$. We call this model \emph{local volatility} and the geometric Brownian motion from eq. \ref{GBM} is transformed into
 \begin{equation}\label{GBM2}
 dS(t)=rS(t)dt+\sigma(K,t)S(t)dW(t),
@@ -148,10 +151,10 @@ dS(t)=rS(t)dt+\sigma(K,t)S(t)dW(t),
 \noindent where $\sigma(K,t)$ is some function of $K$ and $t$.
 
 
-Finding the local volatility function is not very important when pricing typical European options, because we can simply find the implied volatility from similar options in the market and assume a constant volatility throughout the option's duration.
-However, for other contracts, such as American, Asian or Barrier options (among others) where the option's value depends on the intermediate stock prices, this function is indeed very useful.
+We should note that finding the local volatility function is not very important when pricing European options - we can simply find the implied volatility of the option we're pricing from the data of similar options in the market and use eq.\eqref{callputBS}, assuming a constant volatility throughout the option's duration.
+However, for other contracts, such as American, Asian or Barrier options (among others) where the option's value depends on the intermediate stock prices, it is very important to appropriately model the volatility.
 
-Because we can't directly measure the local volatility of a stock from market data, we need some models to find it. The best known of these is Dupire's formula.
+Because we can't directly measure the local volatility of a stock from market data, we need some models to find it. One of the most used of these is Dupire's formula.
 
 \subsubsection{Dupire's Formula}
 \label{subsubsection:Dupire}

@@ -27,7 +27,7 @@ With eqs.\eqref{callput} in mind, it should be clear that the value of these two
 &P(K,T)=e^{-rT}\mathbb{E}\left[\max\left(K-S(T),0\right)\right]=e^{-rT}\mathbb{E}\left[\left(K-S(T)\right)\mathbbm{1}_{\left\{S(T)<K\right\}}\right],
 \end{split}
 \end{equation}
-\noindent with $C(K,T)$ and $P(K,T)$ being the values of call and put options, respectively, and with $\mathbb{E}[\cdot]$, $\mathbbm{1}_{\{\cdot\}}$ corresponding to the expected value and indicator functions, respectively. The parameter $r$ denotes the risk-free interest rate, which we will describe in the next subsection.
+\noindent with $C(K,T)$ and $P(K,T)$ being the values of call and put options, respectively, and $\mathbb{E}[\cdot]$, $\mathbbm{1}_{\{\cdot\}}$ corresponding to the expected value and indicator functions, respectively. The parameter $r$ denotes the risk-free interest rate, which we will describe in the next subsection.
 
 
 
@@ -38,7 +38,7 @@ With eqs.\eqref{callput} in mind, it should be clear that the value of these two
 Due to their high importance, options have been studied in great detail in the past.
 Probably the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price options - the famous Black-Scholes-Merton model~\cite{Scholes} - still in use in present days~\cite{Wilmott3}.
 
-This model states that the price of an European call or put option, whose underlying asset is a stock, follows the partial differential equation (PDE)
+This model states that the price of an European call or put option, whose underlying asset is a \emph{stock}, follows the partial differential equation (PDE)
 
 \begin{equation}\label{BS2}
 \pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}+rS\pdv{V}{S}-rV=0,
@@ -48,9 +48,9 @@ This model states that the price of an European call or put option, whose underl
 
 \hl{underlying asset=stocks}
  
-The risk-free interest rate, $r$, is the interest an investor would receive from any risk-free investment (e.g. treasury bills). No investor should ever invest in risky products whose expected return is lower than this interest (e.g. the lottery), since there's the alternative of obtaining a higher (expected) payoff without the disadvantage of taking risks. In general, this rate changes slightly with time and is unknown, but Black \textit{et al.}, in their original model (eq.\eqref{BS2}), assumed that it remains constant throughout the option's duration and that it is known. Some later developments dealt with this shortcoming, providing models to replicate the behavior of interest rates~\cite{HJM}, but because option prices do not significantly depend on this value~\cite{Wilmott3}, in the remainder of this thesis we shall make the same assumptions as Black \textit{et al.}
+The risk-free interest rate, $r$, is the interest an investor would receive from any risk-free investment (e.g. treasury bills). No investor should ever invest in risky products whose expected return is lower than this interest (e.g. the lottery), since there's the alternative of obtaining a higher (expected) payoff without the disadvantage of taking risks. In general, this rate changes slightly with time and is unknown, but Black \textit{et al.}, in their original model (eq.\eqref{BS2}), assumed that it remains constant throughout the option's duration and that it is known. Some authors have suggested solutions to deal with this shortcoming, providing models to replicate the behavior of interest rates~\cite{HJM}, but because option prices do not significantly depend on this value~\cite{Wilmott3}, in the remainder of this thesis we shall make the same assumptions as Black \textit{et al.}, i.e. constant and known interest rate.
 
-As for the stock price volatility, $\sigma$, we will explore it deeply in the next sections. For now, suffice it to say that it is a measure of the future stock price movement's uncertainty.
+As for the stock price volatility, $\sigma$, because we will explore it deeply in the next sections, suffice it to say for now that it is a measure of the future stock price movement's uncertainty.
 
 One important assumption of the Black-Scholes-Merton model is that stock prices follow a stochastic process, known as Geometric Brownian Motion, which can be defined as
 \begin{equation}\label{GBM}
@@ -59,7 +59,7 @@ dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \noindent with $\{W(t),\ t>0\}$ defining a one-dimensional Brownian motion.
 \hl{put image of GBM here}
 
-With this result, pricing options is fairly straightforward - we simply need to solve the PDE in eq.\eqref{BS2} in a similar fashion to the initial value problem for the diffusion equation~\cite{Dilao}.
+With this result, pricing options is fairly straightforward - we simply need to solve the PDE in eq.\eqref{BS2} as we would for the diffusion equation's initial value problem~\cite{Dilao}.
 The results published originally by Black \textit{et al.} state that, at time $t$, call and put options can be valued as
 \begin{equation}\label{callputBS}
 \begin{split}
@@ -81,12 +81,12 @@ From eq.\eqref{callputBS} we can derive the relationship between $C(S,t)$ and $P
 \begin{equation}
 C(S(t),t)=S(t)-Ke^{-r(T-t)}+P(S(t),t).
 \end{equation}
-\noindent Because of this duality, we can always obtain the prices of put options from the prices of call options with the same underlying asset, maturity and strike. For this reason, providing results for both option types is redundant and unless otherwise stated, all options will be assumed European calls in the following sections.
+\noindent Because of this duality, we can always obtain the prices of put options from the prices of call options with the same underlying asset, maturity and strike. For this reason, providing results for both option types is redundant and unless otherwise stated, all options will be henceforth assumed European calls.
 
 
 \section{Volatility}
 \label{section:volatility}
-Volatility is a measure of the uncertainty of future stock price movements. In other words, a high volatility will lead to great future fluctuations in the stock price, whereas a stock with low volatility is more stable.
+Volatility is a measure of the uncertainty of future stock price movements. In other words, a higher volatility will lead to greater future fluctuations in the stock price, whereas a stock with lower volatility is more stable.
 
 \hl{put image of varying volatilities here}
 
@@ -101,13 +101,13 @@ It should be noted that there are several types of volatility, depending on what
 \subsection{Implied Volatility}
 \label{section:impliedvolatility}
 \emph{Implied volatility} can be described as the value of stock price volatility that, when input into the Black-Scholes pricer in eq.\eqref{callputBS}, outputs a value equal to the market price of a given option.
-In other words, it would be the stock price volatility that the seller/buyer of the option assumed when pricing it (given that the Black-Scholes model was used).
+In other words, it would be the stock price volatility that the seller/buyer of the option used when pricing it (assuming the Black-Scholes model was used - eq.\eqref{callputBS}).
 
-Because eq.\eqref{callputBS} is not invertible, we need to use some numerical method (e.g. Newton's method) to find the value of implied volatility that matches the market and model prices i.e. we must find, numerically, the solution to the equation
+Because eq.\eqref{callputBS} is not invertible, we need to use some numerical method (e.g. Newton's method) to find the value of implied volatility that matches the market and model prices, i.e. we must find, numerically, the solution to the equation
 \begin{equation}\label{impvolform}
 C(\sigma_{imp},S(t),t)-\overline{C}=0,
 \end{equation}
-\noindent where $C(\sigma_{imp},\cdot)$ corresponds to the result of eq.\eqref{callputBS} using the (implied) volatility $\sigma_{imp}$ and $\overline{C}$ is the price of the option observed in the market.
+\noindent where $C(\sigma_{imp},\cdot)$ corresponds to the result of eq.\eqref{callputBS} using $\sigma_{imp}$ as (implied) volatility and where $\overline{C}$ corresponds to the price of the option observed in the market.
 
 Because eq.\eqref{callputBS} is monotonic in the volatility, we can obtain the implied volatility of an option from its price and vice versa. This duality is so fundamental that investors often disclose options by providing their implied volatility instead of their price~\cite{Wilmott}.
 

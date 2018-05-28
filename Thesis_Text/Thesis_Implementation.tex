@@ -219,6 +219,8 @@ The method for the covariance matrix update is rather complex and depends not on
 
 These sampling-classification-adaptation steps are repeated until a some stopping criterion is met. Examples of stopping criteria include a fixed number of iterations or an error threshold.
 
+\hl{mean vector m gets closer and closer to the global optimum at each iteration}
+
 This procedure is summarized in Algorithm \ref{CMAES}.
 
 \begin{algorithm}[H]\label{CMAES}
@@ -241,4 +243,7 @@ As for disadvantages, there may be cases where the convergence of this algorithm
 
 This optimizer was implemented by Hansen in MATLAB (as well as in other computer languages) as function \emph{purecmaes}~\cite{CMAES}.
 
+
+
+\hl{CMA-ES seems to outperform Multi-Start whenever the number of dimensions increases}
 

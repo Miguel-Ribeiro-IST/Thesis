@@ -10,7 +10,7 @@ r = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity at which we want to fit the data. If matur=5, the fifth maturity in the file is chosen.
 OptAlg="CMA"; %PatternSearch GeneticAlgorithm SimulatedAnnealing MultiStart
 SimPoints=false;
-M=10000;           %number of paths to be simulated
+M=50000;           %number of paths to be simulated
 iterations=5;     %number of repetitions to be simulated (and then averaged)
 
 
@@ -83,8 +83,8 @@ if kappa<lb(1)||kappa>ub(1)||nubar<lb(2)||nubar>ub(2)||nu0<lb(3)||nu0>ub(3)||rho
    result=1000; 
 else
 
-F=S0.*exp(r.*T);
-fun1=@(u)real(exp(-1i.*u.*log(K))./(1i.*u.*F).*CharFuncHeston(u-1i,T,S0,r,kappa,nubar,nu0,rho,chi));
+    
+fun1=@(u)real(exp(-1i.*u.*log(K))./(1i.*u.*S0.*exp(r.*T)).*CharFuncHeston(u-1i,T,S0,r,kappa,nubar,nu0,rho,chi));
 fun2=@(u)real(exp(-1i.*u.*log(K))./(1i.*u).*CharFuncHeston(u,T,S0,r,kappa,nubar,nu0,rho,chi));
 P1=1/2+1/pi.*integral(fun1,0,100);
 P2=1/2+1/pi.*integral(fun2,0,100);
@@ -132,7 +132,7 @@ elseif OptAlg=="MultiStart"
     problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts);
     
     ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds-ineqs','Display','off');
-    [optimvars,f] = run(ms,problem,10);
+    [optimvars,f] = run(ms,problem,2);
     %ms = GlobalSearch('StartPointsToRun','bounds-ineqs','Display','off');
     %[optimvars,f] = run(ms,problem);
     
@@ -238,17 +238,20 @@ dt = T/L;      %time steps
 %%%%We don't need to simulate an entire matrix of forwards for all time steps and for all paths.
 %%%%We just need to simulate one vector of forwards for all paths and update it at each time step
 parfor iter=1:iterations    %Perform the "for" cycle in parallel
-    x = zeros(M,1);        %define initial vector of forwards
+    %x = zeros(M,1);        %define initial vector of forwards
+    S=S0*ones(M,1);
     nu=nu0*ones(M,1);    %define the initial vector of volatilities
     
     for k = 1:L
         Z1=randn(M,1);                                 %vector of random variables
         Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);            %vector of random variables with correlation "rho" with vector Z1
-        x(:)=x(:)+(r-max(nu(:),0)./2)*dt+sqrt(dt.*max(nu(:),0)).*Z1;      %update forwards vector
-        nu(:)=nu(:)+kappa.*(nubar-max(nu(:),0)).*dt+chi*sqrt(dt*max(nu(:),0)).*Z2+chi^2/4*dt*(Z2.^2-1);  %update volatilities vector
+        %x(:)=x(:)+(r-max(nu(:),0)./2)*dt+sqrt(dt.*max(nu(:),0)).*Z1;      %update forwards vector
+        S(:)=S(:).*(1+r.*dt+sqrt(dt.*nu(:)).*Z1+0.5.*dt.*nu(:).*(Z1.^2-1));
+        %nu(:)=nu(:)+kappa.*(nubar-max(nu(:),0)).*dt+chi*sqrt(dt*max(nu(:),0)).*Z2+chi^2/4*dt*(Z2.^2-1);  %update volatilities vector
+    nu(:)=max(nu(:)+kappa.*(nubar-nu(:)).*dt+chi.*sqrt(dt.*nu(:)).*Z2+chi.^2./4.*dt.*(Z2.^2-1),0);
     end
     
-    S=S0.*exp(x);
+    %S=S0.*exp(x);
     
     Y=zeros(M,1);
     for i=1:M

@@ -13,11 +13,11 @@ matur=4;           %maturity until which we want to fit the data.
 %If matur=5, all maturities until the fifth maturity in the file are chosen.
 
 
-beta=0.5;
+%beta=0.5;
 OptAlg="CMA"; %PatternSearch GeneticAlgorithm SimulatedAnnealing MultiStart
 SimPoints=false;
-M=100;
-iterations=1;
+M=100000;
+iterations=3;
 
 
 B(:,2)=B(:,2)/S0;
@@ -26,33 +26,27 @@ B(:,1)=B(:,1)/252;
 times=unique(B(:,1));
 B=B(B(:,1)<=times(matur),:);
 
-x0=[1,0.9,1,10,0.01];
+x0=[0.2,-0.2,0.8,1,1,0.75];
+lb = [0,-1,0,0,0,0];
+ub = [5,1,5,100,100,1];
 
-optimvars=Optimizer(beta,S0,B,r,x0,OptAlg);
+optimvars=Optimizer(S0,B,r,x0,OptAlg,lb,ub);
 alpha=optimvars(1);
 rho0=optimvars(2);
 nu0=optimvars(3);
 a=optimvars(4);
 b=optimvars(5);
+beta=optimvars(6);
 
 
 Plotter(alpha,rho0,nu0,a,b,beta,S0,r,B,M,iterations,matur,SimPoints,OptAlg)
+beep
 
 
+function optimvars=Optimizer(S0,B,r,x0,OptAlg,lb,ub)
+fun=@(var)SABRcal(var(1),var(2),var(3),var(4),var(5),var(6),S0,B,r);
 
-function optimvars=Optimizer(beta,S0,B,r,x0,OptAlg)
-fun=@(var)SABRcal(var(1),var(2),var(3),var(4),var(5),beta,S0,B,r);
-lb = [0,-1,0,0,0];
-ub = [5,1,5,100,100];
-
-
-
-if OptAlg=="SimulatedAnnealing"
-    options = optimoptions('simulannealbnd','Display','off'); %procedure options
-    optimvars=simulannealbnd(fun,x0,lb,ub,options); %define minimization procedure (simulated annealing)
-    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),beta,S0,B,r);
-    
-elseif OptAlg=="MultiStart"
+if OptAlg=="MultiStart"
     rng default % For reproducibility
     opts = optimoptions(@fmincon,'Display','off','Algorithm','sqp');
     %problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts,'nonlcon',@Feller_Condition);
@@ -63,24 +57,13 @@ elseif OptAlg=="MultiStart"
     [optimvars,f] = run(ms,problem,25);
     %ms = GlobalSearch('StartPointsToRun','bounds-ineqs','Display','off');
     %[optimvars,f] = run(ms,problem);
-    
-elseif OptAlg=="PatternSearch"
-    options = optimoptions('patternsearch','Display','off');
-    optimvars=patternsearch(fun,x0,[],[],[],[],lb,ub,[],options);
-    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),beta,S0,B,r);
-    
-        
-elseif OptAlg=="GeneticAlgorithm"
-    options = optimoptions('ga','Display','off'); %procedure options
-    optimvars=ga(fun,size(lb,2),[],[],[],[],lb,ub,[],options); %define minimization procedure (patternsearch)
-    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),beta,S0,B,r);
 
     elseif OptAlg=="CMA"
     optimvars=purecmaes(fun,x0);
-    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),beta,S0,B,r);
+    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),optimvars(6),S0,B,r);
 end
 
-fprintf(strcat(strcat(strcat("alpha=",strcat(num2str(optimvars(1)),strcat(",    rho0=",strcat(num2str(optimvars(2)),strcat(",    nu0=",strcat(num2str(optimvars(3)),strcat(",    a=",strcat(num2str(optimvars(4)),strcat(",    b=",strcat(num2str(optimvars(5)),strcat("\nerror=",strcat(num2str(f),",    ")))))))))))),OptAlg),"\n"));
+fprintf(strcat(strcat(strcat("alpha=",strcat(num2str(optimvars(1)),strcat(",    rho0=",strcat(num2str(optimvars(2)),strcat(",    nu0=",strcat(num2str(optimvars(3)),strcat(",    a=",strcat(num2str(optimvars(4)),strcat(",    b=",strcat(num2str(optimvars(5)),strcat(",    beta=",strcat(num2str(optimvars(6)),strcat("\nerror=",strcat(num2str(f),",    ")))))))))))))),OptAlg),"\n"));
 end
 
 
@@ -125,18 +108,17 @@ end
 
 function Total_Error=SABRcal(alpha,rho,nu,a,b,beta,S0,B,r)
 
-if alpha<0 || alpha>5 || rho<-1 || rho>1 || nu<0 || nu>5 || a<0 || a>100 || b<0 || b>100
+if alpha<0 || alpha>5 || rho<-1 || rho>1 || nu<0 || nu>5 || a<0 || a>100 || b<0 || b>100 || beta<0 || beta>1
     Total_Error=10000;
 else
     
 LS=0;
 for i=1:size(B,1)
-    LS=LS+((B(i,3)-sigmaSABR(alpha,rho,nu,a,b,beta,B(i,2),S0*exp(r*B(i,1)),B(i,1)))./B(i,3))^2;
+    LS=LS+((B(i,3)-sigmaSABR(alpha,rho,nu,a,b,beta,B(i,2),S0*exp(r*B(i,1)),B(i,1)))/B(i,3))^2;
 end
 Total_Error=LS;
 end
 end
-
 
 
 function sigma=sigmaSABR(alpha,rho0,nu0,a,b,beta,K,f,T)
@@ -156,27 +138,26 @@ sigma=1/w*(1+A1(T)*log(K./f)+A2(T)*(log(K./f)).^2+B(T)*T);
 end
 
 
+
 function Result_Avg=Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,L,K,iterations,PriceVol)
 dt = T/L;
-f=S0*exp(r*T);
 
 parfor iter=1:iterations
-    F = f*ones(M,1);
-    alp=alpha*ones(M,1);
+    S = S0*ones(M,1);
+    sigma=alpha*ones(M,1);
     
     for k = 1:L
         rho=rho0*exp(-a*dt*(k-1));
         nu=nu0*exp(-b*dt*(k-1));
         Z1=randn(M,1);
         Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);
-        v=alp.*(F.^(beta-1));
-        F(:)=F(:).*exp(v.*Z2.*sqrt(dt)-v.^2*dt/2);
-        alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);
+        S(:)=S(:).*(1+r*dt)+exp(-r*(T-dt*k)*(1-beta)).*sigma(:).*S(:).^beta.*sqrt(dt).*Z1+beta/2*exp(-2*r*(T-dt*k)*(1-beta))*sigma(:).^2.*S(:).^(2*beta-1)*dt.*(Z1.^2-1)
+        sigma(:)=sigma(:).*(1+nu*sqrt(dt).*Z2+nu^2/2*dt*(Z2.^2-1));
     end
     
     Y=zeros(M,1);
     for i=1:M
-        Y(i) = max(F(i)-K,0);
+        Y(i) = max(S(i)-K,0);
     end
     
     if PriceVol=="price"

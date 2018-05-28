@@ -10,9 +10,9 @@
 
 \chapter{Dupire's Formula Derivation}
 \label{chapter:dupireformuladerivation}
-Here is presented a brief demonstration of Dupire's formula, as shown in eq. \eqref{dupire}.
+Here we present a brief demonstration of Dupire's formula, as shown in eq. \eqref{dupire}.
 
-In his article, Dupire begins by assuming that the stock price $S$ follows a dynamic transition probability density function $p(S(t),t,S'(t'),t')$. In other words, integrating this function would result in the probability of the stock price reaching a price $S'$ at a time $t'$ having started at $S$ at time $t$.
+In the original article, Dupire begins by assuming that the stock price $S$ follows a dynamic transition probability density function $p(S(t),t,S'(t'),t')$. In other words, by integrating this density function we would obtain the probability of the stock price reaching a price $S'$ at a time $t'$ having started at $S$ at time $t$.
 
 The present value of a call option, $C(S,t,K,T)$, can be deduced as its expected future payoff, discounted backwards in time, which results in
 \begin{equation}
@@ -21,11 +21,11 @@ C(K,T)=e^{-r(T-t)}\mathbb{E}\left[\max\left(S'-K,0\right)\right]&=e^{-r(T-t)}\in
 &=e^{-r(T-t)}\int_K^\infty(S'-K)p(S,t,S',T)dS'.
 \end{split}
 \end{equation}
-Deriving this result once with respect to the strike price $K$, we obtain
+Taking the first derivative of this result with respect to the strike price $K$, we obtain
 \begin{equation}
 \pdv{C}{K}=-e^{-r(T-t)}\int_K^\infty p(S,t,S',T)dS'.
 \end{equation}
-Deriving again with respect to the same variable results in
+The second derivative results in
 \begin{equation}
 \pdv{^2C}{K^2}=e^{-r(T-t)}p(S,t,S',T).
 \end{equation}
@@ -34,7 +34,7 @@ Due to its stochastic nature, the transition probability density function follow
 \begin{equation}\label{FokkerPlanck}
 \pdv{p}{T}=\frac{1}{2}\sigma^2\pdv{^2(S^2p)}{S^2}-r\pdv{(Sp)}{S}.
 \end{equation}
-\noindent with $\sigma$ our, still unknown, function of $S$ and $t$, evaluated at $t=T$.
+\noindent with $\sigma$ denoting our (still unknown) function of $S$ and $t$, evaluated at $t=T$.
 
 From eq. \ref{deriv0} we can easily derive
 \begin{equation}
@@ -48,10 +48,12 @@ Integrating twice by parts and collecting all terms, we get
 \begin{equation}
 \pdv{C}{T}=\frac{1}{2}\sigma^2K^2\pdv{^2C}{K^2}-rK\pdv{C}{K}.
 \end{equation}
-Rearranging all terms, we are left with the Dupire's formula
+Rearranging all terms, we are left with
 \begin{equation}
-\sigma=\sqrt{\frac{\displaystyle\pdv{C}{T}+rK\pdv{C}{K}}{\displaystyle\frac{1}{2}K^2\pdv{^2C}{K^2}}}.
+\sigma(K,T)=\sqrt{\frac{\displaystyle\pdv{C}{T}+rK\pdv{C}{K}}{\displaystyle\frac{1}{2}K^2\pdv{^2C}{K^2}}},
 \end{equation}
-
-
+\noindent from which we can easily derive Dupire's formula, as shown in eq.\eqref{dupire}, using a simple variable change, i.e. $\sigma(K,T)\implies \sigma(S,t)$, which gives
+\begin{equation}
+\sigma(S,t)=\sqrt{\frac{\displaystyle\pdv{C}{T}+rS\pdv{C}{K}}{\displaystyle\frac{1}{2}S^2\pdv{^2C}{K^2}}}.
+\end{equation}
 

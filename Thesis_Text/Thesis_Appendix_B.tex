@@ -18,17 +18,17 @@ N(\mathbf{x;m,C})=\frac{1}{\sqrt{(2\pi)^D|\mathrm{det}\mathbf{C}|}}\mathrm{exp}\
 
 \section{The Optimization Algorithm}
 \subsection{Initialization}
-We initialize the algorithm by setting the first mean vector, $\mathbf{m}^{(0)}$, to some initial guess and the covariance matrix to the unit matrix, $\mathbf{C}^{(0)}=\mathbf{I}$.
+We initialize the algorithm by setting the first mean vector, $\mathbf{m}^{(0)}$, to some initial guess, $\theta_0$, and the covariance matrix to the unit matrix, $\mathbf{C}^{(0)}=\mathbf{I}$.
 
 \subsection{Sampling}
-We sample $\lambda$ points, $\mathbf{y}_i^{(1)},\ i=1,\ldots,\lambda$, from the multivariate normal distribution $N(\mathbf{x};\mathbf{0},\mathbf{C}^{(0)})$, generating the first candidate solutions
+We sample $\lambda$ points, $\mathbf{y}_i^{(1)},\ i=1,\ldots,\lambda$, from a multivariate normal distribution $N(\mathbf{x};\mathbf{0},\mathbf{C}^{(0)})$, generating the first candidate solutions
 \begin{equation}
 \mathbf{x}^{(1)}_i=\mathbf{m}^{(0)}+\sigma^{(0)}\mathbf{y}^{(1)}_i, \ \ \ \ \ i=1,\ldots,\lambda,
 \end{equation} 
 \noindent where $\sigma^{(0)}=1$.
 
 \subsection{Classification}
-The candidate solutions are ordered based on their cost function, such that we denote $\mathbf{x}^{(1)}_{i:\lambda}$ as the $i$-th best classified point from the set $\mathbf{x}^{(1)}_1,\ldots,\mathbf{x}^{(1)}_\lambda$. In other words, $f(\mathbf{x}_{1:\lambda}^{(1)})\leq f(\mathbf{x}_{2:\lambda}^{(1)})\leq\ldots\leq f(\mathbf{x}_{\lambda:\lambda}^{(1)})$ (for simplicity, we refer here to the cost function as $f(\cdot)$).
+The candidate solutions are ordered based on their cost function, such that we denote $\mathbf{x}^{(1)}_{i:\lambda}$ as the $i$-th best classified point from the set $\mathbf{x}^{(1)}_1,\ldots,\mathbf{x}^{(1)}_\lambda$. In other words, $\mathrm{Cost}(\mathbf{x}_{1:\lambda}^{(1)})\leq \mathrm{Cost}(\mathbf{x}_{2:\lambda}^{(1)})\leq\ldots\leq \mathrm{Cost}(\mathbf{x}_{\lambda:\lambda}^{(1)})$.
 
 \subsection{Selection}
 From the ordered set $\mathbf{x}^{(1)}_{i:\lambda}$ we choose the first $\mu$ data points (with the lowest cost) and discard the others.
@@ -37,7 +37,7 @@ We then define the weights $\omega_i$ as
 \omega_i=\frac{\left(\log\left(\mu+1/2\right)-\log(i)\right)}{\sum_{i=1}^\mu\left(\log\left(\mu+1/2\right)-\log(i)\right)}, \ \ \ \ \ i=1,\ldots,\mu.
 \end{equation}
 
-As an alternative we can also use $\omega_i=1/\mu$.
+As an alternative we could also use $\omega_i=1/\mu$.
 
 
 \subsection{Adaptation}
@@ -60,7 +60,7 @@ We are finally able to calculate the new mean vector and covariance matrix using
 \begin{equation}\label{covariance}
 \mathbf{C}^{(k)}=\left(1-c_1-c_\mu\right)\mathbf{C}^{(k-1)}+c_1\left(\mathbf{p}_c^{(k)}\left(\mathbf{p}_c^{(k)}\right)^T+\delta\left(h_\sigma^{(k)}\right)\mathbf{C}^{(k-1)}\right)+c_\mu\sum_{i=1}^\mu\omega_i\mathbf{y}^{(k)}_{i:\lambda}\left(\mathbf{y}^{(k)}_{i:\lambda}\right)^T,
 \end{equation}
-\noindent where we iterate $k$ until the termination criterion is met and using
+\noindent where we define
 \begin{equation}
 \mu_{\mathrm{eff}}=\left(\sum_{i=1}^\mu\omega_i^2\right)^{-1},
 \end{equation}
@@ -94,7 +94,10 @@ E^*=\frac{\sqrt{2}\Gamma\left(\frac{D+1}{2}\right)}{\Gamma\left(\frac{D}{2}\righ
 \begin{equation}
 \left(\mathbf{C}^{(k)}\right)^{-1/2}=\mathbf{B}\left(\mathbf{D}^{(k)}\right)^{-1}\mathbf{B}^T,
 \end{equation}
-\noindent where $D$ corresponds to the number of parameters of the model (i.e. the dimensions of the search space) and we define $\mathbf{p}_\sigma^{(0)}=\mathbf{p}_c^{(0)}=0$.
+\noindent with $D$ corresponding to the number of parameters of the model (i.e. the dimensions of the sample space) and we define $\mathbf{p}_\sigma^{(0)}=\mathbf{p}_c^{(0)}=0$.
+
+
+This steps are iterated until the termination criterion is met.
 
 
 

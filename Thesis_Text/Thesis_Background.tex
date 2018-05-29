@@ -1,15 +1,18 @@
 \chapter{Background}
 \label{chapter:background}
-\section{Call and Put Options}
+\section{European Options}
 \hl{show payoff functions of other option types?}
-As stated before, call and put options enable their buyers to respectively buy and sell the underlying stock at the maturity for the fixed strike price.
-In the case of a call option, if at the maturity the market price of its underlying asset is greater than the strike, investors can exercise the option and buy the asset for the fixed lower strike price. They can then immediately go to the market and sell the asset for its higher value. Thus, in this case, the payoff of the option would be the difference between the asset's price and the option's strike price. On the other hand, if at the maturity the price of the asset decreases past the strike, the investor should let the option expire, since the asset is available in the market for a lower price. In this case, the payoff of the option would be zero.
-The same reasoning can be made for put type options.
+European options are, by far, the most traded type of option. Not only are they extremely useful to investors, but also very simple to study and comparatively easy to price. For all these reasons, they have been the subject of much research and are deeply understood. Furthermore, because of their high availability, they are used for model calibration and testing.
+
+
+As stated before, call and put European options enable their buyers to respectively buy and sell the underlying stock at the maturity for the fixed strike price.
+In the case of a European call option, if at the maturity the market price of its underlying asset is greater than the strike, investors can exercise the option and buy the asset for the fixed lower strike price. They can then immediately go to the market and sell the asset for its higher value. Thus, in this case, the payoff of the option would be the difference between the asset's price and the option's strike price. On the other hand, if at the maturity the price of the asset decreases past the strike, the investor should let the option expire, since the asset is available in the market for a lower price. In this case, the payoff of the option would be zero.
+The same reasoning can be made for European put type options.
 The payoff function of these two types of options can then simply be deduced as
 \begin{equation}\label{callput}
 \begin{split}
-&\text{Payoff}_\text{call}(K,T)=\max\left(S(T)-K,0\right);\\
-&\text{Payoff}_\text{put}(K,T)=\max\left(K-S(T),0\right),
+&\text{Payoff}_{Euro,\ call}(K,T)=\max\left(S(T)-K,0\right);\\
+&\text{Payoff}_{Euro,\ put}(K,T)=\max\left(K-S(T),0\right),
 \end{split}
 \end{equation}
 \noindent where $K$ is the option's strike price and $S(T)$ is the asset's price, $S(t)$, at the maturity, $T$. These functions are represented in \autoref{fig:Payoff}. \hl{is this image really necessary?}
@@ -17,17 +20,25 @@ The payoff function of these two types of options can then simply be deduced as
 \begin{figure}[!htb]
     \centering
       \includegraphics[width=.5\columnwidth]{Payoff.eps}
-      \caption[Payoff functions of call and put options]{Payoff functions of \emph{call} and \emph{put options}.}\label{fig:Payoff}
+      \caption[Payoff functions of European call and put options]{Payoff functions of European \emph{call} and \emph{put options}.}\label{fig:Payoff}
     \end{figure}
     
 With eqs.\eqref{callput} in mind, it should be clear that the value of these two types of options corresponds to their expected future payoff discounted back to the present, which gives
 \begin{equation}
 \begin{split}
-&C(K,T)=e^{-rT}\mathbb{E}\left[\max\left(S(T)-K,0\right)\right]=e^{-rT}\mathbb{E}\left[\left(S(T)-K\right)\mathbbm{1}_{\left\{S(T)>K\right\}}\right];\\
-&P(K,T)=e^{-rT}\mathbb{E}\left[\max\left(K-S(T),0\right)\right]=e^{-rT}\mathbb{E}\left[\left(K-S(T)\right)\mathbbm{1}_{\left\{S(T)<K\right\}}\right],
+&C(K,T)_{Euro}=e^{-rT}\mathbb{E}\left[\max\left(S(T)-K,0\right)\right]=e^{-rT}\mathbb{E}\left[\left(S(T)-K\right)\mathbbm{1}_{\left\{S(T)>K\right\}}\right];\\
+&P(K,T)_{Euro}=e^{-rT}\mathbb{E}\left[\max\left(K-S(T),0\right)\right]=e^{-rT}\mathbb{E}\left[\left(K-S(T)\right)\mathbbm{1}_{\left\{S(T)<K\right\}}\right],
 \end{split}
 \end{equation}
-\noindent with $C(K,T)$ and $P(K,T)$ being the values of call and put options, respectively, and $\mathbb{E}[\cdot]$, $\mathbbm{1}_{\{\cdot\}}$ corresponding to the expected value and indicator functions, respectively. The parameter $r$ denotes the risk-free interest rate, which we will describe in the next subsection.
+\noindent with $C(K,T)$ and $P(K,T)$ being the values of European call and put options, respectively, and $\mathbb{E}[\cdot]$, $\mathbbm{1}_{\{\cdot\}}$ corresponding to the expected value and indicator functions, respectively. The parameter $r$ denotes the risk-free interest rate, which we will describe in the Section \ref{section:Black-Scholes Formulae}.
+
+
+\section{American Options}
+American options are the second most traded type of option. They are use
+
+\section{Exotic Options}
+European and American options are, by far, the most traded type. There types should not be neglected, however, as they are very much used by many investors.
+
 
 
 
@@ -256,7 +267,7 @@ P_2=\frac{1}{2}+\frac{1}{\pi}\int_0^\infty\operatorname{Re}\left(\frac{e^{-iu\lo
 \end{equation}
 \noindent where $i$ is the imaginary unit and $\phi(\theta;u,t)$ is the characteristic function of the logarithm of the stock price process - the characteristic function of a random variable is the Fourier transform of the probability density function of that variable.
 
-
+\hl{check notation from Cui. log(A2)=log(A2')?}
 Now we just have to find the appropriate characteristic function $\phi(\theta;u,t)$ in order to evaluate the integrals in eqs.\eqref{P1} and \eqref{P2} and find the option price with eq.\eqref{CH}. In the original article, Heston derived this very characteristic function~\cite{Heston}. However, some authors showed that it presented discontinuities for large maturities and wasn't easily derivable~\cite{Kahl}, making eq.\eqref{CH} very difficult to evaluate. These shortcomings led some other authors to propose several modified versions of this function~\cite{Rollin,Schoutens}. Most recently, Cui \textit{et al.}~\cite{Cui} presented a characteristic function that not only doesn't have the previously mentioned discontinuities but is also easily derivable, given by
 \begin{equation}
 \phi(\theta;u,t)=\exp\left\{iu\left(\log S(0)+rt\right)-\frac{t\kappa\overline{\nu}\rho iu}{\eta}-\nu_0A+\frac{2\kappa\overline{\nu}}{\eta^2}D\right\},
@@ -266,17 +277,17 @@ Now we just have to find the appropriate characteristic function $\phi(\theta;u,
 A=\frac{A_1}{A_2},
 \end{equation}
 \begin{equation}
-D=\log d+\frac{\kappa t}{2}-\log A_2,
+D=\log C+\frac{\kappa t}{2}-\log A_2,
 \end{equation}
-\noindent where we introduce the variables $A_1$, $A_2$, $d$  and $\xi$
+\noindent where we introduce the variables $A_1$, $A_2$, $C$  and $\xi$
 \begin{equation}
-A_1=(u^2+iu)\sinh\frac{dt}{2},
-\end{equation}
-\begin{equation}
-A_2=e^{dt/2}\left(\frac{d+\xi}{2}+\frac{d-\xi}{2}e^{-dt}\right),
+A_1=(u^2+iu)\sinh\frac{Ct}{2},
 \end{equation}
 \begin{equation}
-d=\sqrt{\xi^2+\eta^2(u^2+iu)},
+A_2=e^{Ct/2}\left(\frac{C+\xi}{2}+\frac{C-\xi}{2}e^{-Ct}\right),
+\end{equation}
+\begin{equation}
+C=\sqrt{\xi^2+\eta^2(u^2+iu)},
 \end{equation}
 \begin{equation}
 \xi=\kappa-\eta\rho iu.

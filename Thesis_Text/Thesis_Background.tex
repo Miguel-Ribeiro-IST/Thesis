@@ -1,8 +1,14 @@
 \chapter{Background}
 \label{chapter:background}
-\section{European Options}
-\hl{show payoff functions of other option types?}
-European options are, by far, the most traded type of option. Not only are they extremely useful to investors, but also very simple to study and comparatively easy to price. For all these reasons, they have been the subject of much research and are deeply understood. Furthermore, because of their high availability, they are used for model calibration and testing.
+\section{Option Types}
+Before completely focusing on the mechanics of options, what influences their prices and how we can predict their behavior, we should begin by clearly defining the main option types, their characteristics, as also their payoff functions. We will approach the two main types of options - European and American - as well as other Exotic varieties such as Asian, Barrier and Binary options.
+
+
+
+
+
+\subsection{European Options}
+\emph{European options} are the most traded type of option in the OTC market~\cite{InvEuro}. They are not only extremely useful to investors, but also very simple to study and comparatively easy to price. For all these reasons, they have been the subject of much research and are deeply understood. Furthermore, because of their high availability, they are very useful for model calibration and validation.
 
 
 As stated before, call and put European options enable their buyers to respectively buy and sell the underlying stock at the maturity for the fixed strike price.
@@ -33,13 +39,96 @@ With eqs.\eqref{callput} in mind, it should be clear that the value of these two
 \noindent with $C(K,T)$ and $P(K,T)$ being the values of European call and put options, respectively, and $\mathbb{E}[\cdot]$, $\mathbbm{1}_{\{\cdot\}}$ corresponding to the expected value and indicator functions, respectively. The parameter $r$ denotes the risk-free interest rate, which we will describe in the Section \ref{section:Black-Scholes Formulae}.
 
 
-\section{American Options}
-American options are the second most traded type of option. They are use
+\subsection{American Options}
+While European options dominate the OTC market, their American counterparts are the most traded type of option in exchanges~\cite{InvAmer}. \emph{American options} are more complex than European and thus harder to price, but because of their great importance, many models have been developed to find their value~\cite{Longstaff}.
 
-\section{Exotic Options}
-European and American options are, by far, the most traded type. There types should not be neglected, however, as they are very much used by many investors.
+American options grant the right to buy/sell (call/put) the underlying asset at any point in time \emph{until} the maturity date. Following the logic used to find the payoff functions of European calls and puts, we can deduce their American counterparts as
+\begin{equation}
+\begin{split}
+&\text{Payoff}_{Amer,\ call}(K,t^*)=\max\left(S(t^*)-K,0\right);\\
+&\text{Payoff}_{Amer,\ put}(K,t^*)=\max\left(K-S(t^*),0\right),
+\end{split}
+\end{equation}
+\noindent where we now define $0\leq t^*\leq T$ as the exercise date.
+
+It should be obvious that the price of American options will always be greater or equal to the prices of similar European options. The reason behind this is the fact that, with European contracts, we are only allowed to exercise the option on one single date, whereas, with American options, we have several days to make this choice.
+
+We should also note that while we can't exercise European options until the maturity date, we can buy and sell them arbitrarily before this date. This property enables us to treat European options almost as if they were American.
 
 
+\subsection{Exotic Options}
+While European and American options are, by far, the most traded types, \emph{Exotic options} should not be neglected. Not only does there exist a great number of Exotic option types, but these are also highly customizable, making this type of derivatives very useful on unconventional investment strategies~\cite{InvExotic}. We will explore three of the most common types of option, but many others exist.
+
+\subsubsection{Asian Options}
+An \emph{Asian} option is an Exotic contract whose payoff depends on the \emph{average value} of an underlying asset. This averaging procedure makes this type of contracts more stable than their European/American equivalents - e.g. if, at the last day of trading, an extreme market movement occurs, a European or American option might become worthless, even if they had a large valuation on all the days until the maturity, whereas an Asian option should be much less affected by such sudden changes.
+
+The payoff function of this type of contracts is given by
+\begin{equation}
+\begin{split}
+&\text{Payoff}_{Asian,\ call}(K,T)=\max\left(A(S,T)-K,0\right);\\
+&\text{Payoff}_{Asian,\ put}(K,T)=\max\left(K-A(S,T),0\right),
+\end{split}
+\end{equation}
+\noindent with $A(S,T)$ corresponding to the arithmetic average of stock prices until the maturity, i.e.
+\begin{equation}
+A(S,T)=\frac{1}{T}\int_0^TS(t)dt.
+\end{equation}
+
+Other types of Asian option exist: some contracts have a floating strike (i.e. instead of the fixed strike, $K$, the strike is assumed as the average, $A(S,T)$, instead), and others use different types of averaging mechanisms, such as the geometric average. Despite this, we will assume that the Asian options have the properties described before.
+
+
+\subsubsection{Barrier Options}
+A \emph{Barrier option} actually behaves similarly to a European option with the difference that it only becomes active (or void) if the value of its underlying stock reaches a particular value, called the \emph{barrier level}, which we will denote as $B$.
+
+There are four main types of Barrier option:
+\begin{itemize}
+\item \emph{up-and-out}: the stock starts below the barrier (i.e. $S(0)<B$) and if it increases past this threshold, the option becomes worthless;
+\item \emph{down-and-out}: the stock starts above the barrier (i.e. $S(0)>B$) and if it decreases past this threshold, the option becomes worthless;
+\item \emph{up-and-in}: the stock starts below the barrier (i.e. $S(0)<B$) and only if it increases past this threshold does the option become active;
+\item \emph{down-and-in}: the stock starts above the barrier (i.e. $S(0)>B$) and only if it decreases past this threshold does the option become active.
+\end{itemize}
+
+Because all of the previously described Barrier option types are handled similarly, we can easily adapt the models from one type to another. Thus, we will henceforth assume, for simplicity, that all Barrier option type are of the up-and-in type.
+
+Using the up-and-in Barrier option type as an example, if the stock price, $S(t)$, remains below the barrier level $B$ throughout the whole option duration, even if at the maturity the stock price is above the strike price, the option's payoff would be zero. On the contrary, if this threshold was surpassed at any point in this period, the option's payoff would be similar to that of an European.
+
+
+The payoff function of this type of option is given by
+\begin{equation}
+\begin{split}
+&\text{Payoff}_{Barr,\ call}(K,T)=\begin{cases} 
+      \max\left(S(T)-K,0\right), & \mathrm{if}\ \ \exists\,t\,:\,S(t)>B\\
+      0, & \mathrm{otherwise}
+   \end{cases};\\
+&\text{Payoff}_{Barr,\ put}(K,T)=\begin{cases} 
+      \max\left(K-S(T),0\right), & \mathrm{if}\ \ \exists\,t\,:\,S(t)>B\\
+      0, & \mathrm{otherwise}
+   \end{cases}.
+\end{split}
+\end{equation}
+
+
+
+   
+   
+\subsubsection{Binary Options}
+As the name implies, a \emph{Binary option} is a contract that has one of two outcomes: if at the maturity date the stock price is above/below the strike (call/put), the investor receives a fixed amount $C$. If this event does not occur, the investor receives nothing.
+
+The main difference between a Binary and an European option is the fact that the payoff of a Binary contract is fixed, regardless of how great the stock price is at the maturity, which is not true for European options.
+
+The payoff of this function is, thus,
+\begin{equation}
+\begin{split}
+&\text{Payoff}_{Bin,\ call}(K,T)=\begin{cases} 
+      C, & \mathrm{if}\ \ S(T)>K\\
+      0, & \mathrm{otherwise}
+   \end{cases};\\
+&\text{Payoff}_{Bin,\ put}(K,T)=\begin{cases} 
+      C, & \mathrm{if}\ \ S(T)<K\\
+      0, & \mathrm{otherwise}
+   \end{cases}.
+\end{split}
+\end{equation}
 
 
 

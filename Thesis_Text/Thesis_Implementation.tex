@@ -89,6 +89,7 @@ Because it is more precise, the Milstein method will be used in the implementati
 To price options using the Monte Carlo algorithm, we generate $M$ paths by recursively calculating $\{S_i(t),\ \ i=1,\ldots,M\}$, using either of the discretization methods presented before.
 
 When the stock price at the maturity, $S_i(T)$, is obtained for all paths, the option's payoff for each path is calculated from eq.\eqref{callput}. We then average all these results and discount them back to the present, obtaining the (call) option's value
+\hl{replace max(...) by Payoff(...), so that it's consistent with all option types}
 \begin{equation}
 C(K,T)=e^{-rT}\frac{1}{M}\sum_{i=1}^M\max\left(S_i(T)-K,0\right).
 \end{equation}
@@ -127,6 +128,7 @@ Both SABR and Heston stochastic volatility models contain variables that need to
 
 
 Calibrating the models' parameters means finding the optimal values for these parameters such that the difference between the prices of real market options and options priced under the models' assumptions is minimized. This difference should be measured with a cost function such as
+\hl{should we denote this as weighted least squares: sum(wi*(xi-f(xi))2)}
 \begin{equation}\label{cost}
 \mathrm{Cost}(\theta)=\sum_{i=1}^n\sum_{j=1}^m\left(\frac{C_{\mathrm{market}}(T_i,K_j)-C_{\mathrm{model}}(\theta;T_i,K_j)}{C_{\mathrm{market}}(T_i,K_j)}\right)^2,
 \end{equation}

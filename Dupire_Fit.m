@@ -1,12 +1,12 @@
 clear; %clear all variables. This prevents multiple simulations from interfering with one another
 %Import data from file "Data_BNPP.txt" and assign it to matrix B. The file must be in the same folder
 %1st column - maturities, 2nd column - strikes, 3rd column - implied volatilities
-A = importdata('Data_BNPP.txt','\t',1);
+A = importdata('Data_BNPP_2.txt','\t',1);
 B=A.data(:,:);
 
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;        %initial stock price
-r = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
+r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
                    %If matur=5, all maturities until the fifth maturity in the file are chosen.
 M=10000;           %number of paths to be simulated
@@ -137,18 +137,17 @@ interp=scatteredInterpolant(V(:,1),V(:,2),V(:,3),'linear','linear');
 end
 
 
-
 %%%%%%%%%%%%%%  CALCULATE BLACK-SCHOLES PRICE  %%%%%%%%%%%%%%%%%%%%
 %If option is a call: putcall="call"
 %If option is a put: putcall="put"
 function price=european_bs(S0,K,r,sigma,T,putcall)
-d1 = (log(S0/K) + (r + 0.5*sigma^2)*T)/(sigma*sqrt(T));
-d2 = d1 - sigma*sqrt(T);
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)/(sigma.*sqrt(T));
+d2 = d1 - sigma.*sqrt(T);
 N1 = normcdf(d1);
 N2 = normcdf(d2);
 if putcall=="call"
-    price = S0*N1 - K*exp(-r*T)*N2;
+    price = S0.*N1 - K.*exp(-r.*T).*N2;
 elseif putcall=="put"
-    price = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
+    price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
 end
 end

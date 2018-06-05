@@ -1,12 +1,12 @@
 clear; %clear all variables. This prevents multiple simulations from interfering with one another
 %Import data from file "Data_BNPP.txt" and assign it to matrix B. The file must be in the same folder
 %1st column - maturities, 2nd column - strikes, 3rd column - implied volatilities
-A = importdata('Data_BNPP.txt','\t',1);
+A = importdata('Data_BNPP_2.txt','\t',1);
 B=A.data(:,:);
 
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;        %initial stock price
-r = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
+r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity at which we want to fit the data. If matur=5, the fifth maturity in the file is chosen.
 OptAlg="CMA"; %PatternSearch GeneticAlgorithm SimulatedAnnealing MultiStart
 SimPoints=false;
@@ -20,8 +20,8 @@ S0=1;
 B(:,1)=B(:,1)/252;    %convert maturities from days to years
 times=unique(B(:,1));
 
-B=B(B(:,2)>=0.7 ,:); 
-B(6,:)=[];
+%B=B(B(:,2)>=0.7 ,:); 
+%B(6,:)=[];
 
 B=B(B(:,1)<=times(matur),:);     %only keep values of the maturity
 %L = T*252*2;          %number of steps in simulations
@@ -35,14 +35,16 @@ end
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
 x0=[0.01,1,1,0.9,0.001];   %parameter starting values [kappa,nubar,nu0,rho,chi]
 lb = [0.0001,0.0001,0.0001,-1,0.0001];       %parameter lower bounds
-ub = [20,2,2,1,5];    %parameter upper bounds
+ub = [50,2,2,1,5];    %parameter upper bounds
 
+%%{
 optimvars=Optimizer(B,S0,r,x0,OptAlg,lb,ub); 
 kappa=optimvars(1);
 nubar=optimvars(2);
 nu0=optimvars(3);
 rho=optimvars(4);
 chi=optimvars(5);
+%}
 
 
 Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,P,M,iterations,matur,SimPoints,OptAlg,lb,ub)
@@ -86,8 +88,8 @@ else
     
 fun1=@(u)real(exp(-1i.*u.*log(K))./(1i.*u.*S0.*exp(r.*T)).*CharFuncHeston(u-1i,T,S0,r,kappa,nubar,nu0,rho,chi));
 fun2=@(u)real(exp(-1i.*u.*log(K))./(1i.*u).*CharFuncHeston(u,T,S0,r,kappa,nubar,nu0,rho,chi));
-P1=1/2+1/pi.*integral(fun1,0,100);
-P2=1/2+1/pi.*integral(fun2,0,100);
+P1=1/2+1/pi.*integral(fun1,0,200);
+P2=1/2+1/pi.*integral(fun2,0,200);
 call=S0.*P1-exp(-r.*T).*K.*P2;
 if PriceVol=="price"
     result=call;
@@ -102,10 +104,10 @@ function w=CharFuncHeston(u,T,S0,r,kappa,nubar,nu0,rho,chi)
 xi=kappa-chi.*rho.*1i.*u;
 d=sqrt(xi.^2+chi.^2.*(u.^2+1i.*u));
 A1=(u.^2+1i.*u).*sinh(d.*T/2);
-%A2=d*cosh(d*T/2)+(kappa-chi*rho*1i*u)*sinh(d*t/2);
-A2=exp(d.*T/2).*((d+xi)./2+(d-xi)./2.*exp(-d.*T));
+A2=d.*cosh(d.*T./2)+xi.*sinh(d.*T./2);
+%A2=exp(d.*T/2).*((d+xi)./2+(d-xi)./2.*exp(-d.*T));
 A=A1./A2;
-D=log(d)+kappa.*T/2-log(A2);
+D=log(d)+(kappa-d).*T./2-log((d+xi)./2+(d-xi)./2.*exp(-d.*T));
 w=exp(1i.*u.*(log(S0)+r.*T)-T.*kappa.*nubar.*rho.*1i.*u./chi-nu0.*A+2*kappa.*nubar./chi.^2.*D);
 end
 
@@ -206,7 +208,9 @@ for iter=1:matur
     
     scatter(ax(iter),C(:,1),C(:,2),'.');
     hold on;
-    fplot(ax(iter),HestonVol,[0.5,1.5])
+    fplot(ax(iter),HestonVol,[0.4,1.6])
+    xlim([0.4,1.6])
+    ylim([0.2,1])
     %fplot(ax(iter),HestonP,[0.9,1.1])
     hold on;
     title(ax(iter),strcat(strcat(strcat(num2str(T*252)," days  ("),num2str(T*252/21))," months)"))
@@ -268,6 +272,11 @@ parfor iter=1:iterations    %Perform the "for" cycle in parallel
 end
 Result_Avg=mean(Result);  %average all results
 end
+
+
+
+
+
 
 
 %%%%%%%%%%%%%%  CALCULATE BLACK-SCHOLES PRICE  %%%%%%%%%%%%%%%%%%%%

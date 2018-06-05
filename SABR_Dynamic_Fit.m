@@ -3,12 +3,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear;
-A = importdata('Data_BNPP.txt','\t',1);
+A = importdata('Data_BNPP_2.txt','\t',1);
 B=A.data(:,:);
 
 
 S0=17099.4;
-r = 0.06;
+r = 0;
 matur=4;           %maturity until which we want to fit the data.
 %If matur=5, all maturities until the fifth maturity in the file are chosen.
 
@@ -172,15 +172,19 @@ Result_Avg=mean(Result);
 end
 
 
+
+%%%%%%%%%%%%%%  CALCULATE BLACK-SCHOLES PRICE  %%%%%%%%%%%%%%%%%%%%
+%If option is a call: putcall="call"
+%If option is a put: putcall="put"
 function price=european_bs(S0,K,r,sigma,T,putcall)
-d1 = (log(S0/K) + (r + 0.5*sigma^2)*T)/(sigma*sqrt(T));
-d2 = d1 - sigma*sqrt(T);
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)/(sigma.*sqrt(T));
+d2 = d1 - sigma.*sqrt(T);
 N1 = normcdf(d1);
 N2 = normcdf(d2);
 if putcall=="call"
-    price = S0*N1 - K*exp(-r*T)*N2;
+    price = S0.*N1 - K.*exp(-r.*T).*N2;
 elseif putcall=="put"
-    price = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
+    price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
 end
 end
 

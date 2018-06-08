@@ -9,8 +9,8 @@ S0=17099.4;        %initial stock price
 r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
                    %If matur=5, all maturities until the fifth maturity in the file are chosen.
-M=10000;           %number of paths to be simulated
-iterations=5;      %number of repetitions to be simulated (and then averaged)
+M=10;           %number of paths to be simulated
+iterations=2;      %number of repetitions to be simulated (and then averaged)
 sigmamax=2;        %maximum value the local volatility can take
 
 
@@ -65,7 +65,6 @@ end
 %%% CALCULATE MONTE CARLO PRICE/IMPLIED VOLATILITY OF EUROPEAN OPTION UNDER SABR %%%
 function Result_Avg=Pricer(S0,r,T,M,L,K,iterations,PriceVol,sigmamax,interpol)
 dt = T/L;      %time steps
-
 %%NOTE:
 %%%%We don't need to simulate an entire matrix of stock prices for all time steps and for all paths.
 %%%%We just need to simulate one vector of stock prices for all paths and update it at each time step

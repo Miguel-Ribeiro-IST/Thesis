@@ -551,7 +551,10 @@
 \usepackage{bbm}
 \usepackage[ruled,noline]{algorithm2e}
 \usepackage{stackengine}
+\usepackage{multirow}
 
+\usepackage{changepage}
+%\patchcmd{\subfigmatrix}{\hfill}{\hspace{1.5cm}}{}{}
 
 \newcommand{\evalat}[4]{ \left. {\frac{\partial #1}{\partial #2}}_{\stackunder[2pt]{}{}}\right|_{\stackon[3pt]{$\scriptstyle #4$}{$\scriptstyle #3$}}}
 

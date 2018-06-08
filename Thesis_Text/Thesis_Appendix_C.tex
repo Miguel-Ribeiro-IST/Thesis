@@ -1,0 +1,112 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+%     File: Thesis_Appendix_B.tex                                      %
+%     Tex Master: Thesis.tex                                           %
+%                                                                      %
+%     Author: Andre C. Marta                                           %
+%     Last modified :  2 Jul 2015                                      %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{CMA-ES Algorithm Formulas}
+\label{chapter:CMAESAlg}
+
+Here we present the formulas required for the calculation of the mean vector, $\mathbf{m}$, and the covariance matrix, $\mathbf{C}$, to be used, at each iteration of the CMA-ES optimization algorithm, on the multivariate normal distribution
+\begin{equation}
+N(\mathbf{x;m,C})=\frac{1}{\sqrt{(2\pi)^D|\mathrm{det}\mathbf{C}|}}\mathrm{exp}\left(-\frac{1}{2}(\mathbf{x}-\mathbf{m})^T\mathbf{C}^{-1}(\mathbf{x}-\mathbf{m})\right).
+\end{equation}
+
+\section{The Optimization Algorithm}
+\subsection{Initialization}
+We initialize the algorithm by setting the first mean vector, $\mathbf{m}^{(0)}$, to some initial guess, $\theta_0$, and the covariance matrix to the unit matrix, $\mathbf{C}^{(0)}=\mathbf{I}$.
+
+\subsection{Sampling}
+We sample $\lambda$ points, $\mathbf{y}_i^{(1)},\ i=1,\ldots,\lambda$, from a multivariate normal distribution $N(\mathbf{x};\mathbf{0},\mathbf{C}^{(0)})$, generating the first candidate solutions
+\begin{equation}
+\mathbf{x}^{(1)}_i=\mathbf{m}^{(0)}+\sigma^{(0)}\mathbf{y}^{(1)}_i, \ \ \ \ \ i=1,\ldots,\lambda,
+\end{equation} 
+\noindent where $\sigma^{(0)}=1$.
+
+\subsection{Classification}
+The candidate solutions are ordered based on their cost function, such that we denote $\mathbf{x}^{(1)}_{i:\lambda}$ as the $i$-th best classified point from the set $\mathbf{x}^{(1)}_1,\ldots,\mathbf{x}^{(1)}_\lambda$. In other words, $\mathrm{Cost}(\mathbf{x}_{1:\lambda}^{(1)})\leq \mathrm{Cost}(\mathbf{x}_{2:\lambda}^{(1)})\leq\ldots\leq \mathrm{Cost}(\mathbf{x}_{\lambda:\lambda}^{(1)})$.
+
+\subsection{Selection}
+From the ordered set $\mathbf{x}^{(1)}_{i:\lambda}$ we choose the first $\mu$ data points (with the lowest cost) and discard the others.
+We then define the weights $\omega_i$ as
+\begin{equation}
+\omega_i=\frac{\left(\log\left(\mu+1/2\right)-\log(i)\right)}{\sum_{i=1}^\mu\left(\log\left(\mu+1/2\right)-\log(i)\right)}, \ \ \ \ \ i=1,\ldots,\mu.
+\end{equation}
+
+As an alternative we could also use $\omega_i=1/\mu$.
+
+
+\subsection{Adaptation}
+We are finally able to calculate the new mean vector and covariance matrix using
+\begin{equation}
+\left\langle\mathbf{y}^{(k)}\right\rangle_w=\sum_{i=1}^\mu\omega_i\mathbf{y}^{(k)}_{i:\lambda},
+\end{equation}
+\begin{equation}\label{mean}
+\mathbf{m}^{(k)}=\mathbf{m}^{(k-1)}+\sigma^{(k-1)}\left\langle\mathbf{y}^{(k)}\right\rangle_w=\sum_{i=1}^\mu\omega_i\mathbf{x}^{(k)}_{i:\lambda},
+\end{equation}
+\begin{equation}
+\mathbf{p}^{(k)}_\sigma=(1-c_\sigma)\mathbf{p}^{(k-1)}_\sigma+\sqrt{c_\sigma(2-c_\sigma)\mu_{\mathrm{eff}}}\left(\mathbf{C}^{(k-1)}\right)^{-1/2}\left\langle\mathbf{y}^{(k)}\right\rangle_w,
+\end{equation}
+\begin{equation}
+\sigma^{(k)}=\sigma^{(k-1)}\mathrm{exp}\left(\frac{c_\sigma}{d_\sigma}\left(\frac{\|\mathbf{p}^{(k)}_\sigma\|}{E^*}-1\right)\right),
+\end{equation}
+\begin{equation}
+\mathbf{p}^{(k)}_c=(1-c_c)\mathbf{p}^{(k-1)}_c+h_\sigma^{(k)}\sqrt{c_c(2-c_c)\mu_{\mathrm{eff}}}\left\langle\mathbf{y}^{(k)}\right\rangle_w,
+\end{equation}
+\begin{equation}\label{covariance}
+\mathbf{C}^{(k)}=\left(1-c_1-c_\mu\right)\mathbf{C}^{(k-1)}+c_1\left(\mathbf{p}_c^{(k)}\left(\mathbf{p}_c^{(k)}\right)^T+\delta\left(h_\sigma^{(k)}\right)\mathbf{C}^{(k-1)}\right)+c_\mu\sum_{i=1}^\mu\omega_i\mathbf{y}^{(k)}_{i:\lambda}\left(\mathbf{y}^{(k)}_{i:\lambda}\right)^T,
+\end{equation}
+\noindent where we define
+\begin{equation}
+\mu_{\mathrm{eff}}=\left(\sum_{i=1}^\mu\omega_i^2\right)^{-1},
+\end{equation}
+\begin{equation}
+c_c=\frac{4+\mu_{\mathrm{eff}}/D}{D+4+2\mu_{\mathrm{eff}}/D},
+\end{equation}
+\begin{equation}
+c_\sigma=\frac{\mu_{\mathrm{eff}}+2}{D+\mu_{\mathrm{eff}}+5},
+\end{equation}
+\begin{equation}
+d_\sigma=1+2\max\left(0,\ \sqrt{\frac{\mu_{\mathrm{eff}}-1}{D+1}}-1\right)+c_\sigma,
+\end{equation}
+\begin{equation}
+c_1=\frac{2}{(D+1.3)^2+\mu_{\mathrm{eff}}},
+\end{equation}
+\begin{equation}
+c_\mu=\min\left(1-c_1,\ 2\frac{\mu_{\mathrm{eff}}-2+1/\mu_{\mathrm{eff}}}{(D+2)^2+\mu_{\mathrm{eff}}}\right),
+\end{equation}
+\begin{equation}
+E^*=\frac{\sqrt{2}\Gamma\left(\frac{D+1}{2}\right)}{\Gamma\left(\frac{D}{2}\right)},
+\end{equation}
+\begin{equation}h_\sigma^{(k)}=
+\begin{cases} 
+      1, & \mathrm{if} \frac{\|\mathbf{p}^{(k)}_\sigma\|}{\sqrt{1-\left(1-c_\sigma\right)^{2(k+1)}}}<\left(1.4+\frac{2}{D+1}\right)E^*\\
+      0, & \mathrm{otherwise}
+   \end{cases},
+\end{equation}
+\begin{equation}
+\delta\left(h_\sigma^{(k)}\right)=\left(1-h_\sigma^{(k)}\right)c_c\left(2-c_c\right),
+\end{equation}
+\begin{equation}
+\left(\mathbf{C}^{(k)}\right)^{-1/2}=\mathbf{B}\left(\mathbf{D}^{(k)}\right)^{-1}\mathbf{B}^T,
+\end{equation}
+\noindent with $D$ corresponding to the number of parameters of the model (i.e. the dimensions of the sample space) and we define $\mathbf{p}_\sigma^{(0)}=\mathbf{p}_c^{(0)}=0$.
+
+
+This steps are iterated until the termination criterion is met.
+
+
+
+
+
+
+
+
+
+
+
+

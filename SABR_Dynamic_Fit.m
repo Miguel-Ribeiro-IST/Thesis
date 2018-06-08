@@ -88,10 +88,12 @@ for iter=1:matur
     scatter(ax(iter),C(:,1),C(:,2),'.');
     hold on;
 
-    fplot(ax(iter),SABRVol,[min(C(:,1)) max(C(:,1))])
+    fplot(ax(iter),SABRVol,[0.4,1.6])
     hold on;
     title(ax(iter),strcat(strcat(strcat(num2str(T*252)," days  ("),num2str(T*252/21))," months)"))
     clear Volatility
+    xlim([0.4,1.6])
+    ylim([0.2,1])
 end
 text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
 if SimPoints

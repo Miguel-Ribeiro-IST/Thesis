@@ -121,15 +121,40 @@ Because we are modeling volatilities, and because implied volatilities are more 
 
 \hl{consider other weight functions?}
 
-\hl{plot weight function}
 
 The weight function $w_{i,j}$ should be chosen such that higher weights are given to options with strikes closer to the current stock price $S_0$, because these points have a higher influence in the shape of the volatility smile than the others.
 One example of such a function is
 \begin{equation}
-w_{i,j}=\left(1-\left(1-\frac{K_j}{S_0}\right)^2\right)^2,
+w_{i,j}=\left(1-\left|1-\frac{K_j}{S_0}\right|\right)^2,
 \end{equation}
 \noindent where we assume strikes are restricted to $K<2S_0$.
-
+This function is represented in \autoref{fig:weights}.
+    
+\begin{figure}[!htb]
+  \begin{minipage}[b]{0.65\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{Weight.eps}
+  \end{minipage}%
+  \begin{minipage}[b]{0.30\linewidth}
+    \centering
+    \renewcommand{\arraystretch}{1.1}
+\begin{tabular}{@{}lr@{}}
+\toprule
+$K/S_0$ & Weight \\ \midrule
+0.50  & 0.2500 \\
+0.75  & 0.5625 \\
+0.90  & 0.8100 \\
+1.00  & 1.0000 \\
+1.10  & 0.8100 \\
+1.25  & 0.5625 \\ 
+1.50  & 0.2500 \\\bottomrule
+\end{tabular}
+    \vspace{5em}
+  \end{minipage}
+\caption[Weight function plot and significant weight values]{Weight function plot and significant weight values}\label{fig:weights}
+\end{figure}    
+    
+\noindent As we can see, the maximum weight value is given to the point where the strike equals the initial stock price ($K=S_0$) and less weight is given for points farther from this value.
 
 To obtain the value of the cost function for a given set of parameters, we need to calculate $m\times n$ model option prices (see eq.\eqref{cost}). We could achieve this by implementing the Monte Carlo method with the discretization procedures described before.
 Because we want to calibrate the model's parameters, a large number of instances of the cost function will have to be executed for our optimization algorithms to converge to an optimal solution.

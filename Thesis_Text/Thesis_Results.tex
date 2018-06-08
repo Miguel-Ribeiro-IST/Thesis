@@ -12,3 +12,27 @@
 \label{chapter:results}
 
 \hl{show data and mention where it came from. confidentiality, etc}
+
+\hl{in annex, should plot y-axes with different limits?}
+
+
+\begin{table}[!htb]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}lcccccr@{}}
+\toprule
+$K$ ($\EUR$) & $\sigma_{imp,\mathrm{mkt}}$ ($\SI{}{\year\tothe{-1/2}}$) &  $\sigma_{imp,\mathrm{mdl}}$ ($\SI{}{\year\tothe{-1/2}}$) &$\Delta\sigma_{imp}/\sigma_{imp,\mathrm{mkt}}$&$C_{\mathrm{mkt}}$ ($\EUR$)&$C_{\mathrm{mdl}}$ ($\EUR$)& $\Delta C/C_{\mathrm{mkt}}$\\ \midrule
+ 0.50 & 0.7082& \multirow{7}{*}{0.3174} & 0.55 & 0.500013 &   0.500000 &0.00002\\
+ 0.75 & 0.4632 & &0.31&0.250648 &   0.250018 &0.00251\\
+ 0.90 & 0.2989 & &0.06&0.104393 &   0.105395 &0.00960\\
+ 1.00 & 0.2425 & &0.31&0.027923 &   0.036540 &0.30860\\
+ 1.10 & 0.2314 & &0.37&0.002421 &   0.007406 &2.05883\\
+ 1.25 & 0.2699 & &0.18&0.000053 &   0.000250 &3.67938\\
+ 1.50 & 0.3433 & &0.08&0.000001 &   0.000000 &0.80535\\ \bottomrule
+\end{tabular}
+  \caption[Fit results from constant volatility model.]{Data provided by \emph{BNP Paribas} to be used in model calibration and validation.}
+  \label{tab:constvol}
+\end{table}
+\hl{for T=1}
+\hl{check caption}
+\hl{check Cmdl(K=1.5)- relative error is "wrong"}

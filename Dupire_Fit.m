@@ -8,16 +8,17 @@ B=A.data(:,:);
 S0=17099.4;        %initial stock price
 r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
-                   %If matur=5, all maturities until the fifth maturity in the file are chosen.
 M=10;           %number of paths to be simulated
-iterations=2;      %number of repetitions to be simulated (and then averaged)
-sigmamax=2;        %maximum value the local volatility can take
+sigmamax=10;        %maximum value the local volatility can take
+%L=T*252*2
 
 
 %%%%%%%%%%%%%      ORIGINAL DATA MODIFICATIONS     %%%%%%%%%%%%
 B(:,2)=B(:,2)/S0;     %normalize strike prices
 S0=1;
 B(:,1)=B(:,1)/252;    %convert maturities from days to years
+times=unique(B(:,1));
+B=B(B(:,1)<=times(matur),:);  %restrict data to selected maturity
 
 
 %%%%%%%%%%   IMPLIED VOLATILITY INTERPOLATION MESH PARAMETERS   %%%%%%%%%
@@ -31,72 +32,27 @@ dK=0.05*S0;         %mesh grid size w.r.t. strike
 
 interpol=Dupire(S0,r,B,MinT,MaxT,dT,MinK,MaxK,dK);
 
-Plotter(S0,r,B,M,iterations,matur,sigmamax,interpol)
+Plotter(S0,r,B,M,matur,sigmamax,interpol)
+Printer(sigmamax,interpol,M,B,S0,r)
 
+beep
 
-%%%%%%%%%%%%%%%%%%%%%    PLOT INTERPOLATION RESULTS    %%%%%%%%%%%%%%%%%%%%
-function Plotter(S0,r,B,M,iterations,matur,sigmamax,interpol)
-figure
-times=unique(B(:,1));
-for iter=1:matur
-    ax(iter) = subplot(2,ceil(matur/2),iter);
-    T = times(iter);
-    L = T*252*2;
-    
-        C=B(B(:,1)==T,2:3);
-        
-    for i=1:size(C,1)
-        Volatility(i)=Pricer(S0,r,T,M,L,C(i,1),iterations,"vol",sigmamax,interpol);
-    end
-    
-    scatter(ax(iter),C(:,1),C(:,2),'.');
-    hold on;
-    scatter(ax(iter),C(:,1),Volatility(:),'x');
-    hold on;
-    title(ax(iter),strcat(strcat(strcat(num2str(T*252)," days  ("),num2str(T*252/21))," months)"))
-    clear Volatility
-end
-text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
-vars1=strcat(strcat(strcat("sigmamax=",num2str(sigmamax)),strcat(",  paths=",num2str(M))),strcat(",  iterations=",num2str(iterations)));
-title(ax(1),{vars1,text1})
-end
-
-
-%%% CALCULATE MONTE CARLO PRICE/IMPLIED VOLATILITY OF EUROPEAN OPTION UNDER SABR %%%
-function Result_Avg=Pricer(S0,r,T,M,L,K,iterations,PriceVol,sigmamax,interpol)
-dt = T/L;      %time steps
-%%NOTE:
-%%%%We don't need to simulate an entire matrix of stock prices for all time steps and for all paths.
-%%%%We just need to simulate one vector of stock prices for all paths and update it at each time step
-parfor iter=1:iterations               %Perform the "for" cycle in parallel
-    S = S0*ones(M,1);                  %define initial vector of stock prices
-    sigma=interpol(0,S0)*ones(M,1);    %define the initial vector of volatilities
-    
-    for k = 1:L
-        S(:)=S(:)+S(:)*r*dt+sqrt(dt)*sigma(:).*S(:).*randn(M,1);   %GBM formula
-        
-        for i=1:M
-           %At each step, calculate the new local volatility value for each path (maximized by threshold "sigmamax")
-           sigma(i)=min(interpol(k*dt,S(i)),sigmamax);
-        end
-    end
-    
-    Y=zeros(M,1);
-    for i=1:M
-        Y(i) = max(S(i)-K,0);      %Calculate the payoff of all paths (assuming calls)
-    end
-    
-    if PriceVol=="price"
-        Result(iter)=exp(-r*T)*mean(Y(:)); %Output the discounted expected payoff
-    else
-        volatility=@(sigma)european_bs(S0,K,r,sigma,T,"call")-exp(-r*T)*mean(Y(:));
-        Result(iter)=fzero(volatility,0.25);   %Calculate the expected implied volatility
-    end
-end
-
-Result_Avg=mean(Result);
-end
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%       FUNCTIONS       %%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%S0=starting stock price
+%r=risk-free rate
+%L=number of simulation time steps
+%M=number of simulated paths
+%B=input data file
+%MinT=minimum value for maturity in the mesh grid
+%MaxT=maximum value for maturity in the mesh grid
+%MinK=minimum value for strike in the mesh grid
+%MaxK=minimum value for strike in the mesh grid
+%dT=mesh grid size w.r.t. maturity
+%dK=mesh grid size w.r.t. strike
+%interpol=MATLAB object corresponding to the interpolated surface of implied vols
+%sigmamax=maximum value the local volatility can take
 
 %%%%%%%%%%%%%%     OBTAIN THE LOCAL VOLATILITY SURFACE    %%%%%%%%%%
 %%Find function in page 844 of file github.com/Miguel-Ribeiro-IST/Thesis/blob/master/References/Wilmott.pdf
@@ -124,11 +80,11 @@ vol=sqrt((SXY.^2+2*X.*SXY.*SgradT+2*r*Y.*X.*SXY.*SgradK)./((1+Y.*d1.*sqrt(X).*Sg
 %Generate matrix with the local volatility values on the mesh nodes, to be interpolated
 V=[];
 for i=1:size(vol,1)
-   for j=1:size(vol,2)
-       if ~isnan(vol(i,j))                 %some mesh nodes will have no data (vol(i,j)=NaN). These values should be rejected
-           V=[V;[X(i,j),Y(i,j),vol(i,j)]];
-       end
-   end
+    for j=1:size(vol,2)
+        if ~isnan(vol(i,j))                 %some mesh nodes will have no data (vol(i,j)=NaN). These values should be rejected
+            V=[V;[X(i,j),Y(i,j),vol(i,j)]];
+        end
+    end
 end
 
 %Generate local volatility surface
@@ -136,11 +92,151 @@ interp=scatteredInterpolant(V(:,1),V(:,2),V(:,3),'linear','linear');
 end
 
 
+
+%%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%    PLOT MATURITIES IN DIFFERENT FIGURES  %%%%%%%%%%%%
+function Plotter(S0,r,B,M,matur,sigmamax,interpol)
+times=unique(B(:,1));   %array with all maturity dates
+
+for iter=1:matur
+    figure
+    
+    T = times(iter);
+    C=B(B(:,1)==T,2:3);  %Implied volatilities for the selected maturity
+        
+    %Plot original data points
+    scatter(C(:,1),C(:,2),100,'x','LineWidth',1.5);
+    hold on;
+    
+    %Calculate the implied volatility for an array of Ks and connect the dots to generate a function
+    K=0.4:0.01:1.6;
+    V=Pricer(S0,r,T,M,T*252*2,K',"vol",sigmamax,interpol);
+    plot(K,V,'-','LineWidth',1.5)
+    
+    %Plot options
+    xlim([0.4,1.6])
+    ylim([0.2,1])
+    box on;
+    grid on;
+    set(gca,'fontsize',12)
+    xlabel('K/S_0');
+    ylabel('\sigma_{imp} (yr^{-1/2})')
+    pbaspect([1.5 1 1])
+    lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
+    title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
+    
+    clear Volatility
+end
+end
+
+
+
+%%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%    PLOT MULTIPLE MATURITIES IN A SINGLE FIGURE  %%%%%%%%%%%%
+function MultiPlotter(S0,r,B,M,matur,sigmamax,interpol)
+figure
+times=unique(B(:,1));
+for iter=1:matur
+    ax(iter) = subplot(2,ceil(matur/2),iter);
+    T = times(iter);
+    L = T*252*2;
+    
+    C=B(B(:,1)==T,2:3);
+    
+    X=0.4:0.01:1.6;
+    Y=Pricer(S0,r,T,M,L,X',"vol",sigmamax,interpol);
+    
+    %   Volatility=Pricer(S0,r,T,M,L,C(:,1),"vol",sigmamax,interpol);
+    
+    scatter(ax(iter),C(:,1),C(:,2),'.');
+    hold on;
+    % scatter(ax(iter),C(:,1),Volatility(:),'x');
+    plot(ax(iter),X,Y,'-')
+    hold on;
+    xlim([0.4,1.6])
+    ylim([0.2,1])
+    title(ax(iter),strcat(strcat(strcat(num2str(T*252)," days  ("),num2str(T*252/21))," months)"))
+    clear Volatility
+end
+text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
+vars1=strcat(strcat("sigmamax=",num2str(sigmamax)),strcat(",  paths=",num2str(M)));
+title(ax(1),{vars1,text1})
+end
+
+
+
+%%% CALCULATE MONTE CARLO PRICE/IMPLIED VOLATILITY OF EUROPEAN OPTION UNDER SABR %%%
+function Result=Pricer(S0,r,T,M,L,C,PriceVol,sigmamax,interpol)
+dt = T/L;      %time steps
+N=size(C,1);
+
+%%NOTE:
+%%%%We don't need to simulate an entire matrix of stock prices for all time steps and for all paths.
+%%%%We just need to simulate one vector of stock prices for all paths and update it at each time step
+S = S0*ones(M,1);                  %define initial vector of stock prices
+sigma=interpol(0,S0)*ones(M,1);    %define the initial vector of volatilities
+
+for k = 1:L
+    S(:)=S(:)+S(:)*r*dt+sqrt(dt)*sigma(:).*S(:).*randn(M,1);   %GBM formula
+    
+    for i=1:M
+        %At each step, calculate the new local volatility value for each path (maximized by threshold "sigmamax")
+        sigma(i)=min(interpol(k*dt,S(i)),sigmamax);
+    end
+end
+
+Y=zeros(M,N);
+for j=1:N
+    for i=1:M
+        Y(i,j) = max(S(i)-C(j,1),0);      %Calculate the payoff of all paths (assuming calls)
+    end
+end
+
+if PriceVol=="price"
+    Result=exp(-r*T)*mean(Y); %Output the discounted expected payoff
+else
+    Result=zeros(1,N);
+    for j=1:N
+        volatility=@(sigma)european_bs(S0,C(j,1),r,sigma,T,"call")-exp(-r*T)*mean(Y(:,j));
+        res=fzero(volatility,0.25);   %Calculate the expected implied volatility
+        
+        if ~isnan(res)
+            Result(j)=res;
+        else
+            Result(j)=0;
+        end
+    end
+end
+
+end
+
+
+
+%%% PRINT A TABLE WITH MODEL/MARKET IMPLIED VOL/PRICES AND REL. ERRORS %%%
+function Printer(sigmamax,interpol,M,B,S0,r)
+format longG      %Change format for maximum precision
+MKTVols=B(:,3);   %Market implied volatilities
+MKTPrices=european_bs(S0,B(:,2),r,B(:,3),B(:,1),"call");  %Market (converted) prices
+
+Vols=[]; Prices=[];
+for i=1:size(B,1)
+    vol=Pricer(S0,r,B(i,1),M,B(i,1)*252*2,B(i,2),"vol",sigmamax,interpol);
+    Vols=[Vols;vol];    %Model Implied volatilities
+    Prices=[Prices;european_bs(S0,B(i,2),r,vol,B(i,1),"call")];  %Model Prices
+end
+
+%Output table
+[B(:,1)*252,B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices]
+format short
+end
+
+
+
 %%%%%%%%%%%%%%  CALCULATE BLACK-SCHOLES PRICE  %%%%%%%%%%%%%%%%%%%%
 %If option is a call: putcall="call"
 %If option is a put: putcall="put"
 function price=european_bs(S0,K,r,sigma,T,putcall)
-d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)/(sigma.*sqrt(T));
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
 d2 = d1 - sigma.*sqrt(T);
 N1 = normcdf(d1);
 N2 = normcdf(d2);

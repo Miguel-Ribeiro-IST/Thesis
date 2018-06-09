@@ -5,16 +5,17 @@ A = importdata('Data_BNPP.txt','\t',1);
 B=A.data(:,:);
 
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
-S0=17099.4;        %initial stock price
-r = 0;             %risk-free rate. Forward prices in data file assumed r=0.0
-matur=4;           %maturity until which we want to fit the data. If matur=5, all maturities until the fifth are chosen.
+S0=17099.4;               %initial stock price
+r = 0;                    %risk-free rate. Forward prices in data file assumed r=0.0
+matur=4;                  %maturity until which we want to fit the data. If matur=5, all maturities until the fifth are chosen.
 OptAlg="MultiStart";      %"CMA" or "MultiStart" optimization algorithms
 
+
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
-%After calibrating all the model's parameters, we may simulate the implied volatilities using Monte Carlo
+%After calibrating all the model's parameters, we may want to simulate the implied volatilities using Monte Carlo
 SimPoints=false;   %true or false - define if Monte Carlo simulation should be executed
-M=50000;           %number of paths to be simulated
-iterations=5;      %number of repetitions to be simulated (and then averaged) to reduce error
+M=10000;           %number of paths to be simulated
+%L=T*252*2
 
 
 %%%%%%%%%%%%%      ORIGINAL DATA MODIFICATIONS     %%%%%%%%%%%%
@@ -32,7 +33,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
 %    [kappa, nubar, nu0, rho, chi]
-x0=  [0.01,  1, 1, 0.9, 0.001];    %parameter starting values
+x0=  [0.01,  1, 1, 0.9, 0.001];      %parameter starting values
 lb = [0,     0, 0, -1,  0];          %parameter lower bounds
 ub = [50,    2, 2, 1,   5];          %parameter upper bounds
 %%{
@@ -44,10 +45,13 @@ rho=optimvars(4);
 chi=optimvars(5);
 %}
 
-%%%%%%%%%%%%%%%%%%%    PLOT RESULTS    %%%%%%%%%%%%%%%%%%%%%
-Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,M,iterations,matur,SimPoints)
+
+%%%%%%%%%%%%%%%    PLOT AND PRINT RESULTS    %%%%%%%%%%%%%%%%%
+Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,M,matur,SimPoints)
+Printer(kappa,nubar,nu0,rho,chi,B,S0,r)
 
 beep
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%       FUNCTIONS       %%%%%%%%%%%%%%%%%%%%%%%
@@ -58,13 +62,57 @@ beep
 %r=risk-free rate
 %T=maturity (in years)
 %K=strike price
+%L=number of simulation time steps
 %M=number of simulated paths
-%iterations=number of repetitions of the simulations (to reduce error)
 %B=input data file
 %x0=optimization starting parameters
 %lb=parameters lower bounds
 %ub=parameters upper bounds
 %OptAlg=Optimization algorithm selected ("CMA" or "MultiStart")
+
+%%%%%%%%%%%%%      DEFINE MINIMIZATION PROCEDURE      %%%%%%%%%%%%%%%
+function optimvars=Optimizer(B,S0,r,x0,OptAlg,lb,ub)
+fun=@(var)Hestoncal(var(1),var(2),var(3),var(4),var(5),S0,B,r,lb,ub); %function to be optimized.
+%Hestoncal(kappa,nubar,nu0,rho,chi,S0,B,r,lb,ub)
+tic
+%MultiStart Algorithm
+if OptAlg=="MultiStart"
+    StartPoints=2; %Total number of starting points
+    opts = optimoptions(@fmincon,'Display','off','Algorithm','active-set');
+    problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts);
+    ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds-ineqs','Display','off'); %Run minimizers in parallel
+    [optimvars,f] = run(ms,problem,StartPoints);
+    
+    %CMA-ES Algorithm
+elseif OptAlg=="CMA"
+    optimvars=purecmaes(fun,x0);
+    f=Hestoncal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),S0,B,r,lb,ub);  %optimal error value
+end
+
+%print optimization output
+fprintf('kappa=%f, nubar=%f, nu0=%f\nrho=%f,   chi=%f\n%s, error=%f, t=%.0f\n\n',[optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),OptAlg,f,floor(toc/60)])
+end
+
+
+
+%%%  CALCULATE LEAST SQUARES ERROR BETWEEN MODEL AND DATA  IMPLIED VOL  %%%
+function Total_Error=Hestoncal(kappa,nubar,nu0,rho,chi,S0,B,r,lb,ub)
+%Check if bounds are being respected. If not, immediately output a big error so that test point is ignored
+if kappa<=lb(1)||kappa>ub(1)||nubar<=lb(2)||nubar>ub(2)||nu0<=lb(3)||nu0>ub(3)||rho<=lb(4)||rho>ub(4)||chi<=lb(5)||chi>ub(5)
+    Total_Error=1000;
+    
+    %If all boundaries are respected, calculate the error:
+else
+    LS=0;
+    for i=1:size(B,1)
+        %LS is the least squares error: (\sigma_market - \sigma_model)^2
+        %Weight function: (1-|K/S_0-1|)^2
+        LS=LS+(B(i,3)-HestonPrice(B(i,2),B(i,1),S0,r,kappa,nubar,nu0,rho,chi,"vol"))^2*(1-abs(B(i,2)-1))^2;
+    end
+    Total_Error=LS;
+end
+end
+
 
 
 %OUTPUT THE PRICES/VOLATILITIES OF OPTIONS UNDER THE HESTON MODEL
@@ -101,75 +149,77 @@ w=exp(1i.*u.*(log(S0)+r.*T)-T.*kappa.*nubar.*rho.*1i.*u./chi-nu0.*A+2*kappa.*nub
 end
 
 
-%%%%%%%%%%%%%      DEFINE MINIMIZATION PROCEDURE      %%%%%%%%%%%%%%%
-function optimvars=Optimizer(B,S0,r,x0,OptAlg,lb,ub)
-fun=@(var)Hestoncal(var(1),var(2),var(3),var(4),var(5),S0,B,r,lb,ub); %function to be optimized.
-%Hestoncal(kappa,nubar,nu0,rho,chi,S0,P,r)
-tic
-%MultiStart Algorithm
-if OptAlg=="MultiStart"
-    StartPoints=2; %Total number of starting points
-    opts = optimoptions(@fmincon,'Display','off','Algorithm','active-set');
-    problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts);
-    ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds-ineqs','Display','off'); %Run minimizers in parallel
-    [optimvars,f] = run(ms,problem,StartPoints);
+
+%%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%    PLOT MATURITIES IN DIFFERENT FIGURES  %%%%%%%%%%%%
+function Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,M,matur,SimPoints)
+times=unique(B(:,1));   %array with all maturity dates
+
+for iter=1:matur
+    figure
     
-    %CMA-ES Algorithm
-elseif OptAlg=="CMA"
-    optimvars=purecmaes(fun,x0);
-    f=Hestoncal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),S0,B,r,lb,ub);
-end
-
-%print optimization output
-fprintf('kappa=%f, nubar=%f, nu0=%f\nrho=%f,   chi=%f\nOptAlg=%s, error=%f, t=%.0f\n\n',[optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),OptAlg,f,floor(toc/60)])
-end
-
-
-
-%%%  CALCULATE LEAST SQUARES ERROR BETWEEN MODEL AND DATA  IMPLIED VOL  %%%
-function Total_Error=Hestoncal(kappa,nubar,nu0,rho,chi,S0,B,r,lb,ub)
-%Check if bounds are being respected. If not, immediately output a big error so that test point is ignored
-if kappa<=lb(1)||kappa>ub(1)||nubar<=lb(2)||nubar>ub(2)||nu0<=lb(3)||nu0>ub(3)||rho<=lb(4)||rho>ub(4)||chi<=lb(5)||chi>ub(5)
-    Total_Error=1000;
+    T=times(iter);
+    C=B(B(:,1)==T,2:3);  %Implied volatilities for the selected maturity
     
-    %If all boundaries are respected, calculate the error:
-else
-    LS=0;
-    for i=1:size(B,1)
-        %LS is the least squares error: (\sigma_market - \sigma_model)^2
-        %Weight function: (1-|K/S_0-1|)^2
-        LS=LS+(B(i,3)-HestonPrice(B(i,2),B(i,1),S0,r,kappa,nubar,nu0,rho,chi,"vol"))^2*(1-abs(B(i,2)-1))^2;
+    %If the user chose to use Monte Carlo, after calibration, to check model validity, calculate implied volatilities under MC
+    if SimPoints
+        Volatility= Pricer(kappa,nubar,nu0,rho,chi,C,S0,r,T,T*252*2,M,"vol");
+        scatter(C(:,1),Volatility(:),100,'+','LineWidth',1.5);
+        hold on;
     end
-    Total_Error=LS;
-end
+    
+    %Plot original data points
+    scatter(C(:,1),C(:,2),100,'x','LineWidth',1.5);
+    hold on;
+    
+    %Plot implied volatility function under the Heston model
+    HestonVol=@(K)HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,"vol");
+    fplot(HestonVol,[0.4,1.6],'LineWidth',1.5)
+    
+    %Plot options
+    xlim([0.4,1.6])
+    ylim([0.2,1])
+    box on;
+    grid on;
+    set(gca,'fontsize',12)
+    xlabel('K/S_0');
+    ylabel('\sigma_{imp} (yr^{-1/2})')
+    pbaspect([1.5 1 1])
+    if SimPoints
+        lgd=legend({'Simulated Volatilities','Market Data','Fitted Function'},'Location','northeast','FontSize',11);
+    else
+        lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
+    end
+    title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
+    
+    clear Volatility
 end
 
+end
 
 
 
 %%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%    PLOT MULTIPLE MATURITIES IN A SINGLE FIGURE  %%%%%%%%%%%%
-function MultiPlotter(kappa,nubar,nu0,rho,chi,S0,r,B,M,iterations,matur,SimPoints,OptAlg)
+function MultiPlotter(kappa,nubar,nu0,rho,chi,S0,r,B,M,matur,SimPoints,OptAlg)
 figure
 times=unique(B(:,1));   %array with all maturity dates
 
 for iter=1:matur
     if matur>1
-    ax(iter) = subplot(2,ceil(matur/2),iter);  %divide figure into two rows
+        ax(iter) = subplot(2,ceil(matur/2),iter);  %divide figure into two rows
     else
-    ax(iter) = subplot(1,1,1);
+        ax(iter) = subplot(1,1,1);
     end
-    T=times(iter);
     
+    T=times(iter);
     C=B(B(:,1)==T,2:3);  %Implied volatilities for the selected maturity
     
     
     
     %If the user chose to use Monte Carlo, after calibration, to check model validity, calculate implied volatilities under MC
     if SimPoints
-        for i=1:size(C,1)
-            Volatility(i)= Pricer(kappa,nubar,nu0,rho,chi,C(i,1),S0,r,T,T*252*2,M,iterations,"vol");
-        end
+        Volatility= Pricer(kappa,nubar,nu0,rho,chi,C,S0,r,T,T*252*2,M,"vol");
         scatter(ax(iter),C(:,1),Volatility(:),'x');
         hold on;
     end
@@ -195,113 +245,87 @@ end
 
 %Show parameter values in plots as titles
 if matur>1
-text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
-if SimPoints
-    vars1=strcat(strcat(strcat(strcat("paths=",num2str(M)),strcat(",  iterations=",num2str(iterations))),",  method="),OptAlg);
-else
-    vars1=strcat("method=",OptAlg);
-end
-text2=strcat(strcat(strcat(num2str(times(2)*252)," days  ("),num2str(times(2)*252/21))," months)");
-vars2=strcat("\kappa=",strcat(num2str(kappa),strcat(", \nu_{mean}=",strcat(num2str(nubar),strcat(", \nu_0=",strcat(num2str(nu0),strcat(strcat(strcat(", \rho=",num2str(rho)),(strcat(", \chi=",num2str(chi)))))))))));
-title(ax(1),{vars1,text1})
-title(ax(2),{vars2,text2})
-end
-
-end
-
-
-
-%%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%    PLOT MATURITIES IN DIFFERENT FIGURES  %%%%%%%%%%%%
-function Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,M,iterations,matur,SimPoints)
-
-times=unique(B(:,1));   %array with all maturity dates
-
-for iter=1:matur
-    figure
-    T=times(iter);
-    
-    C=B(B(:,1)==T,2:3);  %Implied volatilities for the selected maturity
-    
-    
-    
-    %If the user chose to use Monte Carlo, after calibration, to check model validity, calculate implied volatilities under MC
+    text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
     if SimPoints
-        for i=1:size(C,1)
-            Volatility(i)= Pricer(kappa,nubar,nu0,rho,chi,C(i,1),S0,r,T,T*252*2,M,iterations,"vol");
-        end
-        scatter(C(:,1),Volatility(:),100,'x','LineWidth',1.5);
-        hold on;
+        vars1=strcat(strcat(strcat("paths=",num2str(M)),",  method="),OptAlg);
+    else
+        vars1=strcat("method=",OptAlg);
     end
-    
-    %Plot original data points
-    scatter(C(:,1),C(:,2),100,'x','LineWidth',1.5);
-    hold on;
-    
-    %Plot implied volatility function under the Heston model
-    HestonVol=@(K)HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,"vol");
-    fplot(HestonVol,[0.4,1.6],'LineWidth',1.5)
-    hold on;
-    
-    %Plot options
-    xlim([0.4,1.6])
-    ylim([0.2,1])
-    box on;
-    grid on;
-    set(gca,'fontsize',12)
-    xlabel('K/S_0');
-    ylabel('\sigma_{imp} (yr^{-1/2})')
-    pbaspect([1.5 1 1])
-    lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-    title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
-    
-    clear Volatility
+    text2=strcat(strcat(strcat(num2str(times(2)*252)," days  ("),num2str(times(2)*252/21))," months)");
+    vars2=strcat("\kappa=",strcat(num2str(kappa),strcat(", \nu_{mean}=",strcat(num2str(nubar),strcat(", \nu_0=",strcat(num2str(nu0),strcat(strcat(strcat(", \rho=",num2str(rho)),(strcat(", \chi=",num2str(chi)))))))))));
+    title(ax(1),{vars1,text1})
+    title(ax(2),{vars2,text2})
 end
 
 end
 
 
 
-%%% CALCULATE MONTE CARLO PRICE/IMPLIED VOLATILITY OF EUROPEAN OPTION UNDER SABR %%%
+%%% CALCULATE MONTE CARLO PRICE/IMPLIED VOLATILITY OF EUROPEAN OPTION UNDER HESTON %%%
 %Options are assumed Call
 %If output should be a price, PriceVol="price"
 %If output should be an implied volatility, PriceVol="vol"
-function Result_Avg=Pricer(kappa,nubar,nu0,rho,chi,K,S0,r,T,L,M,iterations,PriceVol)
+function Result=Pricer(kappa,nubar,nu0,rho,chi,C,S0,r,T,L,M,PriceVol)
 dt = T/L;      %time steps
+N=size(C,1);   %size of vector of volatilities to be output
 
-%%NOTE:
-%%%%We don't need to simulate an entire matrix of forwards for all time steps and for all paths.
-%%%%We just need to simulate one vector of forwards for all paths and update it at each time step
-parfor iter=1:iterations    %Perform the "for" cycle in parallel
-    %x = zeros(M,1);        %define initial vector of forwards
-    S=S0*ones(M,1);
-    nu=nu0*ones(M,1);    %define the initial vector of volatilities
+S=S0*ones(M,1);      %define initial vector of stock prices
+nu=nu0*ones(M,1);    %define the initial vector of volatilities
+
+for k = 1:L
+    Z1=randn(M,1);                                 %vector of random variables
+    Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);            %vector of random variables with correlation "rho" with vector Z1
     
-    for k = 1:L
-        Z1=randn(M,1);                                 %vector of random variables
-        Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);            %vector of random variables with correlation "rho" with vector Z1
-        
-        %Milstein discretization
-        S(:)=S(:).*(1+r.*dt+sqrt(dt.*nu(:)).*Z1+0.5.*dt.*nu(:).*(Z1.^2-1));
-        nu(:)=max(nu(:)+kappa.*(nubar-nu(:)).*dt+chi.*sqrt(dt.*nu(:)).*Z2+chi.^2./4.*dt.*(Z2.^2-1),0);  %Ensure variance never becomes negative
-    end
-    
-    Y=zeros(M,1);
+    %Milstein discretization
+    S(:)=S(:).*(1+r.*dt+sqrt(dt.*nu(:)).*Z1+0.5.*dt.*nu(:).*(Z1.^2-1));
+    nu(:)=max(nu(:)+kappa.*(nubar-nu(:)).*dt+chi.*sqrt(dt.*nu(:)).*Z2+chi.^2./4.*dt.*(Z2.^2-1),0);  %Ensure variance never becomes negative
+end
+
+
+Y=zeros(M,N);    %matrix with paths' payoff  (for all inserted strikes)
+for j=1:N
     for i=1:M
-        Y(i) = max(S(i)-K,0);  %Calculate the payoff of all paths (assuming calls)
+        Y(i,j) = max(S(i)-C(j,1),0);      %Calculate the payoff of all paths (assuming calls)
     end
-    
-    if PriceVol=="price"
-        Result(iter)=exp(-r*T)*mean(Y(:));  %Output the discounted expected payoff
-    else
-        volatility=@(sigma)european_bs(S0,K,r,sigma,T,"call")-exp(-r*T)*mean(Y(:));
-        Result(iter)=fzero(volatility,0.25);  %Calculate the expected implied volatility
-    end
-    
-end
-Result_Avg=mean(Result);  %average all results
 end
 
+if PriceVol=="price"
+    Result=exp(-r*T)*mean(Y); %Output the discounted expected payoff
+else
+    Result=zeros(1,N);
+    for j=1:N
+        volatility=@(sigma)european_bs(S0,C(j,1),r,sigma,T,"call")-exp(-r*T)*mean(Y(:,j));
+        res=fzero(volatility,0.25);   %Calculate the expected implied volatility
+        
+        if ~isnan(res)     %if no implied volatility is comaptible with the price, fzero outputs NaN
+            Result(j)=res;
+        else               %if no price is found, output zero implied vol
+            Result(j)=0;
+        end
+    end
+end
+
+end
+
+
+
+%%% PRINT A TABLE WITH MODEL/MARKET IMPLIED VOL/PRICES AND REL. ERRORS %%%
+function Printer(kappa,nubar,nu0,rho,chi,B,S0,r)
+format longG      %Change format for maximum precision
+MKTVols=B(:,3);   %Market implied volatilities
+MKTPrices=european_bs(S0,B(:,2),r,B(:,3),B(:,1),"call");  %Market (converted) prices
+
+Vols=[]; Prices=[];
+for i=1:size(B,1)
+    vol=HestonPrice(B(i,2),B(i,1),S0,r,kappa,nubar,nu0,rho,chi,"vol");
+    Vols=[Vols;vol];    %Model Implied volatilities
+    Prices=[Prices;european_bs(S0,B(i,2),r,vol,B(i,1),"call")];  %Model Prices
+end
+
+%Output table
+[B(:,1)*252,B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices]
+format short
+end
 
 
 
@@ -309,7 +333,7 @@ end
 %If option is a call: putcall="call"
 %If option is a put: putcall="put"
 function price=european_bs(S0,K,r,sigma,T,putcall)
-d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)/(sigma.*sqrt(T));
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
 d2 = d1 - sigma.*sqrt(T);
 N1 = normcdf(d1);
 N2 = normcdf(d2);
@@ -319,7 +343,6 @@ elseif putcall=="put"
     price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
 end
 end
-
 
 
 %%%%%%%%%%%%%%%      CMA-ES OPTIMIZATION ALGORITHM    %%%%%%%%%%%%%%%%%%%%%

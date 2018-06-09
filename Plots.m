@@ -237,7 +237,7 @@ grid on;
 pbaspect([1.5 1 1])
 
 function price=european_bs(S0,K,r,sigma,T,putcall)
-d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)/(sigma.*sqrt(T));
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
 d2 = d1 - sigma.*sqrt(T);
 N1 = normcdf(d1);
 N2 = normcdf(d2);

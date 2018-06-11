@@ -9,7 +9,7 @@ matur=4;
 OptAlg="CMA";
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
-SimPoints=true;
+SimPoints=false;
 M=100000;
 %L=T*252*2
 
@@ -29,13 +29,8 @@ sigma=Optimizer(B,x0);
 
 Plotter(sigma,S0,r,B,M,T,SimPoints);
 
-
-Printer(sigma,B,S0,r)
-
-R=zeros(size(B,1),1);
-for i=1:size(B,1)
-    R(i)=european_bs(S0,B(i,2),r,sigma,B(i,1),"call");
-end
+tab=Printer(sigma,B,S0,r);
+%openvar('tab')
 
 beep
 
@@ -151,7 +146,7 @@ end
 
 
 
-function Printer(sigma,B,S0,r)
+function tab=Printer(sigma,B,S0,r)
 format longG
     Vols=sigma*ones(size(B,1),1);
     Prices=european_bs(S0,B(:,2),r,sigma,B(:,1),"call");
@@ -159,7 +154,7 @@ format longG
     MKTPrices=european_bs(S0,B(:,2),r,B(:,3),B(:,1),"call");
     MKTVols=B(:,3);
 
-[B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices]
+tab=[B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols*100,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices*100];
 format short
 end
 

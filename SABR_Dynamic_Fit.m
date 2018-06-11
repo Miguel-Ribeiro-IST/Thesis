@@ -15,7 +15,7 @@ B=A.data(:,:);
 S0=17099.4;
 r = 0;
 matur=4;           %maturity until which we want to fit the data. If matur=5, all maturities until the fifth maturity in the file are chosen.
-OptAlg="MultiStart";      %"CMA" or "MultiStart" optimization algorithms
+OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
@@ -36,6 +36,7 @@ B=B(B(:,1)<=times(matur),:);
 x0 = [0.2, -0.2, 0.8, 1,   1,   0.75];
 lb = [0,   -1,   0,   0,   0,   0];
 ub = [5,   1,    5,   100, 100, 1];
+%%{
 optimvars=Optimizer(S0,B,r,x0,OptAlg,lb,ub);
 alpha=optimvars(1);
 rho0=optimvars(2);
@@ -43,12 +44,14 @@ nu0=optimvars(3);
 a=optimvars(4);
 b=optimvars(5);
 beta=optimvars(6);
-
+%}
 
 %%%%%%%%%%%%%%%%%%%    PLOT RESULTS    %%%%%%%%%%%%%%%%%%%%%
 Plotter(alpha,rho0,nu0,a,b,beta,S0,r,B,M,matur,SimPoints)
-Printer(alpha,rho0,nu0,a,b,beta,B,S0,r)
+Plotter3D(alpha,rho0,nu0,a,b,beta,S0,r,B)
 
+tab=Printer(alpha,rho0,nu0,a,b,beta,B,S0,r);
+%openvar('tab')
 beep
 
 
@@ -68,7 +71,7 @@ if OptAlg=="MultiStart"
     
 elseif OptAlg=="CMA"
     optimvars=purecmaes(fun,x0);
-    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),optimvars(6),S0,B,r);
+    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),optimvars(6),S0,B,r,lb,ub);
 end
 
 fprintf('alpha=%f\nrho0=%f, nu0=%f\na=%f,     b=%f\nbeta=%f\n%s, error=%f\n\n',[optimvars(1),optimvars(2),optimvars(3),optimvars(4),optimvars(5),optimvars(6),OptAlg,f])
@@ -199,6 +202,70 @@ end
 
 
 
+%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS IN A SURFACE   %%%%%%%%%%%%%%%
+function Plotter3D(alpha,rho0,nu0,a,b,beta,S0,r,B)
+    figure
+    
+    %Plot original data points
+    scatter3(B(:,2),B(:,1),B(:,3),30,'LineWidth',0.5,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
+    hold on;
+    
+    %Plot implied volatility function under the Heston model
+    SABRVol=@(K,T)sigmaSABR(alpha,rho0,nu0,a,b,beta,K,S0*exp(r*T),T);
+    [K,T] = meshgrid(0.4:0.01:1.6,0.5/12:0.1/12:0.5+0.5/12);
+    for i=1:size(K,1)
+        for j=1:size(K,2)
+            SV(i,j)=SABRVol(K(i,j),T(i,j));
+        end
+    end
+    s=surf(K,T,SV);
+    %s.EdgeColor = 'interp';
+    s.EdgeAlpha=0.6;
+    s.FaceAlpha=0.85;
+    shading interp
+    hold on;
+        
+    times=unique(B(:,1));   %array with all maturity dates
+    K2=0.4:0.01:1.6;
+    for i=1:size(times,1)
+        for j=1:size(K2,2)
+           SV2(j)=SABRVol(K2(j),times(i));
+        end
+        plot3(K2,ones(1,size(K2,2))*times(i),SV2,'LineWidth',2,'Color',[0.9500    0.200    0.1])
+    end
+    axis vis3d;
+    %material dull;
+    
+    %{
+    for i=1:size(K,2)
+       HV(i)=HestonVol(K(i));
+    end
+    p=plot(K,HV);
+    %}
+    
+    %{
+    %Plot options
+    xlim([0.4,1.6])
+    ylim([0.2,1])
+    box on;
+    grid on;
+    set(gca,'fontsize',12)
+    xlabel('K/S_0');
+    ylabel('\sigma_{imp} (yr^{-1/2})')
+    pbaspect([1.5 1 1])
+    if SimPoints
+        lgd=legend({'Simulated Volatilities','Market Data','Fitted Function'},'Location','northeast','FontSize',11);
+    else
+        lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
+    end
+    title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
+    
+    clear Volatility
+    %}
+end
+
+
+
 function Result=Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,L,C,PriceVol)
 dt = T/L;
 N=size(C,1);
@@ -240,7 +307,7 @@ end
 
 
 
-function Printer(alpha,rho0,nu0,a,b,beta,B,S0,r)
+function tab=Printer(alpha,rho0,nu0,a,b,beta,B,S0,r)
 format longG
 MKTVols=B(:,3);
 MKTPrices=european_bs(S0,B(:,2),r,B(:,3),B(:,1),"call");
@@ -250,7 +317,7 @@ Vols=SABRVol(B(:,2));
 Prices=european_bs(S0,B(:,2),r,Vols,B(:,1),"call");
 
 
-[B(:,1)*252,B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices]
+tab=[B(:,1)*252,B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols*100,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices*100];
 format short
 end
 

@@ -8,7 +8,7 @@ B=A.data(:,:);
 S0=17099.4;               %initial stock price
 r = 0;                    %risk-free rate. Forward prices in data file assumed r=0.0
 matur=4;                  %maturity until which we want to fit the data. If matur=5, all maturities until the fifth are chosen.
-OptAlg="MultiStart";      %"CMA" or "MultiStart" optimization algorithms
+OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
@@ -24,11 +24,6 @@ S0=1;
 B(:,1)=B(:,1)/252;               %convert maturities from days to years
 times=unique(B(:,1));
 B=B(B(:,1)<=times(matur),:);     %only keep values of the maturity
-
-P=B;  %Generate matrix with European call prices instead of implied vol.
-for i=1:size(B,1)
-    P(i,3)=european_bs(S0,B(i,2),r,B(i,3),B(i,1),"call");
-end
 
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
@@ -48,7 +43,10 @@ chi=optimvars(5);
 
 %%%%%%%%%%%%%%%    PLOT AND PRINT RESULTS    %%%%%%%%%%%%%%%%%
 Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,M,matur,SimPoints)
-Printer(kappa,nubar,nu0,rho,chi,B,S0,r)
+Plotter3D(kappa,nubar,nu0,rho,chi,S0,r,B);
+
+tab=Printer(kappa,nubar,nu0,rho,chi,B,S0,r);
+%openvar('tab')
 
 beep
 
@@ -122,15 +120,15 @@ function result=HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,PriceVol)
 %We need the characteristic function, depicted in function "CharFuncHeston"
 fun1=@(u)real(exp(-1i.*u.*log(K))./(1i.*u.*S0.*exp(r.*T)).*CharFuncHeston(u-1i,T,S0,r,kappa,nubar,nu0,rho,chi));
 fun2=@(u)real(exp(-1i.*u.*log(K))./(1i.*u).*CharFuncHeston(u,T,S0,r,kappa,nubar,nu0,rho,chi));
-P1=1/2+1/pi.*integral(fun1,0,300);
-P2=1/2+1/pi.*integral(fun2,0,300);
+P1=1/2+1/pi.*integral(fun1,0,400);
+P2=1/2+1/pi.*integral(fun2,0,400);
 call=S0.*P1-exp(-r.*T).*K.*P2; %call option price
 
 if PriceVol=="price"   %if desired output is a price, return this result
     result=call;
 else                   %if desired output is a volatility, calculate implied volatility of price
     volatility=@(sigma)european_bs(S0,K,r,sigma,T,"call")-call;
-    result=fzero(volatility,0.25);
+    result=fzero(volatility,1);
 end
 end
 
@@ -174,7 +172,12 @@ for iter=1:matur
     
     %Plot implied volatility function under the Heston model
     HestonVol=@(K)HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,"vol");
-    fplot(HestonVol,[0.4,1.6],'LineWidth',1.5)
+    K=(0.4:0.01:1.6);
+    for i=1:size(K,2)
+       HV(i)=HestonVol(K(i));
+    end
+    p=plot(K,HV);
+    p.LineWidth = 1.5;
     
     %Plot options
     xlim([0.4,1.6])
@@ -261,6 +264,72 @@ end
 
 
 
+%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS IN A SURFACE   %%%%%%%%%%%%%%%
+function Plotter3D(kappa,nubar,nu0,rho,chi,S0,r,B)
+    figure
+
+    %Plot original data points
+    scatter3(B(:,2),B(:,1),B(:,3),30,'LineWidth',0.5,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
+    hold on;
+    
+    %Plot implied volatility function under the Heston model
+    HestonVol=@(K,T)HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,"vol");
+    [K,T] = meshgrid(0.4:0.01:1.6,0.5/12:0.1/12:0.5+0.5/12);
+    for i=1:size(K,1)
+        for j=1:size(K,2)
+            HV(i,j)=HestonVol(K(i,j),T(i,j));
+        end
+    end
+    s=surf(K,T,HV);
+    %s.EdgeColor = 'interp';
+    s.EdgeAlpha=0.6;
+    s.FaceAlpha=0.85;
+    shading interp
+    hold on;
+        
+    times=unique(B(:,1));   %array with all maturity dates
+    K2=0.4:0.01:1.6;
+    for i=1:size(times,1)
+        for j=1:size(K2,2)
+           HV2(j)=HestonVol(K2(j),times(i));
+        end
+        plot3(K2,ones(1,size(K2,2))*times(i),HV2,'LineWidth',2,'Color',[0.9500    0.200    0.1])
+    end
+    axis vis3d;
+    %material dull;
+    
+    %{
+    for i=1:size(K,2)
+       HV(i)=HestonVol(K(i));
+    end
+    p=plot(K,HV);
+    %}
+    
+    %{
+    %Plot options
+    xlim([0.4,1.6])
+    ylim([0.2,1])
+    box on;
+    grid on;
+    set(gca,'fontsize',12)
+    xlabel('K/S_0');
+    ylabel('\sigma_{imp} (yr^{-1/2})')
+    pbaspect([1.5 1 1])
+    if SimPoints
+        lgd=legend({'Simulated Volatilities','Market Data','Fitted Function'},'Location','northeast','FontSize',11);
+    else
+        lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
+    end
+    title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
+    
+    clear Volatility
+    %}
+end
+
+
+
+
+
 %%% CALCULATE MONTE CARLO PRICE/IMPLIED VOLATILITY OF EUROPEAN OPTION UNDER HESTON %%%
 %Options are assumed Call
 %If output should be a price, PriceVol="price"
@@ -310,7 +379,7 @@ end
 
 
 %%% PRINT A TABLE WITH MODEL/MARKET IMPLIED VOL/PRICES AND REL. ERRORS %%%
-function Printer(kappa,nubar,nu0,rho,chi,B,S0,r)
+function tab=Printer(kappa,nubar,nu0,rho,chi,B,S0,r)
 format longG      %Change format for maximum precision
 MKTVols=B(:,3);   %Market implied volatilities
 MKTPrices=european_bs(S0,B(:,2),r,B(:,3),B(:,1),"call");  %Market (converted) prices
@@ -323,7 +392,7 @@ for i=1:size(B,1)
 end
 
 %Output table
-[B(:,1)*252,B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices]
+tab=[B(:,1)*252,B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols*100,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices*100];
 format short
 end
 

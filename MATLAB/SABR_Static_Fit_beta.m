@@ -1,21 +1,23 @@
-clearvars -except alpha rho nu beta; %clear all variables. This prevents multiple simulations from interfering with one another
+clear; %clear all variables. This prevents multiple simulations from interfering with one another
 %Import data from file "Data_BNPP.txt" and assign it to matrix B. The file must be in the same folder
 %1st column - maturities, 2nd column - strikes, 3rd column - implied volatilities
 A = importdata('Data_BNPP.txt','\t',1);
 B=A.data(:,:);
 
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
-S0=17099.4;               %initial stock price
-r = 0;                    %risk-free rate. Forward prices in data file assumed r=0
-matur=4;                  %maturity at which we want to fit the data. If matur=5, only the fifth maturity in the file is chosen.
-OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
-
-
-%%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
-%After calibrating all the model's parameters, we may want to simulate the implied volatilities using Monte Carlo
-SimPoints=false;   %true or false - define if Monte Carlo simulation should be executed
+S0=17099.4;        %initial stock price
+r = 0.06;          %risk-free rate. Forward prices in data file assumed r=0.06
+matur=4;           %maturity at which we want to fit the data. If matur=5, the fifth maturity in the file is chosen.
+beta=0.5;          %parameter of the SABR model
+OptMethod="MultiStart";
+SimPoints=false;
+ShowPrices=false;
+x0=[0.5,-0.5,0.5,0.5];   %parameter starting values [alpha, rho, nu]
+lb = [0,-1,0,0];       %parameter lower bounds
+ub = [5,1,5,1];    %parameter upper bounds
 M=1000;           %number of paths to be simulated
-%L=T*252*2
+iterations=5;     %number of repetitions to be simulated (and then averaged)
+
 
 
 %%%%%%%%%%%%%      ORIGINAL DATA MODIFICATIONS     %%%%%%%%%%%%
@@ -25,28 +27,23 @@ B(:,1)=B(:,1)/252;    %convert maturities from days to years
 times=unique(B(:,1));
 T=times(matur);       %selected maturity
 B=B(B(:,1)==T,:);     %only keep values of the maturity
+L = T*252*2;          %number of steps in simulations
+
 
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
-%    [alpha, rho, nu, beta]
-x0 = [0.5, -0.5, 0.5, 0.75];   %parameter starting values
-lb = [0,   -1,   0,   0];       %parameter lower bounds
-ub = [2,    1,   5,   1];    %parameter upper bounds
 %%{
-optimvars=Optimizer(S0,B,r,x0,OptAlg,lb,ub);  %Obtain optimization variables
+
+optimvars=Optimizer(beta,S0,B,r,x0,OptMethod,lb,ub);  %Obtain optimization variables
 alpha=optimvars(1);
 rho=optimvars(2);
 nu=optimvars(3);
 beta=optimvars(4);
-%}
 
-%%%%%%%%%%%%%%%%%%%    PLOT RESULTS    %%%%%%%%%%%%%%%%%%%%%
-Plotter(alpha,rho,nu,beta,S0,r,T,M,B,SimPoints)
-
-tab=Printer(alpha,rho,nu,beta,B,S0,r,T);
-%openvar('tab')
-
+%Plot optimization results
+Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B,OptMethod,SimPoints,ShowPrices)
 beep
+%}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%       FUNCTIONS       %%%%%%%%%%%%%%%%%%%%%%%
@@ -60,53 +57,109 @@ beep
 %K=strike price
 %L=number of simulation time steps
 %M=number of simulated paths
+%iterations=number of repetitions of the simulations (to reduce error)
 %B=input data file
 %x0=optimization starting parameters
-%lb=parameters lower bounds
-%ub=parameters upper bounds
-%OptAlg=Optimization algorithm selected ("CMA" or "MultiStart")
 
 %%%%%%%%%%%%%      DEFINE MINIMIZATION PROCEDURE      %%%%%%%%%%%%%%%
-function optimvars=Optimizer(S0,B,r,x0,OptAlg,lb,ub)
-fun=@(var)SABRcal(var(1),var(2),var(3),var(4),S0,B,r,lb,ub); %function to be optimized.
-%SABRcal(alpha,rho,nu,beta,S0,B,r,lb,ub)
+function optimvars=Optimizer(beta,S0,B,r,x0,MultiStoch,lb,ub)
+fun=@(var)SABRcal(var(1),var(2),var(3),var(4),S0,B,r); %function to be optimized.
+%alpha=var(1), rho=var(2), nu=var(3);
+%SABRcal(alpha,rho,nu,beta,S0,B,r)
 
-%MultiStart Algorithm
-if OptAlg=="MultiStart"
-    StartPoints=2; %Total number of starting points
+if MultiStoch=="MultiStart"
+    rng default % For reproducibility
     opts = optimoptions(@fmincon,'Display','off','Algorithm','sqp');
+    %problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts,'nonlcon',@Feller_Condition);
+    
     problem = createOptimProblem('fmincon','objective',fun,'x0',x0,'lb',lb,'ub',ub,'options',opts);
-    ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds-ineqs','Display','off'); %Run minimizers in parallel
-    [optimvars,f] = run(ms,problem,StartPoints);
     
+    ms = MultiStart('UseParallel',true,'StartPointsToRun','bounds-ineqs','Display','off');
+    optimvars = run(ms,problem,100000);
+    %ms = GlobalSearch('StartPointsToRun','bounds-ineqs','Display','off');
+    %[optimvars,f] = run(ms,problem);
+    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),S0,B,r);
+   
     
-    %CMA-ES Algorithm
-elseif OptAlg=="CMA"
+elseif MultiStoch=="CMA"
     optimvars=purecmaes(fun,x0);
-    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),S0,B,r,lb,ub);  %optimal error value
+    f=SABRcal(optimvars(1),optimvars(2),optimvars(3),optimvars(4),S0,B,r);
+end
+
+%print optimization output
+fprintf(strcat("beta=",strcat(num2str(optimvars(4)),strcat(",    alpha=",strcat(num2str(optimvars(1)),strcat(",    rho=",strcat(num2str(optimvars(2)),strcat(",    nu=",strcat(num2str(optimvars(3)),strcat("\nerror=",strcat(num2str(f),"\n")))))))))));
 end
 
 
-%print optimization output
-fprintf('alpha=%f, rho=%f\nnu=%f,    beta=%f\n%s, error=%f\n\n',[optimvars(1),optimvars(2),optimvars(3),optimvars(4),OptAlg,f])
+%%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
+function Plotter(alpha,rho,nu,beta,S0,r,T,L,M,iterations,B,OptMethod,SimPoints,ShowPrices)
+SABRVol=@(K)sigmaSABR(alpha,rho,nu,beta,K,S0*exp(r*T),T);   %SABR implied volatility as a function of K
+if SimPoints && ShowPrices
+    ax1 = subplot(1,2,1);
+else ax1 = subplot(1,1,1);
+end
+
+scatter(ax1,B(:,2),B(:,3),'.');
+hold on;
+fplot(ax1,SABRVol,[min(B(:,2)) max(B(:,2))],'k')
+
+
+if SimPoints
+    for i=1:size(B,1)
+        if ShowPrices
+            P(i)=european_bs(S0,B(i,2),r,B(i,3),B(i,1),"call");  %obtain the BS price from each of the data's implied volatilities
+            %european_bs(S0,K,r,sigma0,T,putcall)
+            %Obtain Monte Carlo prices and implied volatilities
+            Price(i)=Pricer(alpha,rho,nu,beta,B(i,2),S0*exp(r*T),r,T,L,M,iterations,"price");
+        end
+        
+        Volatility(i)=Pricer(alpha,rho,nu,beta,B(i,2),S0*exp(r*T),r,T,L,M,iterations,"vol");
+        %Pricer(alpha,rho,nu,beta,K,f,r,T,L,M,iterations,PriceVol)
+        %Plot prices from data and from Monte-Carlo
+    end
+    hold on;
+    scatter(ax1,B(:,2),Volatility(:),'x');
+    
+    if ShowPrices
+        ax2 = subplot(1,2,2);
+        scatter(ax2,B(:,2),P(:),'.');
+        hold on;
+        scatter(ax2,B(:,2),Price(:),'x');
+        
+        %Show fit results in plot titles
+        text=strcat(strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(", paths=",num2str(M))),strcat(", iterations=",num2str(iterations))),strcat(", maturity=",num2str(T*252))),strcat(", method=",OptMethod));
+        text2=strcat(strcat(strcat("\alpha=",num2str(alpha)),strcat(", \rho=",num2str(rho))),strcat(", \nu=",num2str(nu)));
+        title(ax1,{text,'Volatilities'})
+        title(ax2,{text2,'Prices'})
+    end
+else
+    text=strcat(strcat(strcat(strcat(strcat(strcat("\beta=",num2str(beta)),strcat(", paths=",num2str(M))),strcat(", iterations=",num2str(iterations))),strcat(", maturity=",num2str(T*252))),strcat(", method=",OptMethod)),strcat(strcat(strcat(", \alpha=",num2str(alpha)),strcat(", \rho=",num2str(rho))),strcat(", \nu=",num2str(nu))));
+    title(ax1,{text,'Volatilities'})
+end
+
+%Plot implied volatilities from data, from Monte-Carlo and the SABR implied volatility function
+
+
+
+
 end
 
 
 %%%  CALCULATE LEAST SQUARES ERROR BETWEEN MODEL AND DATA  IMPLIED VOL  %%%
-function Total_Error=SABRcal(alpha,rho,nu,beta,S0,B,r,lb,ub)
-%Check if bounds are being respected. If not, immediately output a big error so that test point is ignored
-if alpha<lb(1) || alpha>ub(1) || rho<lb(2) || rho>ub(2) || nu<lb(3) || nu>ub(3) || beta<lb(4) || beta>ub(4)
-    Total_Error=1000;
-    
-    %If all boundaries are respected, calculate the error:
+function Total_Error=SABRcal(alpha,rho,nu,beta,S0,B,r)
+if alpha<0 || alpha>5 || rho<-1 || rho>1 || nu<0 || nu>5 || beta<0 || beta>1
+    Total_Error=10000;
 else
-    LS=0;
-    for i=1:size(B,1)
-        %LS is the least squares error: (\sigma_market - \sigma_model)^2
-        %Weight function: (1-|K/S_0-1|)^2
-        LS=LS+(B(i,3)-sigmaSABR(alpha,rho,nu,beta,B(i,2),S0*exp(r*B(i,1)),B(i,1)))^2*(1-abs(B(i,2)-1))^2;
-    end
-    Total_Error=LS;
+    
+LS=0;
+for i=1:size(B,1)
+    %LS is the least squares error
+    %Function sigmaSABR outputs the error between model and data implied
+    %volatilities using the original Hagan formula
+    LS=LS+(((B(i,3)-sigmaSABR(alpha,rho,nu,beta,B(i,2),S0*exp(r*B(i,1)),B(i,1)))./B(i,3))^2);
+    %sigmaSABR(alpha,rho,nu,beta,K,f,T)
+end
+Total_Error=LS;
 end
 end
 
@@ -116,141 +169,74 @@ end
 function sigma=sigmaSABR(alpha,rho,nu,beta,K,f,T)
 z=nu./alpha.*(f.*K).^((1-beta)./2).*log(f./K);
 x=log((sqrt(1-2.*rho.*z+z.^2)+z-rho)./(1-rho));
-z(z==0,:)=1;
-x(x==0,:)=1;
-
-if beta==0
+if f==K
+    sigma=alpha./((f).^(1-beta)).*(1+T.*((1-beta)^2/24.*alpha^2/((f).^(2-2*beta))+1/4*rho.*beta.*alpha.*nu./((f).^(1-beta))+(2-3*rho^2)/24.*nu^2));
+elseif beta==0
     sigma=alpha.*log(f./K)./(f-K).*(z./x).*(1+T.*(alpha.^2./(24.*f.*K)+(2-3*rho.^2)./24.*nu.^2));
 elseif beta==1
     sigma=alpha.*(z./x).*(1+T.*(1/4*rho.*alpha.*nu+1/24*(2-3*rho.^2).*nu.^2));
 else
-    sigma=alpha./((f.*K).^((1-beta)./2).*(1+(1-beta).^2/24.*(log(f./K)).^2+(1-beta).^4./1920.*(log(f./K)).^4)).*(z./x).*(1+((1-beta).^2./24.*alpha.^2./(f.*K).^(1-beta)+1/4.*rho.*nu.*beta.*alpha./(f.*K).^((1-beta)./2)+(2-3.*rho.^2)./24.*nu.^2).*T);
+    sigma=alpha./((f.*K).^((1-beta)./2).*(1+(1-beta).^2/24.*(log(f./K)).^2+(1-beta).^4./1920.*(log(f./K)).^4)).*(z./x).*(1+((1-beta).^2/24.*alpha.^2./(f.*K).^(1-beta)+1/4.*rho.*nu.*beta.*alpha./(f.*K).^((1-beta)./2)+(2-3*rho.^2)./24.*nu.^2).*T);
 end
 end
-
-
-%%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
-function Plotter(alpha,rho,nu,beta,S0,r,T,M,B,SimPoints)
-figure
-
-%If the user chose to use Monte Carlo, after calibration, to check model validity, calculate implied volatilities under MC
-if SimPoints
-    Volatility=Pricer(alpha,rho,nu,beta,B(:,2:3),S0,r,T,T*252*2,M,"vol");
-    scatter(B(:,2),Volatility(:),100,'+','LineWidth',1.5);
-    hold on;
-end
-
-%Plot original data points
-scatter(B(:,2),B(:,3),100,'x','LineWidth',1.5);
-hold on;
-
-%Plot implied volatility function under the SABR model
-SABRVol=@(K)K.*0+sigmaSABR(alpha,rho,nu,beta,K',S0.*exp(r.*T),T)';
-fplot(SABRVol,[0.4,1.6],'LineWidth',1.5)
-
-%Plot options
-xlim([0.4,1.6])
-ylim([0.2,1])
-box on;
-grid on;
-set(gca,'fontsize',12)
-xlabel('K/S_0');
-ylabel('\sigma_{imp} (yr^{-1/2})')
-pbaspect([1.5 1 1])
-if SimPoints
-    lgd=legend({'Simulated Volatilities','Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-else
-    lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-end
-title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
-end
-
 
 
 %%% CALCULATE MONTE CARLO PRICE/IMPLIED VOLATILITY OF EUROPEAN OPTION UNDER SABR %%%
 %Options are assumed Call
 %If output should be a price, PriceVol="price"
 %If output should be an implied volatility, PriceVol="vol"
-function Result=Pricer(alpha,rho,nu,beta,C,S0,r,T,L,M,PriceVol)
+function Result_Avg=Pricer(alpha,rho,nu,beta,K,f,r,T,L,M,iterations,PriceVol)
 dt = T/L;      %time steps
-N=size(C,1);   %size of vector of volatilities to be output
 
-
-S = S0*ones(M,1);        %define initial vector of forwards
-sigma=alpha*ones(M,1);    %define the initial vector of volatilities
-
-for k = 1:L
-    Z1=randn(M,1);                                 %vector of random variables
-    Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);            %vector of random variables with correlation "rho" with vector Z1
+%%NOTE:
+%%%%We don't need to simulate an entire matrix of forwards for all time steps and for all paths.
+%%%%We just need to simulate one vector of forwards for all paths and update it at each time step
+parfor iter=1:iterations    %Perform the "for" cycle in parallel
+    F = f*ones(M,1);        %define initial vector of forwards
+    alp=alpha*ones(M,1);    %define the initial vector of volatilities
     
-    %Milstein discretization
-    S(:)=max(S(:).*(1+r*dt)+exp(-r*(T-dt*k)*(1-beta)).*sigma(:).*S(:).^beta.*sqrt(dt).*Z1+beta/2*exp(-2*r*(T-dt*k)*(1-beta))*sigma(:).^2.*S(:).^(2*beta-1)*dt.*(Z1.^2-1),0);
-    sigma(:)=max(sigma(:).*(1+nu*sqrt(dt).*Z2+nu^2/2*dt*(Z2.^2-1)),0);
-end
-
-
-Y=zeros(M,N);    %matrix with paths' payoff  (for all inserted strikes)
-for j=1:N
+    for k = 1:L
+        Z1=randn(M,1);                                 %vector of random variables
+        Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);            %vector of random variables with correlation "rho" with vector Z1
+        v=alp.*(F.^(beta-1));                          %intermediate variable
+        F(:)=F(:).*exp(v.*Z2*sqrt(dt)-v.^2*dt/2);      %update forwards vector
+        alp(:)=alp(:).*exp(nu*sqrt(dt)*Z1-nu^2*dt/2);  %update volatilities vector
+    end
+    
+    Y=zeros(M,1);
     for i=1:M
-        Y(i,j) = max(S(i)-C(j,1),0);      %Calculate the payoff of all paths (assuming calls)
+        Y(i) = max(F(i)-K,0);  %Calculate the payoff of all paths (assuming calls)
     end
-end
-
-if PriceVol=="price"
-    Result=exp(-r*T)*mean(Y); %Output the discounted expected payoff
-else
-    Result=zeros(1,N);
-    for j=1:N
-        volatility=@(sigma)european_bs(S0,C(j,1),r,sigma,T,"call")-exp(-r*T)*mean(Y(:,j));
-        res=fzero(volatility,0.25);   %Calculate the expected implied volatility
-        
-        if ~isnan(res)     %if no implied volatility is comaptible with the price, fzero outputs NaN
-            Result(j)=res;
-        else               %if no price is found, return 0
-            Result(j)=0;
-        end
+    
+    if PriceVol=="price"
+        Result(iter)=exp(-r*T)*mean(Y(:));  %Output the discounted expected payoff
+    else
+        volatility=@(sigma)european_bs(f*exp(-r*T),K,r,sigma,T,"call")-exp(-r*T)*mean(Y(:));
+        Result(iter)=fzero(volatility,0.25);  %Calculate the expected implied volatility
     end
+    
 end
-
+Result_Avg=mean(Result);  %average all results
 end
-
-
-
-function tab=Printer(alpha,rho,nu,beta,B,S0,r,T)
-format longG
-MKTVols=B(:,3);
-MKTPrices=european_bs(S0,B(:,2),r,B(:,3),B(:,1),"call");
-
-SABRVol=@(K)sigmaSABR(alpha,rho,nu,beta,K,S0.*exp(r.*T),T);
-Vols=SABRVol(B(:,2));
-Prices=european_bs(S0,B(:,2),r,Vols,B(:,1),"call");
-
-
-tab=[B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols*100,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices*100];
-format short
-end
-
 
 
 %%%%%%%%%%%%%%  CALCULATE BLACK-SCHOLES PRICE  %%%%%%%%%%%%%%%%%%%%
 %If option is a call: putcall="call"
 %If option is a put: putcall="put"
 function price=european_bs(S0,K,r,sigma,T,putcall)
-d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
-d2 = d1 - sigma.*sqrt(T);
+d1 = (log(S0/K) + (r + 0.5*sigma^2)*T)/(sigma*sqrt(T));
+d2 = d1 - sigma*sqrt(T);
 N1 = normcdf(d1);
 N2 = normcdf(d2);
 if putcall=="call"
-    price = S0.*N1 - K.*exp(-r.*T).*N2;
+    price = S0*N1 - K*exp(-r*T)*N2;
 elseif putcall=="put"
-    price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
+    price = S0*N1 - K*exp(-r*T)*N2 + K*exp(-r*T) - S0;
 end
 end
 
 
-%%%%%%%%%%%%%%%      CMA-ES OPTIMIZATION ALGORITHM    %%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%     FUNCTION CREATED BY HANSEN      %%%%%%%%%%%%%%%%%%%%
-%%%%%%%%% ORIGINAL CODE: https://www.lri.fr/~hansen/purecmaes.m   %%%%%%%%%
+
 function xmin=purecmaes(fun,x0)   % (mu/mu_w, lambda)-CMA-ES
 % --------------------  Initialization --------------------------------
 % User defined input parameters (need to be edited)

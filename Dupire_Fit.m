@@ -33,7 +33,9 @@ dK=0.05*S0;         %mesh grid size w.r.t. strike
 interpol=Dupire(S0,r,B,MinT,MaxT,dT,MinK,MaxK,dK);
 
 Plotter(S0,r,B,M,matur,sigmamax,interpol)
-Printer(sigmamax,interpol,M,B,S0,r)
+
+tab=Printer(sigmamax,interpol,M,B,S0,r);
+%openvar('tab')
 
 beep
 
@@ -213,7 +215,7 @@ end
 
 
 %%% PRINT A TABLE WITH MODEL/MARKET IMPLIED VOL/PRICES AND REL. ERRORS %%%
-function Printer(sigmamax,interpol,M,B,S0,r)
+function tab=Printer(sigmamax,interpol,M,B,S0,r)
 format longG      %Change format for maximum precision
 MKTVols=B(:,3);   %Market implied volatilities
 MKTPrices=european_bs(S0,B(:,2),r,B(:,3),B(:,1),"call");  %Market (converted) prices
@@ -226,7 +228,7 @@ for i=1:size(B,1)
 end
 
 %Output table
-[B(:,1)*252,B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices]
+tab=[B(:,1)*252,B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols*100,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices*100];
 format short
 end
 

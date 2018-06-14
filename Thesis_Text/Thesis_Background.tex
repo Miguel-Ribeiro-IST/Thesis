@@ -263,7 +263,7 @@ It can also be shown that the implied volatility is the same for calls and puts~
 
 \subsection{Local Volatility}
 \label{subsection:localvolatility}
-In their original work, Black \textit{et al.} assumed that volatility is constant throughout the whole option duration. From market data, it can be clearly seen that this is not the case. There may be times where new information reaches the market  (e.g. the results of an election) and trading increases, driving volatility up. It is equally true that shortly before this information is known, trading may stall, and volatilities go down. 
+In their original work, Black \textit{et al.} assumed that volatility is constant throughout the whole option duration. From market data, it can be clearly seen that this is not the case~\cite{DJIA}. There may be times where new information reaches the market  (e.g. the results of an election) and trading increases, driving volatility up. It is equally true that shortly before this information is known, trading may stall, and volatilities go down. 
 
 The BS model is therefore clearly incapable of completely grasping real-world trading. We should use a model where volatility is dynamic, measuring the uncertainty on the stock price movement at any point in time.
 However, as we saw in subsection \ref{section:impliedvolatility}, the market's view of volatility also depends on the strike price.
@@ -285,8 +285,58 @@ One of the most famous results in the modelling of the local volatility function
 \begin{equation}\label{dupire}
 \sigma(S,t)=\sqrt{\frac{\displaystyle\pdv{C}{T}+rS\pdv{C}{K}}{\displaystyle\frac{1}{2}S^2\pdv{^2C}{K^2}}},
 \end{equation}
-\noindent where $C=C(K,T)$ is the price of an European call option with strike price $K$ and maturity $T$ and where all the derivatives are evaluated at $K=S$ and $T=t$.
-A brief demonstration of this formula can be found in Appendix \ref{chapter:dupireformuladerivation}.
+\noindent where $C=C(K,T)$ is the price of an European call option with strike price $K$ and maturity $T$. All the derivatives are evaluated at $K=S$ and $T=t$.
+
+
+
+
+\begin{proof}
+
+We begin by assuming that the stock price $S$ follows a dynamic transition probability density function $p(S(t),t,S'(t'),t')$. In other words, by integrating this density function we would obtain the probability of the stock price reaching a price $S'$ at a time $t'$ having started at $S$ at time $t$.
+
+The present value of a call option, $C(S,t,K,T)$, can be deduced as its expected future payoff, discounted backwards in time, which results in
+\begin{equation}
+\begin{split}\label{deriv0}
+C(K,T)=e^{-r(T-t)}\mathbb{E}\left[\max\left(S'-K,0\right)\right]&=e^{-r(T-t)}\int_0^\infty\max\left(S'-K,0\right)p(S,t,S',T)dS'\\
+&=e^{-r(T-t)}\int_K^\infty(S'-K)p(S,t,S',T)dS'.
+\end{split}
+\end{equation}
+Taking the first derivative of this result with respect to the strike price $K$, we obtain
+\begin{equation}
+\pdv{C}{K}=-e^{-r(T-t)}\int_K^\infty p(S,t,S',T)dS'.
+\end{equation}
+The second derivative results in
+\begin{equation}
+\pdv{^2C}{K^2}=e^{-r(T-t)}p(S,t,S',T).
+\end{equation}
+
+Due to its stochastic nature, the transition probability density function follows the Fokker-Planck equation, given by
+\begin{equation}\label{FokkerPlanck}
+\pdv{p}{T}=\frac{1}{2}\sigma^2\pdv{^2(S^2p)}{S^2}-r\pdv{(Sp)}{S}.
+\end{equation}
+\noindent with $\sigma$ denoting our (still unknown) function of $S$ and $t$, evaluated at $t=T$.
+
+From eq. \ref{deriv0} we can easily derive
+\begin{equation}
+\pdv{C}{T}=-rC+e^{-r(T-t)}\int_K^\infty(S'-K)\pdv{p}{T}dS'.
+\end{equation}
+Using eq. \ref{FokkerPlanck}, we can transform this relation into
+\begin{equation}
+\pdv{C}{T}=-rC+e^{-r(T-t)}\int_K^\infty(S'-K)\left(\frac{1}{2}\sigma^2\pdv{^2(S'^2p)}{S'^2}-r\pdv{(S'p)}{S'}\right)dS'.
+\end{equation}
+Integrating twice by parts and collecting all terms, we get
+\begin{equation}
+\pdv{C}{T}=\frac{1}{2}\sigma^2K^2\pdv{^2C}{K^2}-rK\pdv{C}{K}.
+\end{equation}
+Rearranging all terms, we are left with
+\begin{equation}
+\sigma(K,T)=\sqrt{\frac{\displaystyle\pdv{C}{T}+rK\pdv{C}{K}}{\displaystyle\frac{1}{2}K^2\pdv{^2C}{K^2}}},
+\end{equation}
+\noindent from which we can easily derive Dupire's formula, as shown in eq.\eqref{dupire}, using a simple variable change, i.e. $\sigma(K,T)\implies \sigma(S,t)$, which gives
+\begin{equation}
+\sigma(S,t)=\sqrt{\frac{\displaystyle\pdv{C}{T}+rS\pdv{C}{K}}{\displaystyle\frac{1}{2}S^2\pdv{^2C}{K^2}}}.
+\end{equation}
+\end{proof}
 
 As can be seen, we need to differentiate the option prices with respect to their strikes and maturities. To achieve this, we need first to gather, from the market, a large number of prices for options with different maturities and strikes. We then implement some interpolation on these values to obtain an option price surface (with $K$ and $T$ as variables). Finally, we calculate the gradients of this interpolated surface and input them into eq.\eqref{dupire} to obtain the local volatility surface.
 We can then sample the local volatility at each time step of our simulation.
@@ -313,7 +363,7 @@ The relation obtained is
 \begin{equation}
 d_1=\frac{\log(S_0/S)+\left(r+\frac{1}{2}\sigma_{imp}^2\right)t}{\sigma_{imp}\sqrt{t}},
 \end{equation}
-\noindent with $S_0$ being the stock price at $t=0$. We define $\sigma_{imp}=\sigma_{imp}(K,T)$ as the interpolated surface of the implied volatilities evaluated at time $T$, and price $K$. All derivatives are evaluated at $K=S$ and $T=t$.
+\noindent with $S_0$ being the stock price at $t=0$. We define $\sigma_{imp}=\sigma_{imp}(K,T)$ as the interpolated surface of the implied volatilities evaluated at time $T$, and price $K$. All derivatives are also evaluated at $K=S$ and $T=t$. This formula can be obtained from eq.\eqref{dupire} by applying the transformation from call prices to implied volatilities.
 
 Because some of the shortcomings described for eq.\eqref{dupire} do not apply to eq.\eqref{dupire2}, and because the latter is more stable than the former~\cite{Wilmott3}, this new equation will be adopted in the implementation.
 
@@ -326,7 +376,7 @@ Despite its problems, Dupire's formula is still very much used in real-world pra
 
 \subsection{Stochastic Volatility}
 \label{subsection:stochastic volatility}
-As stated before, the volatility is not constant, is not observable and is not predictable, despite our attempts to model it. This seems to indicate that volatility is itself also a stochastic process. Some research has been done into this hypothesis, and many models have been developed to replicate real-world volatilities. Though stochastic volatility is a sort of local volatility, for simplicity we will refer to them as separate things.
+As stated before, the volatility is not constant, is not observable and is not predictable, despite our attempts to model it. This seems to indicate that volatility is itself also a stochastic process. Some research has been done into this hypothesis, and many models have been developed to replicate real-world volatilities.
 
 As before, we assume that the stock price follows a geometric Brownian motion
 \begin{equation}\label{stochvol}
@@ -362,7 +412,7 @@ dS=rSdt+\sqrt{\nu}SdW_1,
 \begin{equation}
 d\nu=\kappa(\overline{\nu}-\nu)dt+\eta\sqrt{\nu}dW_2,
 \end{equation}
-\noindent with $\nu$ corresponding to the stock price variance (i.e. $\nu=\sigma^2$) and again where $W_1$ and $W_2$ have a correlation of $\rho$. The original model used a drift parameter $\mu$ instead of the risk-free measure drift $r$ presented here, but a measure transformation, using Gisarnov's theorem, can be easily implemented~\cite{Crisostomo}.
+\noindent with $\nu$ corresponding to the stock price variance (i.e. $\nu=\sigma^2$) and again where $W_1$ and $W_2$ have a correlation of $\rho$. We furthermore define $\nu_0$ as the initial variance (i.e. variance at time $t=0$). The original model used a drift parameter $\mu$ instead of the risk-free measure drift $r$ presented here, but a measure transformation, using Gisarnov's theorem, can be easily implemented~\cite{Crisostomo}.
 
 The parameters $\kappa$, $\overline{\nu}$ and $\eta$ are, respectively, the mean-reversion rate (i.e. how fast the volatility converges to its mean value), the long-term variance (i.e. the mean value of variance) and the volatility of volatility (i.e. how erratic is the volatility process).
 
@@ -411,6 +461,9 @@ C=\sqrt{\xi^2+\eta^2(u^2+iu)},
 \xi=\kappa-\eta\rho iu.
 \end{equation}
 
+
+
+
 With this result we are now able to find the prices of options under the Heston model for a given set of parameters $\theta$. However, we need to find the optimal set of parameters such that the Heston model appropriately replicates market prices. This procedure is called called calibration and will be approached in detail in Chapter \ref{chapter:implementation}.
 
 \iffalse
@@ -422,8 +475,8 @@ This calibration requires a fair amount of past market data and is by far the mo
 
 
 
-\subsubsection{SABR Model}
-One other very famous model for stochastic volatility was developed by Hagan \textit{et al.}~\cite{Hagan} and is known as \emph{SABR}. It stands for "\emph{stochastic-}$\alpha\beta\rho$" and in this model it is assumed that the option prices and volatilities follow~\cite{Geeske}
+\subsubsection{Static SABR Model}
+One other very famous model for stochastic volatility was developed by Hagan \textit{et al.}~\cite{Hagan} and is known as \emph{SABR} - we will henceforth refer to it by \emph{Static SABR}, to distinguish it from the \emph{Dynamic SABR} model that we will see next. SABR stands for "\emph{stochastic-}$\alpha\beta\rho$" and in this model it is assumed that the option prices and volatilities follow~\cite{Geeske}
 \begin{equation}\label{dF}
 dS=rSdt+e^{-r(T-t)(1-\beta)}\sigma S^\beta dW_1,
 \end{equation}
@@ -432,18 +485,15 @@ d\sigma=\nu\sigma dW_2,
 \end{equation}
 \noindent where we define $\alpha=\sigma(0)$ as the starting volatility and $S_0=S(0)$ as the starting stock price. Finally, as before, the two Brownian motion processes $W_1$ and $W_2$ have a correlation of $\rho$.
 
-\iffalse
-It should be noted that we are now using the \hl{forward measure}, so in eq.\eqref{dF} we use $F$, the \emph{forward price}, instead of the usual spot price $S$ from eq.  \ref{GBM}. These two quantities are related by $S(t)=e^{-r(T-t)}F(t)$, so we can easily obtain one from the other.
-\fi
 
 
 
 In the original article, the authors claim that $\beta$ can be fitted from historical market data, but usually investors choose this value heuristically, depending on the type of assets traded. Typical values used are $\beta=1$ (stochastic lognormal model), used for foreign exchange options, $\beta=0$ (stochastic normal model), typical for interest rate options and $\beta=0.5$ (stochastic CIR model), also common for interest rate options.
 We will leave this parameter free upon implementation, assuming no heuristics.
 
-One of the main problems with the SABR model is the fact that, unlike the Heston model, the stochastic volatility process is not mean-reverting. This shortcoming enables the volatility to evolve unrestrictedly which is problematic - it may become negative, which is clearly absurd, or it may become extremely large, which is troublesome. Labordère~\cite{Labordere} proposed a mean-reverting correction to SABR, but we will study the original model by Hagan \textit{et al.}, as it is more commonly used.
+One of the main problems with the static SABR model is the fact that, unlike the Heston model, the stochastic volatility process is not mean-reverting. This shortcoming enables the volatility to evolve unrestrictedly which is problematic - it may become negative, which is clearly absurd, or it may become extremely large, which is troublesome. Labordère~\cite{Labordere} proposed a mean-reverting correction to static SABR, but we will study the original model by Hagan \textit{et al.}, as it is more commonly used.
 
-One of the main reasons why SABR is so popular is due to its quasi-closed-form solutions that enable us to quickly find the implied volatilities of options priced under this model. With the corrections done by Oblój on Hagan's original formula~\cite{Obloj}, it can be shown that these implied volatilities are given by
+One of the main reasons why static SABR is so popular is due to its quasi-closed-form solutions that enable us to quickly find the implied volatilities of options priced under this model. With the corrections done by Oblój on Hagan's original formula~\cite{Obloj}, it can be shown that these implied volatilities are given by
 \begin{equation}\label{sabr}
 \begin{split}
 \sigma_{SABR}(K,f,T)\approx&\frac{1}{\displaystyle\left[1+\frac{(1-\beta)^2}{24}\log^2\left(\frac{f}{K}\right)+\frac{(1-\beta)^4}{1920}\log^4\left(\frac{f}{K}\right)\right]}.\left(\frac{\nu\log\left(f/K\right)}{x(z)}\right)\\
@@ -463,7 +513,7 @@ Similarly to the Heston model, we again need to find the set of parameters that 
 
 
 \subsubsection{Dynamic SABR Model}
-One of the main setbacks of the SABR model is the fact that it only works for a set of options with the same maturity. The model behaves badly when we try to fit options with different maturities~\cite{Hagan}. 
+One of the main setbacks of the static SABR model is the fact that it only works for a set of options with the same maturity. The model behaves badly when we try to fit options with different maturities~\cite{Hagan}. 
 
 To solve this problem, Hagan \textit{et al.} suggested a similar model known as \emph{Dynamic SABR}~\cite{Hagan}. It follows the same processes presented in eqs.\eqref{dF} and \eqref{dsigma} but with time-dependent parameters $\rho(t)$ and $\nu(t)$,
 \begin{equation}\label{dF2}
@@ -527,6 +577,8 @@ In this particular case, $\nu_1^2(T)$, $\nu_2^2(T)$, $\eta_1(T)$ and $\eta_2^2(T
 \begin{equation}
 \eta_2^2(T)=\frac{3\nu_0^2\rho_0^2}{T^4(a+b)^4}\left[e^{-2(a+b)T}-8e^{-(a+b)T}+(7+2T(a+b)(-3+(a+b)T))\right].
 \end{equation}
+
+\hl{should we include also this new more complex model?}
 
 Despite their analytically solvable integrals, these formulas may not be robust enough to appropriately fit large data sets. Other more robust examples are
 \begin{equation}\label{rhot2}

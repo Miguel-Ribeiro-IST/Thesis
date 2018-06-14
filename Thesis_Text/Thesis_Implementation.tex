@@ -89,6 +89,7 @@ In \autoref{fig:Steps} we can see how smaller subintervals better resemble a tru
     \end{figure}
 
 \subsection{Pricing options from simulations}
+\label{subsection:Pricing options from simulations}
 To price options using the Monte Carlo algorithm, we generate $M$ paths by recursively calculating $\{S_i(t),\ \ i=1,\ldots,M\}$, using either of the discretization methods described before.
 
 When the stock price at the maturity, $S_i(T)$, is obtained for all paths, the option's payoff for each path is calculated from eqs.\eqref{callput}-\ref{binary}. We then average all these results and discount them back to the present, obtaining the option's value
@@ -124,7 +125,7 @@ Because we are modeling volatilities, and because implied volatilities are more 
 
 The weight function $w_{i,j}$ should be chosen such that higher weights are given to options with strikes closer to the current stock price $S_0$, because these points have a higher influence in the shape of the volatility smile than the others.
 One example of such a function is
-\begin{equation}
+\begin{equation}\label{weight}
 w_{i,j}=\left(1-\left|1-\frac{K_j}{S_0}\right|\right)^2,
 \end{equation}
 \noindent where we assume strikes are restricted to $K<2S_0$.

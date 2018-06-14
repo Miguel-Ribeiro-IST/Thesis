@@ -1,6 +1,6 @@
 clear;
 
-r1 = 0.06;
+r1 = 0.0;
 S01=17099.4;
 A = importdata('Data_BNPP.txt','\t',1);
 B1=A.data(:,:);

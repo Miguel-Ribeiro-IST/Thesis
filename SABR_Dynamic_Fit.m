@@ -19,7 +19,7 @@ OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
-SimPoints=true;
+SimPoints=false;
 M=100;
 %L=T*252*2
 
@@ -52,6 +52,7 @@ Plotter3D(alpha,rho0,nu0,a,b,beta,S0,r,B)
 
 tab=Printer(alpha,rho0,nu0,a,b,beta,B,S0,r);
 %openvar('tab')
+
 beep
 
 
@@ -233,35 +234,43 @@ function Plotter3D(alpha,rho0,nu0,a,b,beta,S0,r,B)
         end
         plot3(K2,ones(1,size(K2,2))*times(i),SV2,'LineWidth',2,'Color',[0.9500    0.200    0.1])
     end
-    axis vis3d;
-    %material dull;
     
-    %{
-    for i=1:size(K,2)
-       HV(i)=HestonVol(K(i));
-    end
-    p=plot(K,HV);
-    %}
-    
-    %{
-    %Plot options
-    xlim([0.4,1.6])
-    ylim([0.2,1])
+   xlim([0.4,1.6])
+    ylim([0.5/12,0.5+0.5/12])
+    zlim([0.2,1])
     box on;
     grid on;
-    set(gca,'fontsize',12)
     xlabel('K/S_0');
-    ylabel('\sigma_{imp} (yr^{-1/2})')
-    pbaspect([1.5 1 1])
-    if SimPoints
-        lgd=legend({'Simulated Volatilities','Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-    else
-        lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-    end
-    title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
-    
-    clear Volatility
-    %}
+    ylabel('T (days)');
+    zlabel('\sigma_{imp} (yr^{-1/2})')
+    yticks([1/12,2/12,3/12,4/12,5/12,6/12])
+    yticklabels({'21','42','63','84','105','126'})
+    %ylabel('\sigma_{imp} (yr^{-1/2})')
+    pbaspect([1 1.5 1])
+     %lgd=legend({'Market Data','Fitted Surface','Fitted Functions'},'FontSize',11);
+    %title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
+    set(gca,'fontsize',11)
+    view(40,35)
+    M = view(gca); 
+    R = M(1:3,1:3); 
+x = R*[1;0;0]; 
+y = R*[0;1;0]; 
+z = R*[0;0;1]; 
+set(get(gca,'XLabel'),'rotation',360/(2*pi)*atan(x(2)/x(1))) 
+set(get(gca,'YLabel'),'rotation',360/(2*pi)*atan(y(2)/y(1))) 
+
+
+
+%Contour Plot
+figure
+contourf(K,T,SV,25)
+pbaspect([1.5 1 1])
+xlabel('K/S_0');
+ylabel('T (days)');
+yticks([1/12,2/12,3/12,4/12,5/12,6/12])
+yticklabels({'21','42','63','84','105','126'})
+box on;
+set(gca,'fontsize',12)
 end
 
 

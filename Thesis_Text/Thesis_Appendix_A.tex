@@ -12,7 +12,7 @@
 \label{chapter:mktdata}
 
 Here, we present the data kindly provided by \emph{BNP Paribas} for European options. For confidentiality reasons, the strike prices were normalized by the initial stock price i.e. $K\rightarrow K/S_0$ so that the original strike prices are inaccessible.
-Suffice it to say that the underlying asset of the options here represented is a \emph{stock index}, a weighted average of the prices of some selected stocks (e.g. PSI-20 (Portugal)).
+Suffice it to say that the underlying asset of the options here represented is a \emph{stock index}, i.e. a weighted average of the prices of some selected stocks (e.g. PSI-20 (Portugal)).
 
 The data provided pertains to the options' implied volatilities. We can easily obtain their prices from these values using eq.\eqref{impvolform}. The converted prices of call European options are shown below.
 
@@ -88,12 +88,12 @@ $T$ (days) & $K$ ($\EUR$) & $\sigma_{imp}$ ($\SI{}{\year\tothe{-1/2}}$)  & $C$ (
 
 \begin{figure}[!htb]
   \begin{subfigmatrix}{2}
-    \subfigure[Implied Volatility, T=21 days]{\includegraphics[width=0.49\linewidth]{T1.eps}}
-    \subfigure[European Call Price, T=21 days]{\includegraphics[width=0.49\linewidth]{T1P.eps}}
-    \subfigure[Implied Volatility, T=42 days]{\includegraphics[width=0.49\linewidth]{T2.eps}}
-    \subfigure[European Call Price, T=42 days]{\includegraphics[width=0.49\linewidth]{T2P.eps}}
-    \subfigure[Implied Volatility, T=63 days]{\includegraphics[width=0.49\linewidth]{T3.eps}}
-    \subfigure[European Call Price, T=63 days]{\includegraphics[width=0.49\linewidth]{T3P.eps}}
+    \subfigure[Implied Volatility, T=21 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T1.eps}}
+    \subfigure[European Call Price, T=21 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T1P.eps}}
+    \subfigure[Implied Volatility, T=42 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T2.eps}}
+    \subfigure[European Call Price, T=42 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T2P.eps}}
+    \subfigure[Implied Volatility, T=63 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T3.eps}}
+    \subfigure[European Call Price, T=63 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T3P.eps}}
   \end{subfigmatrix}
   \caption[Scatter plots of the implied volatilities and European call prices provided, for 21, 42 and 63 days, to be used in model calibration and validation.]{Scatter plots of the implied volatilities and European call prices provided, for 21, 42 and 63 days, to be used in model calibration and validation.}
   \label{fig:mktdata}
@@ -101,12 +101,12 @@ $T$ (days) & $K$ ($\EUR$) & $\sigma_{imp}$ ($\SI{}{\year\tothe{-1/2}}$)  & $C$ (
 
 \begin{figure}[!htb]
   \begin{subfigmatrix}{2}
-    \subfigure[Implied Volatility, T=126 days]{\includegraphics[width=0.49\linewidth]{T4.eps}}
-    \subfigure[European Call Price, T=126 days]{\includegraphics[width=0.49\linewidth]{T4P.eps}}
-    \subfigure[Implied Volatility, T=189 days]{\includegraphics[width=0.49\linewidth]{T5.eps}}
-    \subfigure[European Call Price, T=189 days]{\includegraphics[width=0.49\linewidth]{T5P.eps}}
-    \subfigure[Implied Volatility, T=252 days]{\includegraphics[width=0.49\linewidth]{T6.eps}}
-    \subfigure[European Call Price, T=252 days]{\includegraphics[width=0.49\linewidth]{T6P.eps}}
+    \subfigure[Implied Volatility, T=126 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T4.eps}}
+    \subfigure[European Call Price, T=126 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T4P.eps}}
+    \subfigure[Implied Volatility, T=189 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T5.eps}}
+    \subfigure[European Call Price, T=189 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T5P.eps}}
+    \subfigure[Implied Volatility, T=252 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T6.eps}}
+    \subfigure[European Call Price, T=252 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T6P.eps}}
   \end{subfigmatrix}
   \caption[Scatter plots of the implied volatilities and European call prices provided, for 126, 189 and 252 days, to be used in model calibration and validation.]{Scatter plots of the implied volatilities and European call prices provided, for 126, 189 and 252 days, to be used in model calibration and validation.}
   \label{fig:mktdata2}

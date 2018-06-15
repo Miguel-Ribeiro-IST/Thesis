@@ -160,6 +160,53 @@ This model states that the price of an European call or put option follows the p
 \noindent where $V$ is the price of the option, $S$ is the price of the underlying (risky) asset, $r$ is the risk-free interest rate and $\sigma$ is the stock price volatility.
 The underlying asset is commonly referred to as \emph{stock}, so these terms will be used interchangeably in the following sections.
 
+\begin{proof}
+Itô's Lemma can be applied to our option price $V$, which depends on the (stochastic) stock price $S$ and time $t$, so that we obtain
+\begin{equation}\label{BSproof}
+dV=\pdv{V}{t}dt+\pdv{V}{S}dS+\frac{1}{2}\pdv{^2V}{S^2} (dS)^2.
+\end{equation}
+
+We now assume that the stock price $S$ follows a geometric Brownian Motion,
+\begin{equation}
+dS=rSdt+\sigma SdW,
+\end{equation}
+\noindent where $W$ is a Brownian motion process.
+
+It can be shown that $(dW)^2=dt$. With this property, we can reduce eq. \eqref{BSproof} to
+\begin{equation}
+\begin{split}
+dV=&\pdv{V}{t}dt+\pdv{V}{S}\left(rSdt+\sigma SdW\right)+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}dt\\
+=&\left(rS\pdv{V}{S}+\pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}\right)dt+\sigma S\pdv{V}{S}dW.
+\end{split}
+\end{equation}
+
+
+We now construct a portfolio where we sell \emph{one} option and buy an amount $\partial V/\partial S$ of stocks. The value of such a portfolio would be
+\begin{equation}\label{pi}
+\Pi=-V+\pdv{V}{S}S.
+\end{equation}
+
+From this equation we can easily derive the change of the portfolio's value, $d\Pi$, in the time interval $dt$ as
+\begin{equation}\label{dpi}
+\begin{split}
+d\Pi&=-dV+\pdv{V}{S}dS\\
+&=\left(\pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}\right)dt.
+\end{split}
+\end{equation}
+
+Because the portfolio's value doesn't change with the Brownian motion $W$, it follows that it is \emph{riskless}.
+To avoid any arbitrage possibilities (i.e. making profit without risk, which is illegal), the value of this portfolio must be the same as a risk-free asset. The value of a portfolio with such an asset would change with time as
+\begin{equation}\label{dpi2}
+d\Pi=r\Pi dt.
+\end{equation}
+
+Substituting eqs. \eqref{pi} and \eqref{dpi} into eq. \eqref{dpi2} gives
+\begin{equation}
+\pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}+rS\pdv{V}{S}-rV=0.
+\end{equation}
+
+\end{proof}
+
 
 The risk-free interest rate, $r$, is the interest an investor would receive from any risk-free investment (e.g. treasury bills). No investor should ever invest in risky products whose expected return is lower than this interest (e.g. the lottery), since there's the alternative of obtaining a higher (expected) payoff without the disadvantage of taking risks. In general, this rate changes slightly with time and is unknown, but Black \textit{et al.}, in their original model (eq.\eqref{BS2}), assumed that it remains constant throughout the option's duration and that it is known. Some authors have suggested solutions to deal with this shortcoming, providing models to replicate the behavior of interest rates~\cite{HJM}, but because option prices do not significantly depend on this value~\cite{Wilmott3}, in the remainder of this thesis we shall make the same assumptions as Black \textit{et al.} and set this rate to some constant.
 

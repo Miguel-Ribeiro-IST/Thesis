@@ -12,7 +12,7 @@ r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
 M=100000;           %number of paths to be simulated
 sigmamax=1.5;        %maximum value the local volatility can take
-aver=30;
+aver=50;
 %L=T*252*2
 
 
@@ -264,7 +264,7 @@ for iter=1:matur
     plot(K2,DV2(iter,:),'-','LineWidth',1.5)
     
     %Plot options
-    xlim([0.5,1.6])
+    xlim([0.4,1.6])
     ylim([0.2,1])
     box on;
     grid on;

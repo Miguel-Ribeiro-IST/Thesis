@@ -12,7 +12,7 @@ r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
 M=100000;           %number of paths to be simulated
 sigmamax=1.5;        %maximum value the local volatility can take
-aver=50;
+aver=30;
 %L=T*252*2
 
 

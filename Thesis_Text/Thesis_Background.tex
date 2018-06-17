@@ -459,7 +459,7 @@ dS=rSdt+\sqrt{\nu}SdW_1,
 \begin{equation}
 d\nu=\kappa(\overline{\nu}-\nu)dt+\eta\sqrt{\nu}dW_2,
 \end{equation}
-\noindent with $\nu$ corresponding to the stock price variance (i.e. $\nu=\sigma^2$) and again where $W_1$ and $W_2$ have a correlation of $\rho$. We furthermore define $\nu_0$ as the initial variance (i.e. variance at time $t=0$). The original model used a drift parameter $\mu$ instead of the risk-free measure drift $r$ presented here, but a measure transformation, using Gisarnov's theorem, can be easily implemented~\cite{Crisostomo}.
+\noindent with $\nu$ corresponding to the stock price variance (i.e. $\nu=\sigma^2$) and again where $W_1$ and $W_2$ have a correlation of $\rho$. We furthermore define $\nu_0$ as the initial variance (i.e. variance at time $t=0$). The original model used a drift parameter $\mu$ instead of the risk-free measure drift $r$ presented here, but a measure transformation, using Gisarnov's theorem, can be easily implemented~\cite{rouah}.
 
 The parameters $\kappa$, $\overline{\nu}$ and $\eta$ are, respectively, the mean-reversion rate (i.e. how fast the volatility converges to its mean value), the long-term variance (i.e. the mean value of variance) and the volatility of volatility (i.e. how erratic is the volatility process).
 
@@ -470,20 +470,139 @@ One of the reasons why the Heston model is so popular is the fact that there exi
 \begin{split}
 C_{H}(\theta;K,T)&=e^{-rT}\mathbb{E}\left[\left(S(T)-K\right)\mathbbm{1}_{\left\{S(T)>K\right\}}\right]\\
 &=e^{-rT}\left(\mathbb{E}\left[S(T)\mathbbm{1}_{\left\{S(T)>K\right\}}\right]-K\mathbb{E}\left[\mathbbm{1}_{\left\{S(T)>K\right\}}\right]\right)\\
-&=S(0)P_1-e^{-rT}KP_2,
+&=S_0P_1-e^{-rT}KP_0,
 \end{split}
 \end{equation}
 \noindent where $C_{H}(\theta;K,T)$ corresponds to the theoretical European call option price under the Heston model, assuming a parameter set $\theta$, strike $K$ and maturity $T$. The variables $P_1$ and $P_2$ are given by
 \begin{equation}\label{P1}
-P_1=\frac{1}{2}+\frac{1}{\pi}\int_0^\infty\operatorname{Re}\left(\frac{e^{-iu\log K}}{iuS(0)e^{rT}}\phi(\theta;u-i,T)\right)du,
+P_1=\frac{1}{2}+\frac{1}{\pi}\int_0^\infty\operatorname{Re}\left(\frac{e^{-iu\log K}}{iuS_0e^{rT}}\phi(\theta;u-i,T)\right)du,
 \end{equation}
 \begin{equation}\label{P2}
-P_2=\frac{1}{2}+\frac{1}{\pi}\int_0^\infty\operatorname{Re}\left(\frac{e^{-iu\log K}}{iu}\phi(\theta;u,T)\right)du,
+P_0=\frac{1}{2}+\frac{1}{\pi}\int_0^\infty\operatorname{Re}\left(\frac{e^{-iu\log K}}{iu}\phi(\theta;u,T)\right)du,
 \end{equation}
 \noindent where $i$ is the imaginary unit and $\phi(\theta;u,t)$ is the characteristic function of the logarithm of the stock price process - the characteristic function of a random variable is the Fourier transform of the probability density function of that variable.
 
 
-It is crucial to find the appropriate characteristic function $\phi(\theta;u,t)$ in order to evaluate the integrals in eqs.\eqref{P1} and \eqref{P2} and with them find the option price with eq.\eqref{CH}. In his original article, Heston derived this very characteristic function~\cite{Heston}. However, some authors showed that it contained discontinuities for large maturities and wasn't easily derivable~\cite{Kahl}, making eq.\eqref{CH} very difficult to evaluate. These shortcomings led some other authors to propose several modified versions of this function~\cite{Rollin,Schoutens}. Most recently, Cui \textit{et al.}~\cite{Cui} presented a characteristic function that not only doesn't have the previously mentioned discontinuities but is also easily derivable, given by
+It is crucial to find the appropriate characteristic function $\phi(\theta;u,t)$ in order to evaluate the integrals in eqs.\eqref{P1} and \eqref{P2} and with them find the option price with eq.\eqref{CH}. In his original article, Heston proposed a solution to this very characteristic function~\cite{Heston}. However, some posterior authors demonstrated that, for large maturities, some discontinuities appeared for the proposed equation~\cite{Kahl}. One possible alternative, proposed by Schoutens~\cite{Schoutens}, avoids this shortcoming and is given by
+\begin{equation}
+\phi(\theta;u,t)=\exp\left\{iu\left(\log S_0+rt\right)+\frac{\kappa\overline{\nu}}{\eta^2}\left[\left(\xi-\alpha\right)t-2\log\left(\frac{1-ge^{-\alpha t}}{1-g}\right)\right]+\frac{\nu_0}{\eta^2}\left(\xi-\alpha\right)\frac{1-e^{-\alpha t}}{1-ge^{-\alpha t}}\right\},
+\end{equation}
+\noindent where we define
+\begin{equation}
+\xi=\kappa-\eta\rho iu,
+\end{equation}
+\begin{equation}
+\alpha=\sqrt{\xi^2+\eta^2(u^2+iu)},
+\end{equation}
+\begin{equation}
+g=\frac{\xi-\alpha}{\xi+\alpha}.
+\end{equation}
+
+
+\begin{proof}
+We will follow the derivation presented in Gatheral~\cite{gatheral} with slight changes of variables, for consistency.
+
+We begin by defining the (call) option's value equation (from Itô's Lemma) as
+\begin{equation}\label{hestonproof1}
+\pdv{C}{t}+\frac{1}{2}\nu S^2\pdv[2]{C}{S}+\rho\eta\nu S\pdv{C}{\nu}{S}+\frac{1}{2}\eta^2\nu\pdv[2]{C}{\nu}+rS\pdv{C}{S}-rC+\kappa(\overline{\nu}-\nu)\pdv{C}{\nu}=0.
+\end{equation}
+
+We now define the forward price as $F(t)=S(t)e^{r(T-t)}$, and we introduce the variables $\tau=T-t$ and $x(t)=\log\left(F(t)/K\right)$. We furthermore denote $C^*$ as the future value to expiration of the option price (i.e. $C^*=Ce^{rT}$). The relation in eq. \eqref{hestonproof1} reduces to
+\begin{equation}\label{hestonproof2}
+-\pdv{C^*}{\tau}+\frac{1}{2}\nu\pdv[2]{C^*}{x}-\frac{1}{2}\nu\pdv{C^*}{x}+\frac{1}{2}\eta^2\nu\pdv[2]{C^*}{\nu}+\rho\eta\nu\pdv{C^*}{x}{\nu}+\kappa(\overline{\nu}-\nu)\pdv{C^*}{\nu}=0,
+\end{equation}
+\noindent which has a solution of the form \cite{duffie}
+\begin{equation}\label{hestonproof3}
+C^*(x,\nu,\tau)=Ce^{rT}=\left(S_0P_1-e^{-rT}KP_0\right)e^{rT}=K\left[e^xP_1(x,\nu,\tau)-P_0(x,\nu,\tau)\right].
+\end{equation}
+
+
+Substituting the solution \eqref{hestonproof3} in eq. \eqref{hestonproof2} implies that $P_0$ and $P_1$ must satisfy
+\begin{equation}\label{hestonproof4}
+-\pdv{P_j}{\tau}+\frac{1}{2}\nu\pdv[2]{P_j}{x}-\left(\frac{1}{2}-j\right)\nu\pdv{P_j}{x}+\frac{1}{2}\eta^2\nu\pdv[2]{P_j}{\nu}+\rho\eta\nu\pdv{P_j}{x}{\nu}+\left(\kappa(\overline{\nu}-\nu)+j\nu\rho\eta\right)\pdv{P_j}{\nu}=0,
+\end{equation}
+\noindent for $j=0,1$ and subject to the terminal condition $P_j(x,\nu,\tau=0)=\mathbbm{1}_{\left\{x>0\right\}}$.
+
+
+To solve this problem we use a Fourier transform technique. Defining $\tilde{P_j}$ as the Fourier transform of $P_j$,
+\begin{equation}
+\tilde{P_j}(u,\nu,\tau)=\int_{-\infty}^{\infty}e^{-iux}P_j(x,\nu,\tau)dx,
+\end{equation}
+\noindent and substituting this result in eq. \eqref{hestonproof4} produces
+\begin{equation}\label{hestonproof5}
+\nu\left\{\omega_j\tilde{P_j}-\beta_j\pdv{\tilde{P_j}}{\nu}+\frac{\eta^2}{2}\pdv[2]{\tilde{P_j}}{\nu}\right\}+\kappa\overline{\nu}\pdv{\tilde{P_j}}{\nu}-\pdv{\tilde{P_j}}{\tau}=0,
+\end{equation}
+\noindent with
+\begin{equation}
+\omega_j=-\frac{u^2}{2}-\frac{iu}{2}+iju,
+\end{equation}
+\begin{equation}
+\beta_j=\kappa-\rho\eta iu-\rho\eta j.
+\end{equation}
+
+
+Heston proposed that $\tilde{P_j}$ is a function of the form
+\begin{equation}
+\tilde{P_j}(u,\nu,\tau)=\frac{1}{iu}\exp\left\{\zeta_j(u,\tau)\overline{\nu}+\psi_j(u,\tau)\nu\right\}.
+\end{equation}
+
+We can thus derive
+\begin{equation}
+\pdv{\tilde{P_j}}{\tau}=\left\{\overline{\nu}\pdv{\zeta_j}{\tau}+\nu\pdv{\psi_j}{\tau}\right\}\tilde{P_j},
+\end{equation}
+\begin{equation}
+\pdv{\tilde{P_j}}{\nu}=\psi_j\tilde{P_j},
+\end{equation}
+\begin{equation}
+\pdv[2]{\tilde{P_j}}{\nu}=\psi_j^2\tilde{P_j}.
+\end{equation}
+
+Thus, eq. \eqref{hestonproof5} is only satisfied if
+\begin{equation}
+\pdv{\zeta_j}{\tau}=\kappa\psi_j,
+\end{equation}
+\begin{equation}
+\pdv{\psi_j}{\tau}=\omega_j-\beta_j\psi_j+\frac{\eta^2}{2}\psi_j^2.
+\end{equation}
+
+Integrating these solutions with terminal conditions $\zeta_j(u,0)=\psi_j(u,0)=0$, we obtain
+\begin{equation}
+\zeta_j(u,\tau)=\frac{\kappa}{\eta^2}\left[\left(\beta_j-\gamma_j\right)\tau-2\log\left(\frac{1-g_je^{-\gamma_j \tau}}{1-g_j}\right)\right],
+\end{equation}
+\begin{equation}
+\psi_j(u,\tau)=\frac{1}{\eta^2}\left(\beta_j-\gamma_j\right)\frac{1-e^{-\gamma_j \tau}}{1-g_je^{-\gamma_j \tau}}
+\end{equation}
+\noindent where we define
+\begin{equation}
+\gamma_j=\sqrt{\beta_j-2\omega_j\eta^2},
+\end{equation}
+\begin{equation}
+g_j=\frac{\beta_j-\gamma_j}{\beta_j+\gamma_j}.
+\end{equation}
+
+We finally arrive at the solution for $P_j$ given by
+\begin{equation}
+P_j(x,\nu,\tau)=\frac{1}{2}+\frac{1}{\pi}\int_0^\infty\operatorname{Re}\left(\frac{\exp\left\{\zeta_j(u,\tau)\overline{\nu}+\psi_j(u,\tau)\nu+iux\right\}}{iu}\right)du
+\end{equation}
+
+A change of variables is possible, as shown by Crisostomo~\cite{Crisostomo}, such that the two different characteristic functions for $P_1$ and $P_0$ can be transformed into a single one by defining
+\begin{equation}
+P_1=\frac{1}{2}+\frac{1}{\pi}\int_0^\infty\operatorname{Re}\left(\frac{e^{-iu\log K}}{iuS_0e^{rT}}\phi(\theta;u-i,T)\right)du,
+\end{equation}
+\begin{equation}
+P_0=\frac{1}{2}+\frac{1}{\pi}\int_0^\infty\operatorname{Re}\left(\frac{e^{-iu\log K}}{iu}\phi(\theta;u,T)\right)du,
+\end{equation}
+\noindent with the characteristic function $\phi(\theta;u,T)$ given by
+\begin{equation}
+\phi(\theta;u,t)=\exp\left\{iu\left(\log S_0+rt\right)+\frac{\kappa\overline{\nu}}{\eta^2}\left[\left(\xi-\alpha\right)t-2\log\left(\frac{1-ge^{-\alpha t}}{1-g}\right)\right]+\frac{\nu_0}{\eta^2}\left(\xi-\alpha\right)\frac{1-e^{-\alpha t}}{1-ge^{-\alpha t}}\right\}.
+\end{equation}
+
+\end{proof}
+
+
+
+
+ These shortcomings led some other authors to propose several modified versions of this function~\cite{Rollin,Schoutens}. Most recently, Cui \textit{et al.}~\cite{Cui} presented a characteristic function that not only doesn't have the previously mentioned discontinuities but is also easily derivable, given by
 \begin{equation}
 \phi(\theta;u,t)=\exp\left\{iu\left(\log S_0+rt\right)-\frac{t\kappa\overline{\nu}\rho iu}{\eta}-\nu_0A+\frac{2\kappa\overline{\nu}}{\eta^2}D\right\},
 \end{equation}
@@ -512,12 +631,6 @@ C=\sqrt{\xi^2+\eta^2(u^2+iu)},
 
 
 With this result we are now able to find the prices of options under the Heston model for a given set of parameters $\theta$. However, we need to find the optimal set of parameters such that the Heston model appropriately replicates market prices. This procedure is called called calibration and will be approached in detail in Chapter \ref{chapter:implementation}.
-
-\iffalse
-Calibrating the parameters  $\rho$, $\kappa$, $\overline{\nu}$ and $\eta$ is absolutely critical. A model with badly calibrated parameters would output wrong predictions, rendering it completely useless.
-This calibration requires a fair amount of past market data and is by far the most complex and computationally demanding section of this model. We will deal with it in the next section.
-\fi
-
 
 
 

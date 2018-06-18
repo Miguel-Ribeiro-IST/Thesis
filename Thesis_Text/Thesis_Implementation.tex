@@ -163,8 +163,10 @@ Thus, it can be seen that a very great number of Monte Carlo pricers will have t
 Thus, we can conclude that though the Monte Carlo algorithm is very useful to price a small amount of options, it is nearly useless in the calibration procedures required to use both the Heston and SABR models.
 
 
-Fortunately, as mentioned, both Heston and SABR have closed-form solutions, shown in eqs. \eqref{CH}, \eqref{sabr} and \eqref{dynsabr}, that we can use to directly price the options with each model's parameters, without the need to run the slow Monte Carlo pricer. The optimization algorithms should then converge much faster to the optimal solution for the model's parameters.
+We must also mention the fact that, while volatility models are commonplace in finance, investors use different models with different parameters to price their options. This means that even if our calibrated model perfectly fits market data at a given time, after a while the prices will change and the calibration will become outdated. Therefore, a frequent recalibration of the parameters is required which demands fast calibration methods to be employed.
 
+
+Fortunately, as mentioned, both Heston and SABR have closed-form solutions, shown in eqs. \eqref{CH}, \eqref{sabr} and \eqref{dynsabr}, that we can use to directly price the options with each model's parameters, without the need to run the slow Monte Carlo pricer. The optimization algorithms should then converge much faster to the optimal solution for the model's parameters.
 
 
 
@@ -179,7 +181,6 @@ With this issue in mind, we selected two powerful algorithms known as \emph{Mult
 The optimization algorithms will search the $D$-dimensional sample space ($D$ corresponds to the number of parameters of each model), for the optimal solution. Each point in this space corresponds to a possible set of parameters, $\theta$.
 The optimizers should also deal with parameter boundaries, since these are required for some of the models' parameters (e.g. the correlation parameter, $\rho$, in both Heston and SABR is obviously contained between $-1$ and $1$).
 
-\hl{Feller's condition inequalities}
 
 \subsubsection{Multi-Start Optimizer}
 The Multi-Start optimizer is nothing more than the application of a simple optimization algorithm multiple times with multiple different starting points.

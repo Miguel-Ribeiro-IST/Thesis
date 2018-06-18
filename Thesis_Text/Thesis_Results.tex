@@ -12,6 +12,21 @@ We will fit all our functions to a dataset of implied volatilities for European 
 
 For the case of Dupire's local volatility, no calibration is required. Instead we must perform an interpolation in order to find the implied volatility surface from the data mentioned before and, with it, find the local volatility function. From this, we can easily obtain the prices of European options from the Monte Carlo pricer described in subsections \ref{subsection:Simulating stock prices} and \ref{subsection:Pricing options from simulations}. These prices (and their implied volatilities) can then be compared to their true market values.
 
+Some parameters will be used throughout all the simulations, namely the initial stock price, $S_0$, the risk-free interest rate, $r$, and the time step size (used in the Monte Carlo simulations), $\Delta t$. Their values are shown in \autoref{tab:defaultparam}.
+\begin{table}[H]
+    \centering
+        \renewcommand{\arraystretch}{0.8}
+\begin{tabular}{@{}lcr@{}}
+\toprule
+$S_0$($\EUR$) & $r$($\SI{}{\per\year}$) & $\Delta t$(days) \\ \midrule
+1 & 0 & 0.5 \\
+\bottomrule
+\end{tabular}
+  \caption[Parameters used throughout all simulations.]{Parameters used throughout all simulations.}
+  \label{tab:defaultparam}
+\end{table}
+
+
 
 \section{Constant Volatility Model}
 \begin{figure}[H]
@@ -197,6 +212,31 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 
 \newpage
 \section{Static SABR Model}
+As we saw before, the Static SABR model is defined as
+\begin{equation}
+dS=rSdt+e^{-r(T-t)(1-\beta)}\sigma S^\beta dW_1,
+\end{equation}
+\begin{equation}
+d\sigma=\nu\sigma dW_2,
+\end{equation}
+\noindent with $\alpha=\sigma(0)$ and with $W_1$ and $W_2$ having a correlation of $\rho$.
+
+The closed form solution, shown in eq.\eqref{sabr}, enables us to obtain the theoretical implied volatilities of options priced under this model and will be used in the calibration process.
+
+The influence of each parameter of the Static SABR model on the shape of the implied volatility curve is shown in \autoref{fig:SSparam}.
+
+\begin{figure}[H]
+  \begin{subfigmatrix}{2}
+    \subfigure[Dependence on $\alpha$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSalpha.eps}}
+    \subfigure[Dependence on $\beta$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSbeta.eps}}
+    \subfigure[Dependence on $\rho$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSrho.eps}}
+    \subfigure[Dependence on $\nu$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSnu.eps}}
+  \end{subfigmatrix}
+  \caption[Dependence of the implied volatility curve on each of the Static SABR model parameters.]{Dependence of the implied volatility curve on each of the Static model SABR parameters. The default parameters used were $S_0=1\EUR$, $T=42$ days and $r=0$. Furthermore, on all plots, except when the dependence on a parameter is represented, the parameters used were $\alpha=0.2$, $\beta=1$, $\rho=-0.5$ and $\nu=1.5$.}
+  \label{fig:SSparam}
+\end{figure}
+
+
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
     \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSABR1.eps}}
@@ -274,6 +314,32 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 
 \newpage
 \section{Heston Model}
+The Heston model is defined as
+\begin{equation}
+dS=rSdt+\sqrt{\nu}SdW_1,
+\end{equation}
+\begin{equation}
+d\nu=\kappa(\overline{\nu}-\nu)dt+\eta\sqrt{\nu}dW_2,
+\end{equation}
+\noindent where $\nu_0=\nu(0)$ and with $W_1$ and $W_2$ having a correlation of $\rho$.
+
+The closed form solution, shown in eq.\eqref{CH}, we are able to find the theoretical prices of options priced under this model, which we can easily convert to implied volatilities. These last will be used in the calibration process.
+
+The influence of each parameter of the Heston model on the shape of the implied volatility curve is shown in \autoref{fig:Hparam}.
+
+\begin{figure}[H]
+  \begin{subfigmatrix}{2}
+    \subfigure[Dependence on $\kappa$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{Hkappa.eps}}
+    \subfigure[Dependence on $\overline{\nu}$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{Hnubar.eps}}
+    \subfigure[Dependence on $\nu_0$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{Hnu0.eps}}
+    \subfigure[Dependence on $\eta$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{Heta.eps}}
+        \subfigure[Dependence on $\rho$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{Hrho.eps}}
+  \end{subfigmatrix}
+  \caption[Dependence of the implied volatility curve on each of the Heston model parameters.]{Dependence of the implied volatility curve on each of the Heston model parameters. The default parameters used were $S_0=1\EUR$, $T=42$ days and $r=0$. Furthermore, on all plots, except when the dependence on a parameter is represented, the parameters used were $\kappa=10$, $\overline{\nu}=0.1$, $\nu_0=0.1$, $\eta=1$ and $\rho=-0.5$.}
+  \label{fig:Hparam}
+\end{figure}
+
+
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
     \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{H1.eps}}
@@ -461,43 +527,7 @@ $C_{\mathrm{mkt}}$ vs $\overline{C}$
 
 \hl{is implied vol measured in yr-1/2}
 
-
-\hl{see Gatheral for the proof for Heston}
-
-
-\hl{cite Chourdakis in the negative correlation between stock prices and volatilities}
-
-\hl{mention garch models. say they aremore suited for historical estimation and risk management purposes, but stochastic volatility is better for derivative pricing and hedging. garch is very popular amongst econometricians and practitioners to filter or forecast volatility values}
-
-\hl{mention that there exist other stochastic volatility models such as hull and white, stein and stein, among others, but heston is the most popular of these}
-
-\hl{heston follows a feller process, developed in Feller - cite feller}
-
-\hl{show influence of each parameter in the shape of each model - plot three functions of Heston using a different value of a parameter for each of them}
-
-
-\hl{calibration is difficult in stochastic volatility. we can use... (see Chourdakis pg.185)}
-
-\hl{because the calibrated model was not used to produce the price data, stochastic volatility parameters do not remain constant and need to be recalibrated everyday and sometimes even more often - we thus need fast computing methods}
-
-\hl{if we have a very limited set of market prices, there may exist different parameter values that produce the same error. This is problematic when pricing exotic options that are sensitive to these values, because it may lead to mispricing and thus losses}
-
-\hl{local volatility - to account for the implied volatility smile/skew, we create a nonlinear but deterministic volatility structure (plagiarism!)}
-
-\hl{in local volatility, we can try different interpolation methods and smoothers - check Chourdakis}
-
 \hl{the heston and dynamic sabr single plot figures are slices of the implied volatility surface}
-
-\hl{local volatility - numerical differentiation is unstable}
-
-\hl{in appendix - erase data for maturities above 126 days}
-
-\hl{show each function along the parameters in the results section}
-
-\hl{mention all default values: S0, r, L, ...}
 
 \hl{talk about the problem of volatility with sabr (switch volatility and price in code)}
 
-\hl{plot the influence of each variable in heston and sabr}
-
-\hl{put in conclusin: we could study the greeks...}

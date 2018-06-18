@@ -40,14 +40,7 @@ $T$ (days) & $K$ ($\EUR$) & $\sigma_{imp}$ ($\SI{}{\year\tothe{-1/2}}$) & $C$ ($
  & 1.00 & 0.2461 & 0.040063 \\
  & 1.10 & 0.2354 & 0.008525 \\
  & 1.25 & 0.2525 & 0.000621 \\
- & 1.50 & 0.2968 & 0.000016 \\\midrule
-\multirow{7}{*}{63} & 0.50 & 0.4789 & 0.500093 \\
- & 0.75 & 0.3452 & 0.252957 \\
- & 0.90 & 0.2658 & 0.115328 \\
- & 1.00 & 0.2401 & 0.047872 \\
- & 1.10 & 0.2330 & 0.014215 \\
- & 1.25 & 0.2438 & 0.001799 \\
- & 1.50 & 0.2749 & 0.000077 \\ \bottomrule
+ & 1.50 & 0.2968 & 0.000016 \\ \bottomrule
 \end{tabular}}
 \subfigure{
 \centering
@@ -55,27 +48,20 @@ $T$ (days) & $K$ ($\EUR$) & $\sigma_{imp}$ ($\SI{}{\year\tothe{-1/2}}$) & $C$ ($
 \begin{tabular}{@{}lccr@{}}
 \toprule
 $T$ (days) & $K$ ($\EUR$) & $\sigma_{imp}$ ($\SI{}{\year\tothe{-1/2}}$)  & $C$ ($\EUR$)\\ \midrule
+\multirow{7}{*}{63} & 0.50 & 0.4789 & 0.500093 \\
+ & 0.75 & 0.3452 & 0.252957 \\
+ & 0.90 & 0.2658 & 0.115328 \\
+ & 1.00 & 0.2401 & 0.047872 \\
+ & 1.10 & 0.2330 & 0.014215 \\
+ & 1.25 & 0.2438 & 0.001799 \\
+ & 1.50 & 0.2749 & 0.000077 \\\midrule
 \multirow{7}{*}{126} & 0.50 & 0.3878 & 0.500353 \\
  & 0.75 & 0.2954 & 0.256942 \\
  & 0.90 & 0.2444 & 0.127156 \\
  & 1.00 & 0.2295 & 0.064670 \\
  & 1.10 & 0.2269 & 0.028619 \\
  & 1.25 & 0.2340 & 0.007569 \\
- & 1.50 & 0.2521 & 0.000858 \\ \midrule
-\multirow{7}{*}{189} & 0.50 & 0.3448 & 0.500720 \\
- & 0.75 & 0.2729 & 0.261024 \\
- & 0.90 & 0.2348 & 0.136975 \\
- & 1.00 & 0.2246 & 0.077469 \\
- & 1.10 & 0.2241 & 0.040739 \\
- & 1.25 & 0.2304 & 0.014714 \\
- & 1.50 & 0.2438 & 0.002697 \\ \midrule
-\multirow{7}{*}{252} & 0.50 & 0.3168 & 0.501122 \\
- & 0.75 & 0.2582 & 0.264828 \\
- & 0.90 & 0.2281 & 0.145258 \\
- & 1.00 & 0.2209 & 0.087955 \\
- & 1.10 & 0.2220 & 0.051165 \\
- & 1.25 & 0.2286 & 0.022195 \\
- & 1.50 & 0.2408 & 0.005585 \\ \bottomrule
+ & 1.50 & 0.2521 & 0.000858 \\ \bottomrule
 \end{tabular}
 }
   \end{subfigmatrix}
@@ -88,27 +74,17 @@ $T$ (days) & $K$ ($\EUR$) & $\sigma_{imp}$ ($\SI{}{\year\tothe{-1/2}}$)  & $C$ (
 
 \begin{figure}[!htb]
   \begin{subfigmatrix}{2}
-    \subfigure[Implied Volatility, T=21 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T1.eps}}
-    \subfigure[European Call Price, T=21 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T1P.eps}}
-    \subfigure[Implied Volatility, T=42 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T2.eps}}
-    \subfigure[European Call Price, T=42 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T2P.eps}}
-    \subfigure[Implied Volatility, T=63 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T3.eps}}
-    \subfigure[European Call Price, T=63 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T3P.eps}}
+    \subfigure[Implied Volatility, T=21 days]{\includegraphics[width=0.47\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T1.eps}}
+    \subfigure[European Call Price, T=21 days]{\includegraphics[width=0.47\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T1P.eps}}
+    \subfigure[Implied Volatility, T=42 days]{\includegraphics[width=0.47\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T2.eps}}
+    \subfigure[European Call Price, T=42 days]{\includegraphics[width=0.47\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T2P.eps}}
+    \subfigure[Implied Volatility, T=63 days]{\includegraphics[width=0.47\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T3.eps}}
+    \subfigure[European Call Price, T=63 days]{\includegraphics[width=0.47\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T3P.eps}}
+        \subfigure[Implied Volatility, T=126 days]{\includegraphics[width=0.47\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T4.eps}}
+    \subfigure[European Call Price, T=126 days]{\includegraphics[width=0.47\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T4P.eps}}
   \end{subfigmatrix}
-  \caption[Scatter plots of the implied volatilities and European call prices provided, for 21, 42 and 63 days, to be used in model calibration and validation.]{Scatter plots of the implied volatilities and European call prices provided, for 21, 42 and 63 days, to be used in model calibration and validation.}
+  \caption[Scatter plots of the implied volatilities and European call prices provided]{Scatter plots of the implied volatilities and European call prices provided}
   \label{fig:mktdata}
 \end{figure}
 
-\begin{figure}[!htb]
-  \begin{subfigmatrix}{2}
-    \subfigure[Implied Volatility, T=126 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T4.eps}}
-    \subfigure[European Call Price, T=126 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T4P.eps}}
-    \subfigure[Implied Volatility, T=189 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T5.eps}}
-    \subfigure[European Call Price, T=189 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T5P.eps}}
-    \subfigure[Implied Volatility, T=252 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T6.eps}}
-    \subfigure[European Call Price, T=252 days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{T6P.eps}}
-  \end{subfigmatrix}
-  \caption[Scatter plots of the implied volatilities and European call prices provided, for 126, 189 and 252 days, to be used in model calibration and validation.]{Scatter plots of the implied volatilities and European call prices provided, for 126, 189 and 252 days, to be used in model calibration and validation.}
-  \label{fig:mktdata2}
-\end{figure}
 

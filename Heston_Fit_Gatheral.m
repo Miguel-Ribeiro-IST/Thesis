@@ -95,9 +95,11 @@ end
 %%%  CALCULATE LEAST SQUARES ERROR BETWEEN MODEL AND DATA  IMPLIED VOL  %%%
 function Total_Error=Hestoncal(kappa,nubar,nu0,rho,chi,S0,B,r,lb,ub)
 %Check if bounds are being respected. If not, immediately output a big error so that test point is ignored
-if kappa<=lb(1)||kappa>ub(1)||nubar<=lb(2)||nubar>ub(2)||nu0<=lb(3)||nu0>ub(3)||rho<=lb(4)||rho>ub(4)||chi<=lb(5)||chi>ub(5)
+if kappa<=lb(1)||kappa>ub(1)||nubar<=lb(2)||nubar>ub(2)||nu0<=lb(3)||nu0>ub(3)||rho<=lb(4)||rho>ub(4)||chi<=lb(5)||chi>ub(5) 
     Total_Error=1000;
     
+elseif 2*kappa*nubar<chi^2
+    Total_Error=1000;
     %If all boundaries are respected, calculate the error:
 else
     LS=0;
@@ -119,8 +121,8 @@ function result=HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,PriceVol)
 %We need the characteristic function, depicted in function "CharFuncHeston"
 fun1=@(u)real(exp(-1i.*u.*log(K))./(1i.*u.*S0.*exp(r.*T)).*CharFuncHeston(u-1i,T,S0,r,kappa,nubar,nu0,rho,chi));
 fun2=@(u)real(exp(-1i.*u.*log(K))./(1i.*u).*CharFuncHeston(u,T,S0,r,kappa,nubar,nu0,rho,chi));
-P1=1/2+1/pi.*integral(fun1,0,500);
-P2=1/2+1/pi.*integral(fun2,0,500);
+P1=1/2+1/pi.*integral(fun1,0,400);
+P2=1/2+1/pi.*integral(fun2,0,400);
 call=S0.*P1-exp(-r.*T).*K.*P2; %call option price
 
 if PriceVol=="price"   %if desired output is a price, return this result

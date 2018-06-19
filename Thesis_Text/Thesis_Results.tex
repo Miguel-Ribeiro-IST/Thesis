@@ -111,7 +111,7 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
     \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 1.9cm 0.85cm},clip]{ImpliedV.eps}}
-    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.5cm 1.15cm 1.55cm},clip]{ImpliedVC.eps}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{ImpliedVC.eps}}
   \end{subfigmatrix}
     \caption[Implied volatility surface and corresponding contour plot of the function interpolated linearly between the original data points.]{Implied volatility surface (left) and corresponding contour plot (right) of the function interpolated linearly between the original data points (blue circles).}\label{fig:DupImpV}
 \end{figure}   
@@ -120,7 +120,7 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
     \subfigure[$\sigma_{loc}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 1.9cm 0.85cm},clip]{LocalV.eps}}
-    \subfigure[$\sigma_{loc}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.5cm 1.15cm 1.55cm},clip]{LocalVC.eps}}
+    \subfigure[$\sigma_{loc}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{LocalVC.eps}}
   \end{subfigmatrix}
     \caption[Local volatility surface and corresponding contour plot of the function obtained with Dupire's formula from the interpolated implied volatility surface.]{Local volatility surface (left) and corresponding contour plot (right) of the function obtained with Dupire's formula (eq.\eqref{dupire2}) from the interpolated implied volatility surface in \autoref{fig:DupImpV}.}\label{fig:DupLocVol}
 \end{figure}   
@@ -531,3 +531,5 @@ $C_{\mathrm{mkt}}$ vs $\overline{C}$
 
 \hl{talk about the problem of volatility with sabr (switch volatility and price in code)}
 
+
+\hl{change captions to account for model simulations}

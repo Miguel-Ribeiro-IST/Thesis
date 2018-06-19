@@ -7,14 +7,15 @@ B=A.data(:,:);
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;               %initial stock price
 r = 0;                    %risk-free rate. Forward prices in data file assumed r=0
-matur=4;                  %maturity at which we want to fit the data. If matur=5, only the fifth maturity in the file is chosen.
+matur=2;                  %maturity at which we want to fit the data. If matur=5, only the fifth maturity in the file is chosen.
 OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
 %After calibrating all the model's parameters, we may want to simulate the implied volatilities using Monte Carlo
 SimPoints=false;   %true or false - define if Monte Carlo simulation should be executed
-M=1000;           %number of paths to be simulated
+M=100000;           %number of paths to be simulated
+repetitions=10;
 %L=T*252*2
 
 
@@ -41,7 +42,8 @@ beta=optimvars(4);
 %}
 
 %%%%%%%%%%%%%%%%%%%    PLOT RESULTS    %%%%%%%%%%%%%%%%%%%%%
-Plotter(alpha,rho,nu,beta,S0,r,T,M,B,SimPoints)
+%Plotter(alpha,rho,nu,beta,S0,r,T,M,B,SimPoints)
+Plotter_Sim(alpha,rho,nu,beta,S0,r,T,M,B,repetitions)
 
 tab=Printer(alpha,rho,nu,beta,B,S0,r,T);
 %openvar('tab')
@@ -165,6 +167,46 @@ end
 title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
 end
 
+
+function Plotter_Sim(alpha,rho,nu,beta,S0,r,T,M,B,repetitions)
+figure
+
+%If the user chose to use Monte Carlo, after calibration, to check model validity, calculate implied volatilities under MC
+K=(0.4:0.01:1.6);
+SimVol=@(K)Pricer(alpha,rho,nu,beta,K,S0,r,T,T*252*2,M,"vol");
+for j=1:repetitions
+    Mdl_tmp(j,:)=SimVol(K');
+end
+Mdl=mean(Mdl_tmp);
+
+
+
+%Plot original data points
+scatter(B(:,2),B(:,3),100,[0    0.1470    0.6410],'x','LineWidth',1.5);
+hold on;
+
+%Plot implied volatility function under the SABR model
+SABRVol=@(K)K.*0+sigmaSABR(alpha,rho,nu,beta,K',S0.*exp(r.*T),T)';
+fplot(SABRVol,[0.4,1.6],'LineWidth',2,'Color',[1.00    0.3050    0.0580])
+hold on;
+
+plot(K,Mdl,'-.','LineWidth',1.5,'Color',[0.0510    0.70    0.9330]);
+
+%Plot options
+xlim([0.4,1.6])
+ylim([0,1])
+box on;
+grid on;
+set(gca,'fontsize',12)
+xlabel('K/S_0');
+ylabel('\sigma_{imp} (yr^{-1/2})')
+pbaspect([1.5 1 1])
+    lgd=legend({'Market Data','Theoretical Function','Simulated Function'},'Location','northeast','FontSize',11);
+
+title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
+h = get(gca,'Children');
+set(gca,'Children',[h(3) h(1) h(2)])
+end
 
 
 %%% CALCULATE MONTE CARLO PRICE/IMPLIED VOLATILITY OF EUROPEAN OPTION UNDER SABR %%%

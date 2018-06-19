@@ -10,9 +10,9 @@ tic
 S0=17099.4;        %initial stock price
 r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
-M=100000;           %number of paths to be simulated
 sigmamax=1.5;        %maximum value the local volatility can take
-aver=30;
+M=100000;           %number of paths to be simulated
+aver=10;
 %L=T*252*2
 
 
@@ -126,7 +126,7 @@ for iter=1:matur
     
     %Plot options
     xlim([0.5,1.6])
-    ylim([0.2,1])
+    ylim([0,1])
     box on;
     grid on;
     set(gca,'fontsize',12)
@@ -202,6 +202,7 @@ function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur)
         if i==2 || i==4 || i==6 || i==12
             DV2(f,:)=mn;
             plot3(K2,ones(1,size(K2,2))*T(i,1),DV2(f,:),'LineWidth',2,'Color',[0.9500    0.200    0.1])
+            hold on;
         f=f+1;
         end
         DV(i,:)=mn;
@@ -216,6 +217,7 @@ function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur)
     %Plot options
     xlim([0.4,1.6])
     ylim([0.5/12,0.5+0.5/12])
+    zlim([0,1])
     box on;
     grid on;
     xlabel('K/S_0');
@@ -246,6 +248,7 @@ ylabel('T (days)');
 yticks([1/12,2/12,3/12,4/12,5/12,6/12])
 yticklabels({'21','42','63','84','105','126'})
 box on;
+colorbar;
 set(gca,'fontsize',12)
 
 
@@ -265,14 +268,14 @@ for iter=1:matur
     
     %Plot options
     xlim([0.4,1.6])
-    ylim([0.2,1])
+    ylim([0,1])
     box on;
     grid on;
     set(gca,'fontsize',12)
     xlabel('K/S_0');
     ylabel('\sigma_{imp} (yr^{-1/2})')
     pbaspect([1.5 1 1])
-    lgd=legend({'Market Data','Generated Function'},'Location','northeast','FontSize',11);
+    lgd=legend({'Market Data','Simulated Function'},'Location','northeast','FontSize',11);
     title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
     
     clear Volatility

@@ -54,7 +54,7 @@ surf(X,Y,SXY);
 s.EdgeAlpha=0.6;
 s.FaceAlpha=0.85;
 shading interp
-axis([MinK MaxK MinT MaxT 0.2 1])
+axis([MinK MaxK MinT MaxT 0 1])
 box on;
 grid on;
 xlabel('K/S_0');
@@ -83,6 +83,7 @@ ylabel('T (days)');
 yticks([1/12,2/12,3/12,4/12,5/12,6/12])
 yticklabels({'21','42','63','84','105','126'})
 box on;
+colorbar;
 set(gca,'fontsize',12)
 
 
@@ -90,7 +91,7 @@ set(gca,'fontsize',12)
 
 figure
 surf(X,Y,interp2);
-axis([MinK MaxK MinT MaxT 0.1 1])
+axis([MinK MaxK MinT MaxT 0 1])
 s.EdgeAlpha=0.6;
 s.FaceAlpha=0.85;
 shading interp
@@ -123,7 +124,9 @@ ylim([1/12,0.5])
 yticks([1/12,2/12,3/12,4/12,5/12,6/12])
 yticklabels({'21','42','63','84','105','126'})
 box on;
+colorbar;
 set(gca,'fontsize',12)
+
 
 function euro=european_bs(S0,K,r,sigma0,T,putcall)
 d1 = (log(S0/K) + (r + 0.5*sigma0^2)*T)./(sigma0*sqrt(T));

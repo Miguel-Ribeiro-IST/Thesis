@@ -11,8 +11,8 @@ S0=17099.4;        %initial stock price
 r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
 sigmamax=1.5;        %maximum value the local volatility can take
-M=100000;           %number of paths to be simulated
-aver=50;
+M=10000;           %number of paths to be simulated
+aver=10;
 %L=T*252*2
 
 
@@ -203,7 +203,7 @@ function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur)
             DV2(f,:)=mn;
             DV2max(f,:)=quantile(DV_tmp,0.9,1);
             DV2min(f,:)=quantile(DV_tmp,0.1,1);
-            plot3(K2,ones(1,size(K2,2))*T(i,1),DV2(f,:),'LineWidth',2,'Color',[0.9500    0.200    0.1])
+            plot3(K2,ones(1,size(K2,2))*T(i,1),DV2(f,:),'-.','LineWidth',2,'Color',[0.9500    0.200    0.1])
             hold on;
             f=f+1;
         end

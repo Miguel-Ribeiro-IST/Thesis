@@ -36,7 +36,7 @@ $S_0$($\EUR$) & $r$($\SI{}{\per\year}$) & $\Delta t$(days) \\ \midrule
     \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol3.eps}}
     \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol4.eps}}
   \end{subfigmatrix}
-  \caption[Implied volatility functions fitted independently to the implied volatility data for different maturities under constant volatility model.]{Implied volatility functions (red lines) fitted independently to the implied volatility data (crosses) for different maturities under constant volatility model.}
+  \caption[Implied volatility functions fitted independently to the implied volatility data for different maturities under constant volatility model, plotted with their respective Monte Carlo simulated functions along with their confidence intervals.]{Implied volatility functions (red lines) fitted independently to the implied volatility data (crosses) for different maturities under constant volatility model, plotted with their respective Monte Carlo simulated functions (light-blue dot-dashed lines) along with their 90\% confidence intervals (blue region).}
   \label{fig:ConstVol}
 \end{figure}
 
@@ -110,7 +110,7 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 1.9cm 0.85cm},clip]{ImpliedV.eps}}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{ImpliedV.eps}}
     \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{ImpliedVC.eps}}
   \end{subfigmatrix}
     \caption[Implied volatility surface and corresponding contour plot of the function interpolated linearly between the original data points.]{Implied volatility surface (left) and corresponding contour plot (right) of the function interpolated linearly between the original data points (blue circles).}\label{fig:DupImpV}
@@ -119,7 +119,7 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{loc}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 1.9cm 0.85cm},clip]{LocalV.eps}}
+    \subfigure[$\sigma_{loc}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{LocalV.eps}}
     \subfigure[$\sigma_{loc}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{LocalVC.eps}}
   \end{subfigmatrix}
     \caption[Local volatility surface and corresponding contour plot of the function obtained with Dupire's formula from the interpolated implied volatility surface.]{Local volatility surface (left) and corresponding contour plot (right) of the function obtained with Dupire's formula (eq.\eqref{dupire2}) from the interpolated implied volatility surface in \autoref{fig:DupImpV}.}\label{fig:DupLocVol}
@@ -133,7 +133,7 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
     \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{Dup3.eps}}
     \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{Dup4.eps}}
   \end{subfigmatrix}
-  \caption[Implied volatility functions obtained by generating $N_{paths}$ paths under Dupire's local volatility model using the Monte Carlo pricing method, plotted against the original market data.]{Implied volatility functions (red lines) obtained by generating $N_{paths}$ paths under Dupire's local volatility model using the Monte Carlo pricing method, plotted against the original market data (crosses).}
+  \caption[Implied volatility functions simulated with Monte Carlo under Dupire's local volatility model with their corresponding 90\% confidence interval, plotted against the original market data.]{Implied volatility functions (light-blue dot-dashed) simulated with Monte Carlo under Dupire's local volatility model with their corresponding 90\% confidence interval, plotted against the original market data (crosses).}
   \label{fig:Dup}
 \end{figure}
 
@@ -141,9 +141,9 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
     \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 1.9cm 0.85cm},clip]{DupS.eps}}
-    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.5cm 1.15cm 1.55cm},clip]{DupSC.eps}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{DupSC.eps}}
   \end{subfigmatrix}
-    \caption[Implied volatility surface and corresponding contour plot obtained by generating $N_{paths}$ paths under Dupire's local volatility model using the Monte Carlo pricing method plotted against the original market data and the generated functions shown in \autoref{fig:Dup}.]{Implied volatility surface (left) and corresponding contour plot (right) obtained by generating $N_{paths}$ paths under Dupire's local volatility model using the Monte Carlo pricing method, plotted against the original market data (blue circles) and the generated functions shown in \autoref{fig:Dup} (red lines).}\label{fig:DupS}
+    \caption[Implied volatility surface and corresponding contour plot simulated with Monte Carlo under Dupire's local volatility model plotted against the original market data and the generated functions shown in \autoref{fig:Dup}.]{Implied volatility surface (left) and corresponding contour plot (right) simulated with Monte Carlo under Dupire's local volatility model plotted against the original market data (blue circles) and the generated functions shown in \autoref{fig:Dup} (red dot-dashed lines).}\label{fig:DupS}
 \end{figure}   
 
 \begin{table}[H]
@@ -244,7 +244,7 @@ The influence of each parameter of the Static SABR model on the shape of the imp
     \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSABR3.eps}}
     \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSABR4.eps}}
   \end{subfigmatrix}
-  \caption[Implied volatility functions fitted independently to the implied volatility data for different maturities under the static SABR model.]{Implied volatility functions (red lines) fitted independently to the implied volatility data (crosses) for different maturities under the static SABR model.}
+  \caption[Implied volatility functions fitted independently to the implied volatility data for different maturities under the static SABR model, plotted with their respective Monte Carlo simulated functions along with their 90\% confidence intervals.]{Implied volatility functions (red lines) fitted independently to the implied volatility data (crosses) for different maturities under the static SABR model, plotted with their respective Monte Carlo simulated functions (light-blue dot-dashed lines) along with their 90\% confidence intervals (blue region).}
   \label{fig:SS}
 \end{figure}
 
@@ -347,7 +347,7 @@ The influence of each parameter of the Heston model on the shape of the implied 
     \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{H3.eps}}
     \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{H4.eps}}
   \end{subfigmatrix}
-  \caption[Implied volatility functions fitted simultaneously to the implied volatility data for different maturities under the Heston model.]{Implied volatility functions (red lines) fitted simultaneously to the implied volatility data (crosses) for different maturities under the Heston model.}
+  \caption[Implied volatility functions fitted simultaneously to the implied volatility data for different maturities under the Heston model, plotted with their respective Monte Carlo simulated functions along with their 90\% confidence intervals.]{Implied volatility functions (red lines) fitted simultaneously to the implied volatility data (crosses) for different maturities under the Heston model, plotted with their respective Monte Carlo simulated functions (light-blue dot-dashed lines) along with their 90\% confidence intervals (blue region).}
   \label{fig:H}
 \end{figure}
 
@@ -356,18 +356,17 @@ The influence of each parameter of the Heston model on the shape of the implied 
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.75cm 0.45cm 2.35cm 0.85cm},clip]{HS.eps}}
-    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.5cm 1.15cm 1.55cm},clip]{HSC.eps}}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{HS.eps}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{HSC.eps}}
   \end{subfigmatrix}
     \caption[Implied volatility surface and corresponding contour plot of the function fitted simmultaneously to the implied volatility data for different maturities under the Heston model, plotted against the original market data and the fitted functions shown in \autoref{fig:H}.]{Implied volatility surface (left) and corresponding contour plot (right) of the function fitted simmultaneously to the implied volatility data for different maturities under the Heston model, plotted against the original market data (blue circles) and the fitted functions shown in \autoref{fig:H} (red lines).}\label{fig:HS}
 \end{figure}   
 
 
-
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.75cm 0.45cm 2.35cm 0.85cm},clip]{HSSim.eps}}
-    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.5cm 1.15cm 1.55cm},clip]{HSCSim.eps}}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{HSSim.eps}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{HSCSim.eps}}
   \end{subfigmatrix}
     \caption[Implied volatility surface and corresponding contour plot of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:HR}, under the Heston model, plotted against the original market data and the simulated functions shown in \autoref{fig:H}.]{Implied volatility surface (left) and corresponding contour plot (right) of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:HR}, under the dynamic SABR model, plotted against the original market data (blue circles) and the simulated functions shown in \autoref{fig:H} (red dot-dashed lines).}\label{fig:HSSim}
 \end{figure} 
@@ -448,15 +447,15 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
     \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{DS3.eps}}
     \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{DS4.eps}}
   \end{subfigmatrix}
-  \caption[Implied volatility functions fitted simultaneously to the implied volatility data for different maturities under the dynamic SABR model.]{Implied volatility functions (red lines) fitted simultaneously to the implied volatility data (crosses) for different maturities under the dynamic SABR model.}
+  \caption[Implied volatility functions fitted simultaneously to the implied volatility data for different maturities under the dynamic SABR model, plotted with their respective Monte Carlo simulated functions along with their 90\% confidence intervals.]{Implied volatility functions (red lines) fitted simultaneously to the implied volatility data (crosses) for different maturities under the dynamic SABR model, plotted with their respective Monte Carlo simulated functions (light-blue dot-dashed lines) along with their 90\% confidence intervals (blue region).}
   \label{fig:DS}
 \end{figure}
 
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.75cm 0.45cm 2.35cm 0.85cm},clip]{DSS.eps}}
-    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.5cm 1.15cm 1.55cm},clip]{DSSC.eps}}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{DSS.eps}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{DSSC.eps}}
   \end{subfigmatrix}
     \caption[Implied volatility surface and corresponding contour plot of the function fitted simmultaneously to the implied volatility data for different maturities under the dynamic SABR model, plotted against the original market data and the fitted functions shown in \autoref{fig:DS}.]{Implied volatility surface (left) and corresponding contour plot (right) of the function fitted simmultaneously to the implied volatility data for different maturities under the dynamic SABR model, plotted against the original market data (blue circles) and the fitted functions shown in \autoref{fig:DS} (red lines).}\label{fig:DSS}
 \end{figure}   
@@ -465,8 +464,8 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.75cm 0.45cm 2.35cm 0.85cm},clip]{DSSSim.eps}}
-    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.5cm 1.15cm 1.55cm},clip]{DSSCSim.eps}}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{DSSSim.eps}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{DSSCSim.eps}}
   \end{subfigmatrix}
     \caption[Implied volatility surface and corresponding contour plot of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:DSR}, under the dynamic SABR model, plotted against the original market data and the simulated functions shown in \autoref{fig:DS}.]{Implied volatility surface (left) and corresponding contour plot (right) of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:DSR}, under the dynamic SABR model, plotted against the original market data (blue circles) and the simulated functions shown in \autoref{fig:DS} (red dot-dashed lines).}\label{fig:DSSSim}
 \end{figure} 
@@ -550,11 +549,6 @@ $C_{\mathrm{mkt}}$ vs $\overline{C}$
 
 \hl{talk about the problem of volatility with sabr (switch volatility and price in code)}
 
-
-\hl{change captions to account for model simulations}
-
 \hl{plot the decaying functions of rho and nu on the dynamic sabr model}
 
-\hl{replot the implied volatility scatter plots in the appendix}
-
-\hl{trim the figures appropriately}
+\hl{mention the parameters used to simulate each monte carlo pricer}

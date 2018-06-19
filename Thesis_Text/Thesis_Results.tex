@@ -363,6 +363,17 @@ The influence of each parameter of the Heston model on the shape of the implied 
 \end{figure}   
 
 
+
+\begin{figure}[H]
+  \begin{subfigmatrix}{2}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.75cm 0.45cm 2.35cm 0.85cm},clip]{HSSim.eps}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.5cm 1.15cm 1.55cm},clip]{HSCSim.eps}}
+  \end{subfigmatrix}
+    \caption[Implied volatility surface and corresponding contour plot of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:HR}, under the Heston model, plotted against the original market data and the simulated functions shown in \autoref{fig:H}.]{Implied volatility surface (left) and corresponding contour plot (right) of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:HR}, under the dynamic SABR model, plotted against the original market data (blue circles) and the simulated functions shown in \autoref{fig:H} (red dot-dashed lines).}\label{fig:HSSim}
+\end{figure} 
+
+
+
 \begin{table}[H]
     \centering
         \renewcommand{\arraystretch}{0.8}
@@ -452,6 +463,14 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 
 
 
+\begin{figure}[H]
+  \begin{subfigmatrix}{2}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.75cm 0.45cm 2.35cm 0.85cm},clip]{DSSSim.eps}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.5cm 1.15cm 1.55cm},clip]{DSSCSim.eps}}
+  \end{subfigmatrix}
+    \caption[Implied volatility surface and corresponding contour plot of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:DSR}, under the dynamic SABR model, plotted against the original market data and the simulated functions shown in \autoref{fig:DS}.]{Implied volatility surface (left) and corresponding contour plot (right) of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:DSR}, under the dynamic SABR model, plotted against the original market data (blue circles) and the simulated functions shown in \autoref{fig:DS} (red dot-dashed lines).}\label{fig:DSSSim}
+\end{figure} 
+
 
 \begin{table}[H]
     \centering
@@ -533,3 +552,9 @@ $C_{\mathrm{mkt}}$ vs $\overline{C}$
 
 
 \hl{change captions to account for model simulations}
+
+\hl{plot the decaying functions of rho and nu on the dynamic sabr model}
+
+\hl{replot the implied volatility scatter plots in the appendix}
+
+\hl{trim the figures appropriately}

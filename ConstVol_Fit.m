@@ -5,13 +5,13 @@ B=A.data(:,:);
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;
 r = 0;
-matur=4;
+matur=1;
 OptAlg="CMA";
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
 SimPoints=false;
 M=100000;
-repetitions=10;
+repetitions=100;
 %L=T*252*2
 
 
@@ -119,6 +119,8 @@ for j=1:repetitions
     Mdl_tmp(j,:)=SimVol(K');
 end
 Mdl=mean(Mdl_tmp);
+Mdlmax90=quantile(Mdl_tmp,0.9,1);
+Mdlmin10=quantile(Mdl_tmp,0.1,1);
 
 
 scatter(B(:,2),B(:,3),100,[0    0.1470    0.6410],'x','LineWidth',1.5);
@@ -130,6 +132,11 @@ hold on;
 
 plot(K,Mdl,'-.','LineWidth',1.5,'Color',[0.0510    0.70    0.9330]);
 
+hold on;
+K2 = [K, fliplr(K)]; % Use ; instead of ,
+inBetween = [Mdlmax90, fliplr(Mdlmin10)]; % Use ; instead of ,
+fill(K2, inBetween,[0    0.150    0.830],'FaceAlpha',0.2,'EdgeAlpha',0);
+
 
 xlim([0.4,1.6])
 ylim([0,1])
@@ -139,11 +146,11 @@ set(gca,'fontsize',12)
 xlabel('K/S_0');
 ylabel('\sigma_{imp} (yr^{-1/2})')
 pbaspect([1.5 1 1])
-lgd=legend({'Market Data','Theoretical Function','Simulated Function'},'Location','northeast','FontSize',11);
-title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
 
 h = get(gca,'Children');
-set(gca,'Children',[h(3) h(1) h(2)])
+lgd=legend([h(4) h(3) h(2) h(1)],{'Market Data','Theoretical Function','Simulated Function (mean)','90% Confidence Interval'},'Location','northeast','FontSize',11);
+title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
+set(gca,'Children',[h(4) h(2) h(3) h(1)])
 end
 
 

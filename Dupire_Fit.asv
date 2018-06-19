@@ -11,8 +11,8 @@ S0=17099.4;        %initial stock price
 r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
 sigmamax=1.5;        %maximum value the local volatility can take
-M=100000;           %number of paths to be simulated
-aver=50;
+M=100;           %number of paths to be simulated
+aver=5;
 %L=T*252*2
 
 
@@ -263,10 +263,10 @@ for iter=1:matur
     C=B(B(:,1)==T,2:3);  %Implied volatilities for the selected maturity
         
     %Plot original data points
-    scatter(C(:,1),C(:,2),100,[0    0.1470    0.6410],'x','LineWidth',1.5);
+    scatter(C(:,1),C(:,2),100,'x','LineWidth',1.5);
     hold on;
     
-    plot(K2,DV2(iter,:),'-.','LineWidth',1.5,'Color',[0.0510    0.70    0.9330])
+    plot(K2,DV2(iter,:),'-','LineWidth',1.5)
     
     hold on;
     K3 = [K2, fliplr(K2)]; % Use ; instead of ,
@@ -289,7 +289,7 @@ for iter=1:matur
     h = get(gca,'Children');
     lgd=legend([h(3) h(2) h(1)],{'Market Data','Simulated Function (mean)','90% Confidence Interval'},'Location','northeast','FontSize',11);
     title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
-    set(gca,'Children',[h(3) h(2) h(1)])
+    set(gca,'Children',[h(2) h(3) h(1)])
     
     clear Volatility
 end

@@ -176,7 +176,7 @@ B=A.data(:,:);
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;        %initial stock price
 r = 0;
-matur=6;
+matur=4;
 %%%%%%%%%%%%%      ORIGINAL DATA MODIFICATIONS     %%%%%%%%%%%%
 B(:,2)=B(:,2)/S0;     %normalize strike prices
 S0=1;
@@ -190,7 +190,7 @@ C=B(B(:,1)==T,2:3);
 
 scatter(C(:,1),C(:,2),100,'x','LineWidth',1.5);
     xlim([0.4,1.6])
-    ylim([0.2,1])
+    ylim([0,1])
     box on;
 set(gca,'fontsize',12)
 
@@ -202,7 +202,7 @@ pbaspect([1.5 1 1])
 
 
 %{
-A = importdata('Data_BNPP_2.txt','\t',1);
+A = importdata('Data_BNPP.txt','\t',1);
 B=A.data(:,:);
 
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%

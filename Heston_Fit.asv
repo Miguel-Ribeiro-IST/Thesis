@@ -15,7 +15,7 @@ OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 %After calibrating all the model's parameters, we may want to simulate the implied volatilities using Monte Carlo
 SimPoints=true;   %true or false - define if Monte Carlo simulation should be executed
 M=100000;           %number of paths to be simulated
-repetitions=100;
+repetitions=50;
 %L=T*252*2
 
 
@@ -32,7 +32,7 @@ B=B(B(:,1)<=times(matur),:);     %only keep values of the maturity
 x0=  [40.5,  0.065, 0.1, -0.4, 5];      %parameter starting values
 lb = [0,     0, 0, -1,  0];          %parameter lower bounds
 ub = [60,    2, 2, 1,   10];          %parameter upper bounds
-%%{
+%{
 optimvars=Optimizer(B,S0,r,x0,OptAlg,lb,ub);
 kappa=optimvars(1);
 nubar=optimvars(2);

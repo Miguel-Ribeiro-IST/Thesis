@@ -1,7 +1,7 @@
 \chapter{Background}
 \label{chapter:background}
 \section{Option Types}
-Before completely focusing on the mechanics of options, what influences their prices and how we can predict their behavior, we should begin by clearly defining the main option types, their characteristics, as well as their payoff functions. We will not only approach the two main types of options - European and American - but also other less common types, commonly referred to as Exotic options, such as Asian, Barrier and Binary options.
+Before completely focusing on the mechanics of options, what influences their prices and how we can predict their behavior, we should begin by clearly defining the main option types, their characteristics, as well as their payoff functions. Not only will we approach the two main types of options - European and American - but we will also shortly introduce other less common types, commonly referred to as Exotic options, focusing particularly on Barrier options.
 
 
 
@@ -42,28 +42,11 @@ American options grant the right to buy/sell (call/put) the underlying asset at 
 \end{equation}
 \noindent where we now define $t^*$ (with $0\leq t^*\leq T$) as the exercise date.
 
-It should be obvious that the price of American options will always be greater or equal to the prices of similar European options. The reason behind this is the fact that, with European contracts our exercise decision is restricted to a single day, whereas with American options we have several other opportunities to make this choice.
+It should be obvious that the price of American options will always be greater or equal to the prices of similar European options. The reason behind this is the fact that, with European contracts our exercise decision is restricted to a single day, whereas with American options we have that same day as well as several others to make this choice.
 
 
 \subsection{Exotic Options}
-While European and American options are, by far, the most traded types, \emph{Exotic options} should not be neglected. Not only does there exist a great number of Exotic option types, but these are also highly customizable, making this type of derivatives very useful for unconventional investment strategies. Due to their high complexity, these options are only traded in the OTC market, and not in exchanges~\cite{InvExotic}. We will explore three of the most common types of Exotic options, though many others exist.
-
-\subsubsection{Asian Options}
-An \emph{Asian} option is an Exotic contract whose payoff depends on the \emph{average value} of an underlying asset. This averaging procedure makes this type of derivative more stable than their European/American equivalents - e.g. if, at the last day of trading, an extreme market event occurs, affecting the price of the underlying asset, an European or American option might suffer radical changes to its value (either beneficial or detrimental), whereas the value of an Asian option should be much less affected by such sudden movements.
-
-The payoff function of this type of contracts is given by
-\begin{equation}\label{asian}
-\begin{split}
-&\text{Payoff}_{Asian,\ call}(K,T)=\max\left(A(S,T)-K,0\right);\\
-&\text{Payoff}_{Asian,\ put}(K,T)=\max\left(K-A(S,T),0\right),
-\end{split}
-\end{equation}
-\noindent with $A(S,T)$ corresponding to the arithmetic average of the asset's prices until the maturity,
-\begin{equation}\label{avg}
-A(S,T)=\frac{1}{T}\int_0^TS(t)dt.
-\end{equation}
-
-Other types of Asian option exist: some contracts have a floating strike (i.e. instead of the fixed strike, $K$, the strike is assumed as the average, $A(S,T)$, instead), and others use different types of averaging mechanisms, such as the geometric average. Despite this, we will assume that all Asian options follow the properties described in eqs.\eqref{asian} and \eqref{avg}.
+While European and American options are, by far, the most traded types, \emph{Exotic options} should not be neglected. Not only does there exist a great number of Exotic option types, but these are also highly customizable, making this type of derivatives ideal for unconventional investment strategies. Due to their high complexity, these options are only traded in the OTC market, and not in exchanges~\cite{InvExotic}. We will explore one of the most common types of Exotic options - \emph{Barrier} options - though many others exist.
 
 
 \subsubsection{Barrier Options}
@@ -73,13 +56,13 @@ There are four main types of Barrier option:
 \begin{itemize}
 \item \emph{up-and-out}: the asset's price starts below the barrier (i.e. $S(0)<B$). If it increases past this threshold, the option becomes \emph{worthless};
 \item \emph{down-and-out}: the asset's price starts above the barrier (i.e. $S(0)>B$). If it decreases past this threshold, the option becomes \emph{worthless};
-\item \emph{up-and-in}: the asset's price starts below the barrier (i.e. $S(0)<B$). Only if it increases past this threshold does the option become \emph{active};
-\item \emph{down-and-in}: the asset's price starts above the barrier (i.e. $S(0)>B$). Only if it decreases past this threshold does the option become \emph{active}.
+\item \emph{up-and-in}: the asset's price starts below the barrier (i.e. $S(0)<B$). \emph{Only if} it increases past this threshold does the option become \emph{active};
+\item \emph{down-and-in}: the asset's price starts above the barrier (i.e. $S(0)>B$). \emph{Only if} it decreases past this threshold does the option become \emph{active}.
 \end{itemize}
 
 Because all of the previously described Barrier option types are handled similarly, we can easily adapt the models from one type to another. Thus, for simplicity, we will henceforth assume that all Barrier options are of the up-and-in type.
 
-Using the up-and-in Barrier option type as an example, if the asset price, $S(t)$, remains below the barrier level $B$ throughout the whole option duration, even if at the maturity the asset's value is higher than the strike price, the option's payoff would nonetheless be zero. On the contrary, if this threshold was surpassed at any point in this period, the option's payoff would be similar to that of its European equivalent.
+Using the up-and-in Barrier option type as an example, if the asset price, $S(t)$, remains below the barrier level $B$ throughout the whole option duration, even if at the maturity the asset's value is higher than the strike price, the option's payoff would nonetheless be zero. On the contrary, if this threshold was surpassed at any point during this period, the option's payoff would be similar to that of its European equivalent.
 
 
 The payoff function of this type of option is given by
@@ -97,31 +80,8 @@ The payoff function of this type of option is given by
 \end{equation}
 
 
-
-   
-   
-\subsubsection{Binary Options}
-As the name implies, a \emph{Binary option} is a contract that has one of two outcomes: if at the maturity date the asset price is above/below the strike (call/put), the investor receives a fixed amount of money, $C$. If this event does not occur, the investor receives nothing.
-
-The main difference between a Binary and an European option is the fact that the payoff of a Binary contract is fixed, regardless of the asset price at the maturity, which is not true for European options.
-
-The payoff of this function is, thus,
-\begin{equation}\label{binary}
-\begin{split}
-&\text{Payoff}_{Bin,\ call}(K,T)=\begin{cases} 
-      C, & \mathrm{if}\ \ S(T)>K\\
-      0, & \mathrm{otherwise}
-   \end{cases};\\
-&\text{Payoff}_{Bin,\ put}(K,T)=\begin{cases} 
-      C, & \mathrm{if}\ \ S(T)<K\\
-      0, & \mathrm{otherwise}
-   \end{cases}.
-\end{split}
-\end{equation}
-
-
-Though all the option types described before are used by banks and investors everyday, we will mainly focus on European options, for the reasons mentioned. One further reason for this choice is the fact that the data available for model calibration and validation pertains only to this option type.
-The remaining types will nonetheless be implemented and studied, though no benchmark will be used to verify the models' validity in these cases.
+Though Exotic options are used by banks and investors everyday, we will mainly focus on European options: not only are these the most common types of option traded, as we mentioned before, but data is also readily available for many different maturities and strike prices, making European options ideal for model calibration and validation.
+Barrier options will nonetheless be implemented and studied, though no benchmark will be used to verify the models' validity in this case.
 
 
 \section{Option Prices and Payoffs}
@@ -131,18 +91,14 @@ With this concept in mind, we can price options by setting their expected profit
 \text{Price}(K,t^*)=e^{-rt^*}\mathbb{E}\left[\text{Payoff}(K,t^*)\right],
 \end{equation}
 \noindent where $t^*$ denotes the time at which the option is exercised and $r$ corresponds to the risk-free interest rate, which we will approach in Section \ref{section:Black-Scholes Formulae}.
-
-
-
-As an example, we now present the price functions of European call and put options.
-With eqs.\eqref{callput} in mind, it should be clear that the value of these two types of contracts is given by
+In particular, with eqs.\eqref{callput} in mind, the price functions of European call and put options is clearly given by
 \begin{equation}\label{callprice}
 \begin{split}
 &C(K,T)_{Euro}=e^{-rT}\mathbb{E}\left[\max\left(S(T)-K,0\right)\right]=e^{-rT}\mathbb{E}\left[\left(S(T)-K\right)\mathbbm{1}_{\left\{S(T)>K\right\}}\right];\\
 &P(K,T)_{Euro}=e^{-rT}\mathbb{E}\left[\max\left(K-S(T),0\right)\right]=e^{-rT}\mathbb{E}\left[\left(K-S(T)\right)\mathbbm{1}_{\left\{S(T)<K\right\}}\right],
 \end{split}
 \end{equation}
-\noindent with $C(K,T)$ and $P(K,T)$ being the values of European call and put options, respectively, and $\mathbb{E}[\cdot]$, $\mathbbm{1}_{\{\cdot\}}$ corresponding to the expected value and indicator functions, respectively.
+\noindent with $C(K,T)$ and $P(K,T)$ being the values (i.e. prices) of European call and put options, respectively, and $\mathbb{E}[\cdot]$, $\mathbbm{1}_{\{\cdot\}}$ corresponding to the expected value and indicator functions, respectively.
 
 When selling or buying options, investment banks add some premium to this zero-profit price, to account for the risk taken. Though this premium is important to define, it is besides the scope of this work and will not be considered here.
     
@@ -167,12 +123,12 @@ dV=\pdv{V}{t}dt+\pdv{V}{S}dS+\frac{1}{2}\pdv{^2V}{S^2} (dS)^2.
 \end{equation}
 
 We now assume that the stock price $S$ follows a geometric Brownian Motion,
-\begin{equation}
+\begin{equation}\label{BSproofGBM}
 dS=rSdt+\sigma SdW,
 \end{equation}
 \noindent where $W$ is a Brownian motion process.
 
-It can be shown that $(dW)^2=dt$. With this property, we can reduce eq. \eqref{BSproof} to
+It can be shown that $(dW)^2=dt$ and $(dt)^2=dt.dW=0$. With these properties in mind, we can substitute eq.\eqref{BSproofGBM} into eq.\eqref{BSproof}, giving
 \begin{equation}
 \begin{split}
 dV=&\pdv{V}{t}dt+\pdv{V}{S}\left(rSdt+\sigma SdW\right)+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}dt\\
@@ -210,12 +166,12 @@ Substituting eqs. \eqref{pi} and \eqref{dpi} into eq. \eqref{dpi2} gives
 
 The risk-free interest rate, $r$, is the interest an investor would receive from any risk-free investment (e.g. treasury bills). No investor should ever invest in risky products whose expected return is lower than this interest (e.g. the lottery), since there's the alternative of obtaining a higher (expected) payoff without the disadvantage of taking risks. In general, this rate changes slightly with time and is unknown, but Black \textit{et al.}, in their original model (eq.\eqref{BS2}), assumed that it remains constant throughout the option's duration and that it is known. Some authors have suggested solutions to deal with this shortcoming, providing models to replicate the behavior of interest rates~\cite{HJM}, but because option prices do not significantly depend on this value~\cite{Wilmott3}, in the remainder of this thesis we shall make the same assumptions as Black \textit{et al.} and set this rate to some constant.
 
-As for the stock price volatility, $\sigma$, since we will explore it to great extent in the next sections, suffice it to say that it is a measure of the future stock price movement's uncertainty.
+As for the stock price volatility, $\sigma$, since we will explore it to great extent in Chapter \ref{chapter:volatility}, so suffice it to say that it is a measure of the future stock price movement's uncertainty.
 
-Some companies decide to grant their shareholders a part of the profits generated, known as \emph{dividends}. This action decreases the company's total assets, which decreases the value of stocks, changing option prices. Because this occurrence is based on human decisions, it is extremely hard to model. Furthermore, Black \textit{et al.} assumed in their models that no dividends were paid throughout the option's duration. For both these reasons, we will henceforth set dividend payment to zero.
+Some companies decide to grant their shareholders a part of the profits generated, known as \emph{dividends}. This action decreases the company's total assets, which decreases the value of stocks, changing option prices. Because this occurrence is based on human behavior, it is extremely hard to model. Furthermore, Black \textit{et al.} assumed in their models that no dividends were paid throughout the option's duration. For both these reasons, we will set dividend payment to zero in all our models.
 
 
-One other important assumption of the BS model is that stock prices follow a stochastic process, known as Geometric Brownian Motion, which can be defined as
+One other important assumption of the BS model is that stock prices follow a stochastic process, known as Geometric Brownian Motion, defined as
 \begin{equation}\label{GBM}
 dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \end{equation}
@@ -241,10 +197,10 @@ The results published originally by Black \textit{et al.} state that, at time $t
 &d_2=d_1-\sigma\sqrt{T-t}.\\
 \end{split}
 \end{equation}
+\noindent This is a very important result that can be used to precisely price European options, so long as all the parameters are exactly known (which never occurs).
 
 
-
-From eq.\eqref{callputBS} we can derive the relationship between $C(S,t)$ and $P(S,t)$, known as the \emph{put-call parity}
+As a final consideration, from eq.\eqref{callputBS} we can derive the relationship between $C(S,t)$ and $P(S,t)$, known as the \emph{put-call parity}
 \begin{equation}
 C(S(t),t)=S(t)-Ke^{-r(T-t)}+P(S(t),t).
 \end{equation}

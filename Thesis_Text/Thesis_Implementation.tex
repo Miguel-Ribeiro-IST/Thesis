@@ -176,44 +176,12 @@ Fortunately, as mentioned, both Heston and SABR have closed-form solutions, show
 There are several possible methods to find the parameter set that minimizes the cost function shown in eq.\eqref{cost}.
 Our main concern when choosing the best algorithms for calibration is the nonlinearity of the cost function. This is problematic because several local minima might exist and an unsuitable algorithm may get stuck in these points, causing the globally optimal solution to not be found.
 
-With this issue in mind, we selected two powerful algorithms known as \emph{Multi-Start}~\cite{Ugray} and \emph{CMA-ES}~\cite{Hansen2} (short for Covariance Matrix Adaptation Evolution Strategy), which we will summarize below. It should be noted that we will only provide a general idea of how each optimizer works. For detailed descriptions, the original sources should be consulted.
+With this issue in mind, we selected a powerful algorithm known as \emph{CMA-ES}~\cite{Hansen2} (short for Covariance Matrix Adaptation Evolution Strategy), which we will summarize below. It should be noted that we will only provide a general idea of how this optimizer works. For detailed descriptions, the original source should be consulted.
 
-The optimization algorithms will search the $D$-dimensional sample space ($D$ corresponds to the number of parameters of each model), for the optimal solution. Each point in this space corresponds to a possible set of parameters, $\theta$.
-The optimizers should also deal with parameter boundaries, since these are required for some of the models' parameters (e.g. the correlation parameter, $\rho$, in both Heston and SABR is obviously contained between $-1$ and $1$).
-
-
-\subsubsection{Multi-Start Optimizer}
-The Multi-Start optimizer is nothing more than the application of a simple optimization algorithm multiple times with multiple different starting points.
+The optimization algorithm will search the $D$-dimensional sample space ($D$ corresponds to the number of parameters of each model), for the optimal solution. Each point in this space corresponds to a possible set of parameters, $\theta$.
 
 
-This algorithm starts by generating a set of $N$ different starting points, $\theta_{0,i},\ \ i=1,\ldots,N$, distributed in the $D$-dimensional sample space. These can be generated at random (i.e. by sampling from a uniform distribution) or using some complex meta-heuristic such as scatter search~\cite{Ugray}. For simplicity, and because it is usually faster to execute, we will use the former randomized sampling.
 
-
-The procedure then applies a weak optimizer to each of these starting points, finding one (local) minimum for all of them. Examples of such simple optimizers are the \emph{Active Set Method}, \emph{Sequential Quadratic Programming}, among others. These optimizers are weak because they are only expected to converge to the (local) optimum closest to their starting point, though they are very fast to converge.
-
-After a local minimum is found for each of the selected starting points, the minimum where the cost function is minimized is chosen as optimal solution.
-
-This procedure is depicted in Algorithm \ref{MSOpt}.
-
-\begin{algorithm}[H]\label{MSOpt}
-\DontPrintSemicolon
-Generate $\theta_{0,i},\ \ i=1,\ldots,N$\tcc*[r]{Multiple starting points}
- \For{$i=1,\ldots,N$}{
-  Run weak optimization algorithm with starting point $\theta_{0,i}$\;
-  Calculate $\mathrm{Cost}(\theta_i')$ for the minimum found, $\theta_i'$\;
- }
- Optimal parameters: $\theta^{*}=\underset{\theta_i'}{\arg\min}\left\{\mathrm{Cost}(\theta_i')\right\}$\;
- \caption{Multi-Start Optimizer}
-\end{algorithm}
-\ 
-
-One of the advantages of the Multi-Start is the fact that, because the weak algorithms are independent of one another (assuming no meta-heuristics are used), we can run them in parallel, further increasing calibration speed.
-As a disadvantage, we can point out the fact that, for highly nonlinear functions, a large number of starting points may be required, decreasing the calibration speed.
-
-As a sidenote, we should point out that, for a large enough starting sample set, $N$, the global minimum will be found with probability 1, even for highly nonlinear objective functions. Though the proof is trivial, this remark is important, because we need a compromise between a large starting set that takes too long to compute and a small data set that might return a non-optimal result.
-
-
-This optimizer is implemented in MATLAB with the \emph{MultiStart} function~\cite{MATLABMS}
 
 \subsubsection{CMA-ES Optimizer}
 The CMA-ES optimizer belongs to the class of evolutionary algorithms. These methods are based on the principle of biological evolution: at each iteration (generation), new candidate solutions (individuals) are generated from a given random distribution (mutation) obtained using the data (genes) of the previous solutions (parents). Of these newly generated solutions (individuals), we select the ones where the cost function is minimized (with the best fitness) to generate the candidate solutions of the next iterations (to become the parents of the next generation) and we reject the others.
@@ -257,8 +225,8 @@ Define covariance matrix $\mathbf{C}=I$\;
 \
 
 The complexity of the covariance matrix updating process makes the CMA-ES a very robust optimization algorithm, enabling it to find the global optimum of highly nonlinear functions~\cite{DilaoCMA}.
-Furthermore, the CMA-ES is almost parameter free. It simply requires an initial guess, to generate the starting mean vector, and the algorithm is expected to converge to a global minimum.
-As for disadvantages, there may be cases where the convergence of this algorithm is slow, and the Multi-Start may be used as an alternative when a fast convergence is required, though the CMA-ES will outperform the Multi-Start algorithm in terms of precision.
+Furthermore, unlike many other optimizers, the CMA-ES is almost non-parametric. It simply requires an starting guess, to generate the starting mean vector, and the algorithm is expected to converge to a global minimum.
+As for disadvantages, because we have to generate a set of samples at each iteration, if this generation process is slow, the convergence may stall significantly, particularly when many parameters are used in the model. Other algorithms may perform faster than CMA-ES, but CMA-ES is expected to outperform them in terms of precision.
 
-This optimizer was implemented by Hansen in MATLAB (as well as in other computer languages) as function \emph{purecmaes}~\cite{CMAES}.
+This optimizer was implemented by Hansen in MATLAB (as well as in other computer languages) as a function named \emph{purecmaes}~\cite{CMAES} and will be used with only very slight changes, to account for the volatility models used used.
 

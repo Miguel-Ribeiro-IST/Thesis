@@ -13,11 +13,11 @@ These two factors make volatility one of the most important subjects in all of m
 
 
 Usually, volatility is estimated from the standard deviation of the rate of returns~\cite{Hull}.
-We begin by measuring the stock price at fixed time intervals (e.g. daily, monthly), such that $S_i$ corresponds to the stock price at the end of the $i$th interval. We define the return rate $u_i$ as
+We begin by measuring the stock price at fixed time intervals (e.g. daily, monthly), such that $S_i$ corresponds to the stock price at the end of the $i$th interval. We define the return rate, $u_i$, as
 \begin{equation}
 u_i=\log\left(\frac{S_i}{S_{i-1}}\right).
 \end{equation}
-We define the standard deviation of this rate, $s$, with the usual formula
+We can then calculate the standard deviation of this rate, $s$, with the classical formula
 \begin{equation}
 s=\sqrt{\frac{1}{n-1}\sum_{i=1}^n(u_i-\overline{u})^2},
 \end{equation}
@@ -31,7 +31,7 @@ The volatility can also be measured in other time periods: we can define a month
 
 Our goal is to model the volatility of any given stock price.
 We begin by introducing the implied volatility, crucial to fully grasp the concepts used later. Afterwards, we will introduce four models to replicate market volatility: one with local volatility (Dupire's formula) and three with stochastic volatility (Heston, Static/Dynamic SABR).
-Other very common models exist. The GARCH model (Generalized Autoregressive Conditional Heteroskedasticity) along with all its many variations (EGARCH, NGARCH, ...) is particularly popular among econometricians. However, this model is mostly used to forecast volatility, and performs poorly when used to price derivatives~\cite{chourdakis}. Because pricing is our objective, GARCH will not be covered in this work.
+Other very common models exist. The GARCH model (Generalized Autoregressive Conditional Heteroskedasticity) along with all its many variations (EGARCH, NGARCH, ...) is particularly popular among econometricians. However, this model is mostly used to forecast volatility, and performs poorly when used to price derivatives~\cite{chourdakis}. Because pricing is our objective, GARCH will not be covered in this work. We will also study the constant volatility model, as used by Black \textit{et al.}, as a benchmark for the quality of our models.
 
 
 
@@ -42,11 +42,11 @@ In other words, it would be the stock price volatility that the seller/buyer of 
 
 Because eq.\eqref{callputBS} is not invertible, we need to use some numerical procedure (e.g. Newton's method) to find the value of implied volatility that matches the market and model prices, i.e. we must find, numerically, the solution to the equation
 \begin{equation}\label{impvolform}
-C(\sigma_{imp},S(t),t)-\overline{C}=0,
+C(\sigma_{imp},S(t),t)-C_{\mathrm{mkt}}=0,
 \end{equation}
-\noindent where $C(\sigma_{imp},\cdot)$ corresponds to the result of eq.\eqref{callputBS} using $\sigma_{imp}$ as (implied) volatility and $\overline{C}$ the price of the option observed in the market.
+\noindent where $C(\sigma_{imp},\cdot)$ corresponds to the result of eq.\eqref{callputBS} using $\sigma_{imp}$ as (implied) volatility and $C_{\mathrm{mkt}}$ to the price of the option observed in the market.
 
-Because eq.\eqref{callputBS} is monotonic w.r.t. the volatility, we can obtain the implied volatility of an option from its price and vice versa. This duality is so fundamental that investors often disclose options by providing their implied volatility instead of their price~\cite{Wilmott}.
+Because eq.\eqref{callputBS} is monotonic w.r.t. the volatility, we can obtain the implied volatility of an option from its price and vice versa. This duality is so fundamental that investors often disclose options by providing their implied volatility instead of their price~\cite{Wilmott}, as is indeed the case for the data we will use later.
 
 One important property of implied volatility is that, in the real-world, it depends on the strike price and the maturity. This should not occur in the "Black-Scholes world". Because the volatility is a property of the stock, if investors really used the the BS model to price their options, two options with the same underlying stock should have the same implied volatility, regardless of their strike prices or maturities (i.e. the same stock can't have two different volatilities at the same time).
 However, when observing real market data, this is in fact what is observed.
@@ -62,12 +62,12 @@ An implied volatility smile presents higher volatilities for options with strike
 \end{figure}
 
 
-Because of their higher implied volatility, we can conclude that options with strikes different from the current stock price are \emph{overpriced}.
+Because of their higher implied volatility, we can conclude that, if we observe a smile in the data, options with strikes different from the current stock price are \emph{overpriced}.
 The reason behind this odd market behavior is related to the simple demand-supply rule~\cite{Wilmott3}. On the one hand, some investors are risk-averse and want to hedge their losses in case of a market crash (as explained in subsection \ref{subsection:why options are important}). They don't mind paying a higher price for an option if this means they would be relatively safe from potentially devastating market crashes. For this reason, the prices of call options with lower strikes increase, driving their implied volatility up. On the other hand, other investors are risk-seekers and want to take advantage of possible sudden price movements, buying the stocks for the lower strike prices. They don't mind paying higher prices for the chance of earning high profits and this drives the prices of high strike call options (and, consequently, their implied volatility) up. This fear-greed duality gives rise to the observed volatility smile. 
 In the case of the volatility skew, only one of the two fenomena described occurs.
 
 
-The presence of a smile instead of a skew, and vice-versa, is determined by the type of product serving as underlying asset. For example, Forex market options usually exhibit volatility smiles whereas index and commodities options usually present a volatility skew.
+The presence of a smile in the data instead of a skew, and vice-versa, is determined by the type of product serving as underlying asset - Forex market options usually exhibit volatility smiles whereas index and commodities options usually show a volatility skew.
 
 The dependence of the implied volatility on the maturity date is more complex, but in general it decreases with $T$.
 
@@ -80,9 +80,9 @@ It can also be shown that the implied volatility is the same for calls and puts~
 
 \section{Local Volatility}
 \label{section:localvolatility}
-In their original work, Black \textit{et al.} assumed that volatility is constant throughout the whole option duration. From market data, it can be clearly seen that this is not the case~\cite{DJIA}. There may be times where new information reaches the market  (e.g. the results of an election) and trading increases, driving volatility up. It is equally true that shortly before this information is known, trading may stall, and volatilities go down. 
+In their original work, Black \textit{et al.} assumed that volatility is constant throughout the whole option duration. From market data, it can be clearly seen that this is not the case~\cite{DJIA}. There may be times where new information reaches the market  (e.g. the results of an election) and trading increases, driving volatility up. It is equally true that shortly before this information is known, trading may stall due to expectancy, and volatilities go down. 
 
-The BS model is therefore clearly incapable of completely grasping real-world trading. We should use a model where volatility is dynamic, measuring the uncertainty on the stock price movement at any point in time.
+The constant volatility BS model is therefore clearly incapable of completely grasping real-world trading. We should use a model where volatility is dynamic, measuring the uncertainty on the stock price movement at any point in time.
 However, as we saw in section \ref{section:impliedvolatility}, the market's view of volatility also depends on the strike price.
 The volatility should therefore be a function of both time and stock price: $\sigma(S,t)$. We call this model \emph{local volatility} and the geometric Brownian motion from eq. \ref{GBM} is transformed into
 \begin{equation}\label{GBM2}
@@ -91,7 +91,7 @@ dS(t)=rS(t)dt+\sigma(S,t)S(t)dW(t),
 \noindent where $\sigma(S,t)$ is some function of $S$ and $t$.
 
 
-This local volatility model implies that we have a nonlinear \emph{deterministic} volatility surface, $\sigma(S,t)$, which can be thought of as the market's expectation of future volatility if the stock price reaches $S$ at time $t$.
+This local volatility model implies that we have a nonlinear \emph{deterministic} volatility surface, $\sigma(S,t)$, which can be thought of as the market's expectation of future volatility at time $t$ if the stock price is $S$ at that time.
 
 
 
@@ -163,7 +163,7 @@ We can then sample the local volatility at each time step of our simulation.
 A major problem can be pointed out in eq.\eqref{dupire}. For options far in or far out of the money (i.e. with strikes much greater or much smaller that $S_0$), it can be shown that the option price depends almost linearly on the strike. This means that the second derivative of the price w.r.t. the strike is very small in these regions. Because this value is in the denominator of eq.\eqref{dupire}, the local volatility will explode in such cases, which is unrealistic.
 
 
-One possible solution to this problem is to relate our local volatility with the implied volatility surface instead of the option price's.
+One possible solution to this problem is to relate our local volatility with the implied volatility surface instead of the option price's~\cite{Wilmott2}.
 The relation obtained is
 \begin{equation}\label{dupire2}
 \sigma(S,t)=\sqrt{\frac{\displaystyle\sigma_{imp}^2+2t\sigma_{imp}\pdv{\sigma_{imp}}{T}+2rSt\sigma_{imp}\pdv{\sigma_{imp}}{K}}{\displaystyle\left(1+Sd_1\sqrt{t}\pdv{\sigma_{imp}}{K}\right)^2+S^2t\sigma_{imp}\left(\pdv{^2\sigma_{imp}}{K^2}-d_1\left(\pdv{\sigma_{imp}}{K}\right)^2\sqrt{t}\right)}},
@@ -184,7 +184,7 @@ Because we are directly using the market data, the implied volatility surface is
 
 Three other problems can be identified in Dupire's local volatility assumption, however.
 First, it can be shown that the local volatility surface changes with time~\cite{Wilmott}. This means that the whole interpolation procedure must be done regularly in order for the model to work properly.
-Secondly, some authors have also pointed out that the volatility smile obtained from Dupire's local-volatility model doesn't follow real market dynamics~\cite{Hagan}: it can be shown that when the price of the stock either increases or decreases, the volatility smile predicted by Dupire's model shifts in the opposite direction. The minimum of the volatility smile would therefore be offset and no longer correspond to the local stock price. The volatility smile dynamics obtained from the local-volatility model would thus be actually worse than if we assumed a constant volatility.
+Secondly, some authors have pointed out that the volatility smile obtained from Dupire's local-volatility model doesn't follow real market dynamics~\cite{Hagan}: it can be shown that when the price of the stock either increases or decreases, the volatility smile predicted by Dupire's model shifts in the opposite direction. The minimum of the volatility smile would therefore be offset and no longer correspond to the local stock price. The volatility smile dynamics obtained from the local-volatility model would thus be actually worse than if we assumed a constant volatility.
 Finally, the gradients used in eq.\eqref{dupire2} have to be generated numerically. This numerical differentiation is very unstable, especially when done on our rough interpolated surface, which might lead to errors in the local volatility obtained.
 
 Despite its problems, Dupire's formula is still very much used by practitioners and performs surprisingly well, as we will see in later chapters.

@@ -92,7 +92,7 @@ In \autoref{fig:Steps} we can see how smaller subintervals better resemble a tru
 \label{subsection:Pricing options from simulations}
 To price options using the Monte Carlo algorithm, we generate $M$ paths by recursively calculating $\{S_i(t),\ \ i=1,\ldots,M\}$, using either of the discretization methods described before.
 
-When the stock price at the maturity, $S_i(T)$, is obtained for all paths, the option's payoff for each path is calculated from eqs.\eqref{callput}-\ref{binary}. We then average all these results and discount them back to the present, obtaining the option's value
+When the stock price at the maturity, $S_i(T)$, is obtained for all paths, the option's payoff for each path is calculated from eqs.\eqref{callput}-\eqref{barrier}. We then average all these results and discount them back to the present, obtaining the option's value
 \begin{equation}
 \begin{split}
 &C(K,T)=e^{-rT}\frac{1}{M}\sum_{i=1}^M\text{Payoff}_{call}(K,T);\\
@@ -116,7 +116,7 @@ Calibrating the models' parameters means finding the optimal values for these pa
 
 Because we are modeling volatilities, and because implied volatilities are more sensitive to slight changes in the parameters, it is more appropriate to use a cost function based on the implied volatility instead of the price, such as
 \begin{equation}\label{cost}
-\mathrm{Cost}(\theta)=\sum_{i=1}^n\sum_{j=1}^mw_{i,j}\left(\sigma_{imp,\mathrm{mkt}}(T_i,K_j)-\sigma_{imp,\mathrm{mdl}}(\theta;T_i,K_j)\right)^2,
+\boxed{\mathrm{Cost}(\theta)=\sum_{i=1}^n\sum_{j=1}^mw_{i,j}\left(\sigma_{imp,\mathrm{mkt}}(T_i,K_j)-\sigma_{imp,\mathrm{mdl}}(\theta;T_i,K_j)\right)^2,}
 \end{equation}
 \noindent where $\sigma_{imp,\mathrm{mkt}}(\cdot)$ and $\sigma_{imp,\mathrm{mdl}}(\cdot)$ correspond to the real-market and model implied volatilities, respectively, for maturities $T_i,(i=1,\ldots,n)$ and strikes $K_j,(j=1,\ldots,m)$. This cost function will be used in the calibration procedure, for the reason stated before.
 

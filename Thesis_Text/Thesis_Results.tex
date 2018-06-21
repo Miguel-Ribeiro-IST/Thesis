@@ -63,7 +63,7 @@ $T$ (days) & $\sigma_{imp,\mathrm{mdl}}$ ($\SI{}{\year\tothe{-1/2}}$) & Cost \\ 
 \renewcommand{\arraystretch}{0.8}
 \begin{tabular}{@{}lccccccr@{}}
 \toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) &$\mathrm{Error}_{\sigma}(\%)$&$C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& $\mathrm{Error}_{C}(\%)$\\ \midrule
+$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) &$\mathrm{Error}_{\sigma}(\%)$&$C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
 \multirow{7}{*}{21} & 0.50 & 0.7082 & \multirow{7}{*}{0.3174} & 55.2 & 0.50001 & 0.50000 & 0.003 \\
 &0.75 & 0.4632 &  & 31.5 & 0.25065 & 0.25002 & 0.3 \\
 &0.90 & 0.2989 &  & 6.2 & 0.10439 & 0.10540 & 1.0 \\
@@ -534,11 +534,6 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 
 $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 
-$C_{\mathrm{mkt}}$ vs $\overline{C}$
-
-
-\hl{in annex, should plot y-axes with different limits?}
-
 \hl{should we include the market values in all comparison tables?}
 
 \hl{put units in fitted parameters}
@@ -552,3 +547,11 @@ $C_{\mathrm{mkt}}$ vs $\overline{C}$
 \hl{plot the decaying functions of rho and nu on the dynamic sabr model}
 
 \hl{mention the parameters used to simulate each monte carlo pricer}
+
+\hl{mention sabr negative vol is not problematic}
+
+\hl{in the background plots (and implementation), use dashed and dot-dashed lines}
+
+\hl{in the results section, the dashed lines look not-dashed}
+
+\hl{align values in tables}

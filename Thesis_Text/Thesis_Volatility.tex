@@ -11,7 +11,6 @@ Of all the parameters in the BS formula (eq.\eqref{BS2}), volatility is the only
 Furthermore, unlike the interest rate, volatility has a great impact on the behavior of stock prices and, consequently, on the price of options~\cite{Wilmott3}.
 These two factors make volatility one of the most important subjects in all of mathematical finance and thus the focus of much research.
 
-
 Usually, volatility is estimated from the standard deviation of the rate of returns~\cite{Hull}.
 We begin by measuring the stock price at fixed time intervals (e.g. daily, monthly), such that $S_i$ corresponds to the stock price at the end of the $i$th interval. We define the return rate, $u_i$, as
 \begin{equation}
@@ -120,19 +119,58 @@ C(K,T)=e^{-r(T-t)}\mathbb{E}\left[\max\left(S'-K,0\right)\right]&=e^{-r(T-t)}\in
 \end{split}
 \end{equation}
 Taking the first derivative of this result with respect to the strike price $K$, we obtain
-\begin{equation}
+\begin{equation}\label{dcdk}
 \pdv{C}{K}=-e^{-r(T-t)}\int_K^\infty p(S,t,S',T)dS'.
 \end{equation}
 The second derivative results in
-\begin{equation}
+\begin{equation}\label{d2cdk2}
 \pdv{^2C}{K^2}=e^{-r(T-t)}p(S,t,S',T).
 \end{equation}
 
-Due to its stochastic nature, the transition probability density function follows the Fokker-Planck equation, given by
-\begin{equation}\label{FokkerPlanck}
-\pdv{p}{T}=\frac{1}{2}\sigma^2\pdv{^2(S^2p)}{S^2}-r\pdv{(Sp)}{S}.
+We now make a brief detour to derive the Fokker-Planck equation (following the procedure shown in \cite{Wilmott}), which we require for the next steps.
+We begin by assuming a trinomial model: at each time step, our stock price can only increase or decrease by an amount $dS$, with probabilities $\phi^+$ and $\phi^-$, respectively, or remain the same, with probability $(1-\phi^+-\phi^-)$.
+The expected value of the change is therefore
+\begin{equation}
+\phi^+dS+(1-\phi^+-\phi^-).0+\phi^-(-dS)=dS(\phi^+-\phi^-),
 \end{equation}
-\noindent with $\sigma$ denoting our (still unknown) function of $S$ and $t$, evaluated at $t=T$.
+\noindent and its variance is approximately given by
+\begin{equation}
+(dS)^2(\phi^++\phi^--(\phi^+-\phi^-)^2)\approx (dS)^2(\phi^++\phi^-)
+\end{equation}
+\noindent where we take only the first order terms. The expected value of the change of a GBM can be thought of as its drift term (i.e. $rSdt$), and the variance is its stochastic term squared (i.e. $(\sigma SdW)^2=\sigma^2S^2dt$), so that we have
+\begin{equation}
+\begin{split}
+rSdt&=(\phi^+-\phi^-)dS;\\
+\sigma^2S^2dt&=(\phi^++\phi^-)(dS)^2,
+\end{split}
+\end{equation}
+\noindent from which we can derive the probabilities $\phi^+$ and $\phi^-$ as
+\begin{equation}
+\begin{split}
+\phi^+&=\frac{1}{2}\frac{dt}{dS^2}(rSdS+\sigma^2S^2);\\
+\phi^-&=\frac{1}{2}\frac{dt}{dS^2}(-rSdS+\sigma^2S^2).
+\end{split}
+\end{equation}
+
+We can now move backwards and derive the probability of reaching the price $S'$ at time $t'$ having started at the previous time $t'-dt$ with some (unknown) price $S$, which could be either $S'+dS$, $S'-dS$ or $S'$ (assuming a trinomial movement). This probability is indeed the probability density, $ p(S,t,S',T) $ and can be derived as
+\begin{equation}
+p(S,t,S',T)=\phi^-p(S'+dS,t-dt,S',T)+(1-\phi^+-\phi^-)(S',t-dt,S',T)+\phi^+p(S'-dS,t-dt,S',T).
+\end{equation}
+\noindent If we expand each term on its Taylor series around point $(S',t')$, we get
+\begin{equation}
+\begin{split}
+p(S,t,S',T)=&\ \phi^-\left(p(S',t,S',T)+dS\frac{dp}{dS'}+\frac{1}{2}(dS)^2\frac{d^2p}{dS^2}-dt\frac{dp}{dt'}\right)\\
+&+(1-\phi^+-\phi^-)\left(p(S',t,S',T)-dt\frac{dp}{dt'}\right)\\
+&+\phi^+\left(p(S',t,S',T)-dS\frac{dp}{dS'}+\frac{1}{2}(dS)^2\frac{d^2p}{dS^2}-dt\frac{dp}{dt'}\right)\\
+=&\frac{1}{2}\frac{dt}{dS^2}\sigma^2S^2(dS)^2\frac{d^2p}{dS^2}-\frac{dt}{dS^2}rS(dS)^2\frac{dp}{dS},
+\end{split}
+\end{equation}
+\noindent from which we can derive the famous Fokker-Planck equation (with rather sloppy notation) as
+\begin{equation}\label{FokkerPlanck}
+\pdv{p}{T}=\frac{1}{2}\pdv{^2(\sigma^2S'^2p)}{S'^2}-\pdv{(rS'p)}{S'}.
+\end{equation}
+\noindent where we have used $t'=T$.
+
 
 From eq. \ref{deriv0} we can easily derive
 \begin{equation}
@@ -142,15 +180,32 @@ Using eq. \ref{FokkerPlanck}, we can transform this relation into
 \begin{equation}
 \pdv{C}{T}=-rC+e^{-r(T-t)}\int_K^\infty(S'-K)\left(\frac{1}{2}\sigma^2\pdv{^2(S'^2p)}{S'^2}-r\pdv{(S'p)}{S'}\right)dS'.
 \end{equation}
-Integrating twice by parts and collecting all terms, we get
+
+We now split the terms in the integral to evaluate them independently. We integrate the second term by parts as
+\begin{equation}
+\begin{split}
+\int_K^\infty(S'-K)\left(-r\pdv{(S'p)}{S'}\right)dS'&=-r(S'-K)(S'p)\big|_{S'=K}^\infty+r\int_K^\infty S'p dS'\\
+&=r\int_K^\infty (S'-K)p dS'+rK\int_K^\infty p dS'\\
+&=e^{r(T-t)}rV-rK\pdv{C}{K}
+\end{split}
+\end{equation}
+\noindent where in the first step we assumed that $p$ and its first derivative w.r.t. $S$ go sufficiently fast to zero and in last step we used eqs.\eqref{deriv0} and \eqref{dcdk}.
+
+Turning now to the first term of the integral, we integrate twice by parts
+\begin{equation}
+\begin{split}
+\int_K^\infty(S'-K)\left(\frac{1}{2}\sigma^2\pdv{^2(S'^2p)}{S'^2}\right)dS'&=\frac{1}{2}\sigma^2(S'-K)\pdv{(S'^2p)}{S'}\bigg|_{S'=K}^\infty-\frac{1}{2}\sigma^2\int_K^\infty\left(\pdv{(S'^2p)}{S'}\right)dS'\\
+&=\frac{1}{2}\sigma^2S'^2p\big|_{S'=K}^\infty=\frac{1}{2}\sigma^2K^2p\\
+&=\frac{1}{2}e^{r(T-t)}\sigma^2K^2\pdv{^2C}{K^2},
+\end{split}
+\end{equation}
+\noindent where in the last step we used eq.\eqref{d2cdk2} and again assumed that $p$ goes to zero sufficiently fast.
+
+Collecting all the terms, we obtain
 \begin{equation}
 \pdv{C}{T}=\frac{1}{2}\sigma^2K^2\pdv{^2C}{K^2}-rK\pdv{C}{K}.
 \end{equation}
-Rearranging all terms, we are left with
-\begin{equation}
-\sigma(K,T)=\sqrt{\frac{\displaystyle\pdv{C}{T}+rK\pdv{C}{K}}{\displaystyle\frac{1}{2}K^2\pdv{^2C}{K^2}}},
-\end{equation}
-\noindent from which we can easily derive Dupire's formula, as shown in eq.\eqref{dupire}, using a simple variable change, i.e. $\sigma(K,T)\implies \sigma(S,t)$, which gives
+\noindent from which, by rearranging all the terms and applying the variable change $\sigma(K,T)\implies \sigma(S,t)$, we get
 \begin{equation}
 \sigma(S,t)=\sqrt{\frac{\displaystyle\pdv{C}{T}+rS\pdv{C}{K}}{\displaystyle\frac{1}{2}S^2\pdv{^2C}{K^2}}}.
 \end{equation}
@@ -166,13 +221,13 @@ A major problem can be pointed out in eq.\eqref{dupire}. For options far in or f
 One possible solution to this problem is to relate our local volatility with the implied volatility surface instead of the option price's~\cite{Wilmott2}.
 The relation obtained is
 \begin{equation}\label{dupire2}
-\sigma(S,t)=\sqrt{\frac{\displaystyle\sigma_{imp}^2+2t\sigma_{imp}\pdv{\sigma_{imp}}{T}+2rSt\sigma_{imp}\pdv{\sigma_{imp}}{K}}{\displaystyle\left(1+Sd_1\sqrt{t}\pdv{\sigma_{imp}}{K}\right)^2+S^2t\sigma_{imp}\left(\pdv{^2\sigma_{imp}}{K^2}-d_1\left(\pdv{\sigma_{imp}}{K}\right)^2\sqrt{t}\right)}},
+\boxed{\sigma(S,t)=\sqrt{\frac{\displaystyle\sigma_{imp}^2+2t\sigma_{imp}\pdv{\sigma_{imp}}{T}+2rSt\sigma_{imp}\pdv{\sigma_{imp}}{K}}{\displaystyle\left(1+Sd_1\sqrt{t}\pdv{\sigma_{imp}}{K}\right)^2+S^2t\sigma_{imp}\left(\pdv{^2\sigma_{imp}}{K^2}-d_1\left(\pdv{\sigma_{imp}}{K}\right)^2\sqrt{t}\right)}},}
 \end{equation}
 \noindent where $d_1$ is given by
 \begin{equation}
 d_1=\frac{\log(S_0/S)+\left(r+\frac{1}{2}\sigma_{imp}^2\right)t}{\sigma_{imp}\sqrt{t}},
 \end{equation}
-\noindent with $S_0$ being the stock price at $t=0$. We define $\sigma_{imp}=\sigma_{imp}(K,T)$ as the interpolated surface of the implied volatilities evaluated at time $T$, and price $K$. All derivatives are also evaluated at $K=S$ and $T=t$. This formula can be obtained from eq.\eqref{dupire} by applying the transformation from call prices to implied volatilities.
+\noindent with $S_0$ being the stock price at $t=0$. We define $\sigma_{imp}=\sigma_{imp}(K,T)$ as the implied volatilities of options with maturity $T$, and strike $K$. Furthermore, $\sigma_{imp}$ and all its derivatives are evaluated at $K=S$ and $T=t$. This formula can be obtained from eq.\eqref{dupire} by applying the transformation from call prices to implied volatilities.
 
 
 We now need to generate the implied volatility surface from market data in order to find the gradients shown in eq.\eqref{dupire2}. We again need to interpolate between the market's implied volatilities in order to find this surface.
@@ -223,10 +278,10 @@ Another model, known as \emph{SABR}, is also widely used by practitioners, espec
 \subsection{Heston Model}
 One of the most popular stochastic volatility models is known as \emph{Heston model}. It was developed in 1993 by Steven Heston~\cite{Heston} and it states that stock prices satisfy the relations
 \begin{equation}\label{hestons}
-dS=rSdt+\sqrt{\nu}SdW_1,
+\boxed{dS=rSdt+\sqrt{\nu}SdW_1,}
 \end{equation}
 \begin{equation}\label{hestonv}
-d\nu=\kappa(\overline{\nu}-\nu)dt+\eta\sqrt{\nu}dW_2,
+\boxed{d\nu=\kappa(\overline{\nu}-\nu)dt+\eta\sqrt{\nu}dW_2,}
 \end{equation}
 \noindent with $\nu$ corresponding to the stock price variance (i.e. $\nu=\sigma^2$) and again where $W_1$ and $W_2$ have a correlation of $\rho$. We furthermore define $\nu_0$ as the initial variance (i.e. variance at time $t=0$). The original model used a drift parameter $\mu$ instead of the risk-free measure drift $r$ presented here, but a measure transformation, using Gisarnov's theorem, can be easily implemented~\cite{rouah}.
 
@@ -408,10 +463,10 @@ By analyzing eqs.\eqref{hestons} and \eqref{hestonv} we can see that the square 
 \subsection{Static SABR Model}
 One other very famous model for stochastic volatility was developed by Hagan \textit{et al.}~\cite{Hagan} and is known as \emph{SABR} - we will henceforth refer to it by \emph{Static SABR}, to distinguish it from the \emph{Dynamic SABR} model that we will see next. SABR stands for "\emph{stochastic-}$\alpha\beta\rho$" and in this model it is assumed that the option prices and volatilities follow~\cite{Geeske}
 \begin{equation}\label{dF}
-dS=rSdt+e^{-r(T-t)(1-\beta)}\sigma S^\beta dW_1,
+\boxed{dS=rSdt+e^{-r(T-t)(1-\beta)}\sigma S^\beta dW_1,}
 \end{equation}
 \begin{equation}\label{dsigma}
-d\sigma=\nu\sigma dW_2,
+\boxed{d\sigma=\nu\sigma dW_2,}
 \end{equation}
 \noindent where we define $\alpha=\sigma(0)$ as the starting volatility and $S_0=S(0)$ as the starting stock price. Finally, as before, the two Brownian motion processes $W_1$ and $W_2$ have a correlation of $\rho$.
 
@@ -448,12 +503,14 @@ One of the main setbacks of the static SABR model is the fact that it only works
 
 To solve this problem, Hagan \textit{et al.} suggested a similar model known as \emph{Dynamic SABR}~\cite{Hagan}. It follows the same processes presented in eqs.\eqref{dF} and \eqref{dsigma} but with time-dependent parameters $\rho(t)$ and $\nu(t)$,
 \begin{equation}\label{dF2}
-dS=rSdt+e^{-r(T-t)(1-\beta)}\sigma S^\beta dW_1,
+\boxed{dS=rSdt+e^{-r(T-t)(1-\beta)}\sigma S^\beta dW_1,}
 \end{equation}
 \begin{equation}\label{dsigma2}
-d\sigma=\nu(t)\sigma dW_2,
+\boxed{d\sigma=\nu(t)\sigma dW_2,}
 \end{equation}
 \noindent with the correlation between $W_1$ and $W_2$ now given by $\rho(t)$.
+
+
 
 Hagan \textit{et al.} derived again a quasi-closed-form solution for the implied volatilities of options priced under this model. Osajima later simplified this expression using asymptotic expansion~\cite{Osajima}. The resulting formula is given by
 \begin{equation}\label{dynsabr}

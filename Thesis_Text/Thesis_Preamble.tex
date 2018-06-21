@@ -249,7 +249,7 @@
 % > decimal-aligned tabular math columns
 %
 \usepackage{dcolumn}
-\newcolumntype{d}{D{.}{.}{-1}} % column aligned by the point separator '.'
+\newcolumntype{d}[1]{D{.}{.}{#1}} % column aligned by the point separator '.'
 \newcolumntype{e}{D{E}{E}{-1}} % column aligned by the exponent 'E'
 
 
@@ -557,5 +557,6 @@
 %\patchcmd{\subfigmatrix}{\hfill}{\hspace{1.5cm}}{}{}
 
 \newcommand{\evalat}[4]{ \left. {\frac{\partial #1}{\partial #2}}_{\stackunder[2pt]{}{}}\right|_{\stackon[3pt]{$\scriptstyle #4$}{$\scriptstyle #3$}}}
+
 
 \renewenvironment{proof}{{\bfseries \slshape Proof}}{\qed}

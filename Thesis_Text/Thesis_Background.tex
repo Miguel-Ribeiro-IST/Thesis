@@ -66,7 +66,7 @@ Using the up-and-in Barrier option type as an example, if the asset price, $S(t)
 
 
 The payoff function of this type of option is given by
-\begin{equation}
+\begin{equation}\label{barrier}
 \begin{split}
 &\text{Payoff}_{Barr,\ call}(K,T)=\begin{cases} 
       \max\left(S(T)-K,0\right), & \mathrm{if}\ \ \exists\,t<T\,:\,S(t)>B\\
@@ -110,7 +110,7 @@ Probably the most important result in this field came from Fischer Black, Myron 
 This model states that the price of an European call or put option follows the partial differential equation (PDE)
 
 \begin{equation}\label{BS2}
-\pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}+rS\pdv{V}{S}-rV=0,
+\boxed{\pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}+rS\pdv{V}{S}-rV=0,}
 \end{equation}
 
 \noindent where $V$ is the price of the option, $S$ is the price of the underlying (risky) asset, $r$ is the risk-free interest rate and $\sigma$ is the stock price volatility.

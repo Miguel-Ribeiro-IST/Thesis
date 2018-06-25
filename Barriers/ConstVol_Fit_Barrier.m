@@ -5,7 +5,7 @@ B=A.data(:,:);
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;
 r = 0;
-matur=2;
+matur=4;
 OptAlg="CMA";
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
@@ -26,13 +26,11 @@ B=B(B(:,1)==T,:);
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
 x0=0.2;
-sigma=Optimizer(B,x0);
 
-%Plotter(sigma,S0,r,B,M,T,SimPoints);
-Plotter_Sim(sigma,S0,r,B,M,T,repetitions)
+sigma=0.2518;
+b=1.1;
+Plotter_Sim(sigma,S0,r,M,T,repetitions,b)
 
-tab=Printer(sigma,B,S0,r);
-%openvar('tab')
 
 beep
 
@@ -51,70 +49,11 @@ beep
 %iterations=number of repetitions of the simulations (to reduce error)
 %B=input data file
 %x0=optimization starting parameters
-
-
-
-%%%%%%%%%%%%%      DEFINE MINIMIZATION PROCEDURE      %%%%%%%%%%%%%%%
-function optimvars=Optimizer(B,x0)
-fun=@(var)Constcal(var(1),B);
-optimvars=purecmaes(fun,x0);
-
-fprintf('sigma=%f\nerror=%f\n',[optimvars(1),Constcal(optimvars(1),B)])
-end
-
-
-function Total_Error=Constcal(sigma,B)
-if sigma<0
-    Total_Error=1000;
-else
-    LS=0;
-    for i=1:size(B,1)
-        LS=LS+(B(i,3)-sigma)^2*(1-abs(B(i,2)-1))^2;
-    end
-    Total_Error=LS;
-end
-end
-
-
-function Plotter(sigma,S0,r,B,M,T,SimPoints)
-figure
-
-
-if SimPoints
-    Volatility=Pricer(sigma,B(:,2:3),S0,r,T,T*252*2,M,"vol");
-    scatter(B(:,2),Volatility(:),100,'+','LineWidth',1.5);
-    hold on;
-end
-
-scatter(B(:,2),B(:,3),100,'x','LineWidth',1.5);
-hold on;
-
-ConstVol=@(K)K*0+sigma;
-fplot(ConstVol,[0.4,1.6],'LineWidth',1.5)
-
-
-xlim([0.4,1.6])
-ylim([0.2,1])
-box on;
-grid on;
-set(gca,'fontsize',12)
-xlabel('K/S_0');
-ylabel('\sigma_{imp} (yr^{-1/2})')
-pbaspect([1.5 1 1])
-if SimPoints
-    lgd=legend({'Simulated Volatilities','Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-else
-    lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-end
-title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
-end
-
-
-function Plotter_Sim(sigma,S0,r,B,M,T,repetitions)
+function Plotter_Sim(sigma,S0,r,M,T,repetitions,b)
 figure
 
 K=(0.4:0.01:1.6);
-SimVol=@(K)Pricer(sigma,K,S0,r,T,T*252*2,M,"vol");
+SimVol=@(K)Pricer(sigma,K,S0,r,T,T*252*2,M,"vol",b);
 for j=1:repetitions
     Mdl_tmp(j,:)=SimVol(K');
 end
@@ -122,16 +61,7 @@ Mdl=mean(Mdl_tmp);
 Mdlmax90=quantile(Mdl_tmp,0.9,1);
 Mdlmin10=quantile(Mdl_tmp,0.1,1);
 
-
-
-scatter(B(:,2),B(:,3),100,[0    0.1470    0.6410],'x','LineWidth',1.5);
-hold on;
-
-ConstVol=@(K)K*0+sigma;
-fplot(ConstVol,[0.4,1.6],'LineWidth',2,'Color',[0.9500    0.2250    0.0580])
-hold on;
-
-plot(K,Mdl,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
+plot(K,Mdl,'-.','LineWidth',1.5,'Color',[0.0510    0.70    0.9330]);
 
 hold on;
 K2 = [K, fliplr(K)]; % Use ; instead of ,
@@ -149,24 +79,27 @@ ylabel('\sigma_{imp} (yr^{-1/2})')
 pbaspect([1.5 1 1])
 
 h = get(gca,'Children');
-lgd=legend([h(4) h(3) h(2) h(1)],{'Market Data','Theoretical Function','Simulated Function (mean)','90% Confidence Interval'},'Location','northeast','FontSize',11);
+lgd=legend([h(2) h(1)],{'Simulated Function (mean)','90% Confidence Interval'},'Location','northeast','FontSize',11);
 title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
-set(gca,'Children',[h(4) h(2) h(3) h(1)])
+set(gca,'Children',[h(2) h(1)])
 end
 
 
-function Result=Pricer(sigma,C,S0,r,T,L,M,PriceVol)
+function Result=Pricer(sigma,C,S0,r,T,L,M,PriceVol,b)
 dt = T/L;
 N=size(C,1);
 
 S = S0*ones(M,1);
+barrier = zeros(M,1);
 for k = 1:L
     %Euler-Maruyama discretization
     S(:)=S(:).*(1+r*dt+sigma*sqrt(dt)*randn(M,1));
+    barrier=max(barrier,S>b);
 end
-
+S=S.*barrier;
 
 Y=zeros(M,N);
+
 for j=1:N
     for i=1:M
         Y(i,j) = max(S(i)-C(j,1),0);
@@ -184,25 +117,12 @@ else
         if ~isnan(res)
             Result(j)=res;
         else
-            Result(j)=2;
+            Result(j)=0;
         end
     end
 end
 end
 
-
-
-function tab=Printer(sigma,B,S0,r)
-format longG
-    Vols=sigma*ones(size(B,1),1);
-    Prices=european_bs(S0,B(:,2),r,sigma,B(:,1),"call");
-
-    MKTPrices=european_bs(S0,B(:,2),r,B(:,3),B(:,1),"call");
-    MKTVols=B(:,3);
-
-tab=[B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols*100,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices*100];
-format short
-end
 
 
 %%%%%%%%%%%%%%  CALCULATE BLACK-SCHOLES PRICE  %%%%%%%%%%%%%%%%%%%%

@@ -5,7 +5,7 @@ B=A.data(:,:);
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;
 r = 0;
-matur=2;
+matur=4;
 OptAlg="CMA";
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
@@ -21,7 +21,7 @@ S0=1;
 B(:,1)=B(:,1)/252;
 times=unique(B(:,1));
 T=times(matur);
-B=B(B(:,1)==T,:);
+B=B(B(:,1)<=T,:);
 
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
@@ -29,10 +29,10 @@ x0=0.2;
 sigma=Optimizer(B,x0);
 
 %Plotter(sigma,S0,r,B,M,T,SimPoints);
-Plotter_Sim(sigma,S0,r,B,M,T,repetitions)
+Plotter_Sim(sigma,S0,r,B,M,matur,repetitions)
 
 tab=Printer(sigma,B,S0,r);
-%openvar('tab')
+openvar('tab')
 
 beep
 
@@ -76,43 +76,12 @@ end
 end
 
 
-function Plotter(sigma,S0,r,B,M,T,SimPoints)
+function Plotter_Sim(sigma,S0,r,B,M,matur,repetitions)
+times=unique(B(:,1));
+for iter=1:matur
+T=times(iter);
+
 figure
-
-
-if SimPoints
-    Volatility=Pricer(sigma,B(:,2:3),S0,r,T,T*252*2,M,"vol");
-    scatter(B(:,2),Volatility(:),100,'+','LineWidth',1.5);
-    hold on;
-end
-
-scatter(B(:,2),B(:,3),100,'x','LineWidth',1.5);
-hold on;
-
-ConstVol=@(K)K*0+sigma;
-fplot(ConstVol,[0.4,1.6],'LineWidth',1.5)
-
-
-xlim([0.4,1.6])
-ylim([0.2,1])
-box on;
-grid on;
-set(gca,'fontsize',12)
-xlabel('K/S_0');
-ylabel('\sigma_{imp} (yr^{-1/2})')
-pbaspect([1.5 1 1])
-if SimPoints
-    lgd=legend({'Simulated Volatilities','Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-else
-    lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-end
-title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
-end
-
-
-function Plotter_Sim(sigma,S0,r,B,M,T,repetitions)
-figure
-
 K=(0.4:0.01:1.6);
 SimVol=@(K)Pricer(sigma,K,S0,r,T,T*252*2,M,"vol");
 for j=1:repetitions
@@ -124,7 +93,7 @@ Mdlmin10=quantile(Mdl_tmp,0.1,1);
 
 
 
-scatter(B(:,2),B(:,3),100,[0    0.1470    0.6410],'x','LineWidth',1.5);
+scatter(B(B(:,1)==T,2),B(B(:,1)==T,3),100,[0    0.1470    0.6410],'x','LineWidth',1.5);
 hold on;
 
 ConstVol=@(K)K*0+sigma;
@@ -153,7 +122,7 @@ lgd=legend([h(4) h(3) h(2) h(1)],{'Market Data','Theoretical Function','Simulate
 title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
 set(gca,'Children',[h(4) h(2) h(3) h(1)])
 end
-
+end
 
 function Result=Pricer(sigma,C,S0,r,T,L,M,PriceVol)
 dt = T/L;

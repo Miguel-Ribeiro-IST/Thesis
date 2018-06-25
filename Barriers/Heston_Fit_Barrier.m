@@ -16,6 +16,7 @@ OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 SimPoints=true;   %true or false - define if Monte Carlo simulation should be executed
 M=100000;           %number of paths to be simulated
 repetitions=100;
+barr=[1.05,1.15,1.25];
 %L=T*252*2
 
 
@@ -24,7 +25,8 @@ B(:,2)=B(:,2)/S0;                %normalize strike prices
 S0=1;
 B(:,1)=B(:,1)/252;               %convert maturities from days to years
 times=unique(B(:,1));
-B=B(B(:,1)<=times(matur),:);     %only keep values of the maturity
+T=times(matur);
+B=B(B(:,1)==T,:);     %only keep values of the maturity
 
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
@@ -44,8 +46,9 @@ chi=optimvars(5);
 %%%%%%%%%%%%%%%    PLOT AND PRINT RESULTS    %%%%%%%%%%%%%%%%%
 %Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,M,matur,SimPoints)
 tic
-Plotter_Sim(kappa,nubar,nu0,rho,chi,S0,r,B,M,matur,repetitions)
-Plotter3D(kappa,nubar,nu0,rho,chi,S0,r,B);
+Plotter_Sim(kappa,nubar,nu0,rho,chi,S0,r,M,T,repetitions,barr)
+
+%Plotter3D(kappa,nubar,nu0,rho,chi,S0,r,B,b);
 toc
 tab=Printer(kappa,nubar,nu0,rho,chi,B,S0,r);
 %openvar('tab')
@@ -159,156 +162,41 @@ end
 
 
 
-%%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%    PLOT MATURITIES IN DIFFERENT FIGURES  %%%%%%%%%%%%
-function Plotter(kappa,nubar,nu0,rho,chi,S0,r,B,M,matur,SimPoints)
-times=unique(B(:,1));   %array with all maturity dates
+function Plotter_Sim(kappa,nubar,nu0,rho,chi,S0,r,M,T,repetitions,barr)
 
-for iter=1:matur
-    figure
-    
-    T=times(iter);
-    C=B(B(:,1)==T,2:3);  %Implied volatilities for the selected maturity
-    
-    %If the user chose to use Monte Carlo, after calibration, to check model validity, calculate implied volatilities under MC
-    if SimPoints
-        Volatility= Pricer(kappa,nubar,nu0,rho,chi,C,S0,r,T,T*252*2,M,"vol");
-        scatter(C(:,1),Volatility(:),100,'+','LineWidth',1.5);
-        hold on;
-    end
-    
-    %Plot original data points
-    scatter(C(:,1),C(:,2),100,'x','LineWidth',1.5);
-    hold on;
-    
-    %Plot implied volatility function under the Heston model
-    HestonVol=@(K)HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,"vol");
-    K=(0.4:0.01:1.6);
-    for i=1:size(K,2)
-        HV(i)=HestonVol(K(i));
-    end
-    p=plot(K,HV);
-    p.LineWidth = 1.5;
-    
-    %Plot options
-    xlim([0.4,1.6])
-    ylim([0,1])
-    box on;
-    grid on;
-    set(gca,'fontsize',12)
-    xlabel('K/S_0');
-    ylabel('\sigma_{imp} (yr^{-1/2})')
-    pbaspect([1.5 1 1])
-    if SimPoints
-        lgd=legend({'Simulated Volatilities','Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-    else
-        lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-    end
-    title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
-    
-    clear Volatility
-end
+K=0.4:0.01:1.6;
 
-end
+SimVol1=@(K,PriceVol)Pricer(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,PriceVol,barr(1));
+SimVol2=@(K,PriceVol)Pricer(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,PriceVol,barr(2));
+SimVol3=@(K,PriceVol)Pricer(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,PriceVol,barr(3));
 
 
-function Plotter_Sim(kappa,nubar,nu0,rho,chi,S0,r,B,M,matur,repetitions)
-times=unique(B(:,1));   %array with all maturity dates
-
-K2=0.4:0.01:1.6;
-Mdl=zeros(matur,size(K2,2));
-
-scatter3(B(:,2),B(:,1),B(:,3),30,'LineWidth',0.5,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
-hold on;
-SimVol=@(K,T)Pricer(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,"vol");
-[K,T] = meshgrid(K2,0.5/12:0.5/12:0.5+0.5/12); %create the grid to be evaluated
-DV_tmp=zeros(repetitions,size(K,2)); %matrix to be averaged (reducing noise) to generate the values
-f=1; %auxiliary variable
-for i=1:size(K,1)
     parfor j=1:repetitions
-        DV_tmp(j,:)=SimVol(K(i,:),T(i,1));
+        DV_tmp1(j,:)=SimVol1(K,"vol");
+        DV_tmp2(j,:)=SimVol2(K,"vol");
+        DV_tmp3(j,:)=SimVol3(K,"vol");
+        DVP_tmp1(j,:)=SimVol1(K,"price");
+        DVP_tmp2(j,:)=SimVol2(K,"price");
+        DVP_tmp3(j,:)=SimVol3(K,"price");
     end
-    mn=mean(DV_tmp,1)';
-    if i==2 || i==4 || i==6 || i==12
-        DV2(f,:)=mn;
-        DV2max(f,:)=quantile(DV_tmp,0.9,1);
-        DV2min(f,:)=quantile(DV_tmp,0.1,1);
-        plot3(K2,ones(1,size(K2,2))*T(i,1),DV2(f,:),'-.','LineWidth',2,'Color',[0.9500    0.200    0.1])
-        hold on;
-        f=f+1;
-    end
-    DV(i,:)=mn;
-end
-s=surf(K,T,DV);
-s.EdgeAlpha=0.6;
-s.FaceAlpha=0.85;
-shading interp
-hold on;
+    DV1=mean(DV_tmp1,1);
+    DV2=mean(DV_tmp2,1);
+    DV3=mean(DV_tmp3,1);
+    DVP1=mean(DVP_tmp1,1);
+    DVP2=mean(DVP_tmp2,1);
+    DVP3=mean(DVP_tmp3,1);
 
-%Plot options
-xlim([0.4,1.6])
-ylim([0.5/12,0.5+0.5/12])
-zlim([0,1])
-box on;
-grid on;
-xlabel('K/S_0');
-ylabel('T (days)');
-zlabel('\sigma_{imp} (yr^{-1/2})')
-yticks([1/12,2/12,3/12,4/12,5/12,6/12])
-yticklabels({'21','42','63','84','105','126'})
-pbaspect([1 1.5 1])
-set(gca,'fontsize',11)
-view(40,35)
-M = view(gca);
-R = M(1:3,1:3);
-x = R*[1;0;0];
-y = R*[0;1;0];
-z = R*[0;0;1];
-set(get(gca,'XLabel'),'rotation',360/(2*pi)*atan(x(2)/x(1)))
-set(get(gca,'YLabel'),'rotation',360/(2*pi)*atan(y(2)/y(1)))
-
-
-%Contour Plot
-figure
-contourf(K,T,DV,25)
-pbaspect([1.5 1 1])
-xlim([0.4,1.6])
-ylim([0.5/12,0.5+0.5/12])
-xlabel('K/S_0');
-ylabel('T (days)');
-yticks([1/12,2/12,3/12,4/12,5/12,6/12])
-yticklabels({'21','42','63','84','105','126'})
-box on;
-colorbar;
-set(gca,'fontsize',12)
-hold on;
-
-
-for iter=1:matur
-    figure
-    
-    T=times(iter);
-    C=B(B(:,1)==T,2:3);  %Implied volatilities for the selected maturity
-    
-    %Plot original data points
-    scatter(C(:,1),C(:,2),100,[0    0.1470    0.6410],'x','LineWidth',1.5);
-    hold on;
-    
     %Plot implied volatility function under the Heston model
+    figure
     HestonVol=@(K)HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,"vol");
-    K=(0.4:0.01:1.6);
     for i=1:size(K,2)
         HV(i)=HestonVol(K(i));
     end
     plot(K,HV,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
     hold on;
-    
-    plot(K,DV2(iter,:),'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
-    
-    hold on;
-    K3 = [K2, fliplr(K2)]; % Use ; instead of ,
-    inBetween = [DV2max(iter,:), fliplr(DV2min(iter,:))]; % Use ; instead of ,
-    fill(K3, inBetween,[0    0.150    0.830],'FaceAlpha',0.2,'EdgeAlpha',0);
+    plot(K,DV1,'-.','LineWidth',2);
+    plot(K,DV2,'--','LineWidth',2);
+    plot(K,DV3,':','LineWidth',2);
     
     %Plot options
     xlim([0.4,1.6])
@@ -320,77 +208,37 @@ for iter=1:matur
     ylabel('\sigma_{imp} (yr^{-1/2})')
     pbaspect([1.5 1 1])
 
-    h = get(gca,'Children');
-    lgd=legend([h(4) h(3) h(2) h(1)],{'Market Data','Theoretical Function','Simulated Function (mean)','90% Confidence Interval'},'Location','northeast','FontSize',11);
-    title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
-    set(gca,'Children',[h(4) h(2) h(3) h(1)])
-    
-    clear Volatility
-end
 
+    lg={'European Call',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    legend(lg,'Location','northeast','FontSize',11);
 
-end
-
-
-%%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%    PLOT MULTIPLE MATURITIES IN A SINGLE FIGURE  %%%%%%%%%%%%
-function MultiPlotter(kappa,nubar,nu0,rho,chi,S0,r,B,M,matur,SimPoints,OptAlg)
-figure
-times=unique(B(:,1));   %array with all maturity dates
-
-for iter=1:matur
-    if matur>1
-        ax(iter) = subplot(2,ceil(matur/2),iter);  %divide figure into two rows
-    else
-        ax(iter) = subplot(1,1,1);
+   
+    figure
+       %Plot implied volatility function under the Heston model
+    HestonVol=@(K)HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,"price");
+    for i=1:size(K,2)
+        HV2(i)=HestonVol(K(i));
     end
-    
-    T=times(iter);
-    C=B(B(:,1)==T,2:3);  %Implied volatilities for the selected maturity
-    
-    
-    
-    %If the user chose to use Monte Carlo, after calibration, to check model validity, calculate implied volatilities under MC
-    if SimPoints
-        Volatility= Pricer(kappa,nubar,nu0,rho,chi,C,S0,r,T,T*252*2,M,"vol");
-        scatter(ax(iter),C(:,1),Volatility(:),'x');
-        hold on;
-    end
-    
-    %Plot original data points
-    scatter(ax(iter),C(:,1),C(:,2),'.');
+    plot(K,HV2,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
     hold on;
-    
-    %Plot implied volatility function under the Heston model
-    HestonVol=@(K)HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,"vol");
-    fplot(ax(iter),HestonVol,[0.4,1.6])
-    hold on;
+    plot(K,DVP1,'-.','LineWidth',2);
+    plot(K,DVP2,'--','LineWidth',2);
+    plot(K,DVP3,':','LineWidth',2);
     
     %Plot options
     xlim([0.4,1.6])
-    ylim([0.2,1])
+    ylim([0,0.6])
     box on;
     grid on;
-    title(ax(iter),strcat(strcat(strcat(num2str(T*252)," days  ("),num2str(T*252/21))," months)"))
-    
-    clear Volatility
+    set(gca,'fontsize',12)
+    xlabel('K/S_0');
+    ylabel('Option Price(€)')
+    pbaspect([1.5 1 1])
+
+    lg={'European Call',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    legend(lg,'Location','northeast','FontSize',11);
 end
 
-%Show parameter values in plots as titles
-if matur>1
-    text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
-    if SimPoints
-        vars1=strcat(strcat(strcat("paths=",num2str(M)),",  method="),OptAlg);
-    else
-        vars1=strcat("method=",OptAlg);
-    end
-    text2=strcat(strcat(strcat(num2str(times(2)*252)," days  ("),num2str(times(2)*252/21))," months)");
-    vars2=strcat("\kappa=",strcat(num2str(kappa),strcat(", \nu_{mean}=",strcat(num2str(nubar),strcat(", \nu_0=",strcat(num2str(nu0),strcat(strcat(strcat(", \rho=",num2str(rho)),(strcat(", \chi=",num2str(chi)))))))))));
-    title(ax(1),{vars1,text1})
-    title(ax(2),{vars2,text2})
-end
-
-end
 
 
 
@@ -473,12 +321,13 @@ end
 %Options are assumed Call
 %If output should be a price, PriceVol="price"
 %If output should be an implied volatility, PriceVol="vol"
-function Result=Pricer(kappa,nubar,nu0,rho,chi,C,S0,r,T,L,M,PriceVol)
+function Result=Pricer(kappa,nubar,nu0,rho,chi,C,S0,r,T,L,M,PriceVol,b)
 dt = T/L;      %time steps
 N=size(C,1);   %size of vector of volatilities to be output
 
 S=S0*ones(M,1);      %define initial vector of stock prices
 nu=nu0*ones(M,1);    %define the initial vector of volatilities
+barrier = zeros(M,1);
 
 for k = 1:L
     Z1=randn(M,1);                                 %vector of random variables
@@ -487,8 +336,9 @@ for k = 1:L
     %Milstein discretization
     S(:)=S(:).*(1+r.*dt+sqrt(dt.*max(nu(:),0)).*Z1+0.5.*dt.*max(nu(:),0).*(Z1.^2-1));
     nu(:)=nu(:)+kappa.*(nubar-max(nu(:),0)).*dt+chi.*sqrt(dt.*max(nu(:),0)).*Z2+chi.^2./4.*dt.*(Z2.^2-1);  %Ensure variance never becomes negative
+    barrier=max(barrier,S>b);
 end
-
+S=S.*barrier;
 
 Y=zeros(M,N);    %matrix with paths' payoff  (for all inserted strikes)
 for j=1:N

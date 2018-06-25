@@ -1,5 +1,5 @@
 clear;
-figure
+%figure
 %{
 K=1;
 syms S;
@@ -261,4 +261,66 @@ ylabel('Weight')
 set(gca,'fontsize',12)
 grid on;
 pbaspect([1.5 1 1])
+%}
+
+%%{
+format long
+T=1/12;
+r=0.01;
+S0=1;
+
+K1=0.9;
+P=logspace(log10(S0-K1*exp(-r*T)),log10(0.6),100);
+vol=zeros(1,size(P,2));
+for i=1:size(P,2)
+volatility=@(sigma)european_bs(S0,K1,r,sigma,T,"call")-P(i);
+vol(i)=fzero(volatility,0.000001);
+end
+plot(P,vol,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
+hold on;
+
+K2=0.75;
+P=logspace(log10(S0-K2*exp(-r*T)),log10(0.6),100);
+vol=zeros(1,size(P,2));
+for i=1:size(P,2)
+volatility=@(sigma)european_bs(S0,K2,r,sigma,T,"call")-P(i);
+vol(i)=fzero(volatility,0.000001);
+end
+plot(P,vol,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
+hold on;
+
+K3=0.5;
+P=logspace(log10(S0-K3*exp(-r*T)),log10(0.6),100);
+vol=zeros(1,size(P,2));
+for i=1:size(P,2)
+volatility=@(sigma)european_bs(S0,K3,r,sigma,T,"call")-P(i);
+vol(i)=fzero(volatility,0.000001);
+end
+plot(P,vol,':','LineWidth',2.25,'Color',[0.4660    0.6740    0.1880]);
+
+xlim([0,0.6])
+ylim([10^-2,10])
+set(gca, 'YScale', 'log')
+
+xlabel('C(€)');
+ylabel('\sigma_{imp}(yr^{-1/2})')
+%xticks(S0-K*exp(-r*T));
+%xticklabels({'S_0-Ke^{(-rT)}'})
+pbaspect([1.5 1 1])
+set(gca,'fontsize',12)
+grid on;
+legend({['K=',num2str(K1),'0 €'],['K=',num2str(K2),' €'],['K=',num2str(K3),'0 €']},'Location','northwest','FontSize',11)
+
+
+function price=european_bs(S0,K,r,sigma,T,putcall)
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d2 = d1 - sigma.*sqrt(T);
+N1 = normcdf(d1);
+N2 = normcdf(d2);
+if putcall=="call"
+    price = S0.*N1 - K.*exp(-r.*T).*N2;
+elseif putcall=="put"
+    price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
+end
+end
 %}

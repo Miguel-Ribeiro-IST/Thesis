@@ -1,25 +1,28 @@
-
-
 \chapter{Results}
 \label{chapter:results}
-
 In this chapter we will implement all the models described before: constant volatility, Dupire's local volatility, Heston's stochastic volatility and both static and dynamic SABR models.
 
-With the exception of Dupire's local volatility, will perform the calibration described in section \ref{section:Model Calibration} for all models: we will minimize the cost function in eq. \eqref{cost} with the weight function shown in eq. \eqref{weight}. We shall apply both the MultiStart and the CMA-ES optimization algorithms to find the optimal solution.
+With the exception of Dupire's local volatility, will perform the calibration described in section \ref{section:Model Calibration} for all models: we will minimize the cost function in eq. \eqref{cost} with the weight function shown in eq. \eqref{weight}. The model values for the implied volatilities, $\sigma_{imp,\mathrm{mdl}}$, will be obtained through the closed form solutions for each of the models. We shall apply the CMA-ES optimization algorithm to find the optimal solution.
+
+To validate the models' closed-form solutions, after finding the optimal parameters we will input them into a Monte Carlo pricer (different for each model), and calculate the simulated price, applying the discretization procedures described in section \ref{subsection:Simulating stock prices}. To better grasp the behavior of the simulations we will repeat them a large number of times, $N_{\mathrm{reps}}$, averaging the results to produce a function - henceforth named \emph{simulated function} -  and producing the 90\% confidence intervals from their sorted values.
+
 
 We will fit all our functions to a dataset of implied volatilities for European options with different maturities and strike prices. This data was kindly provided by \emph{BNP Paribas} and is shown in Appendix \ref{chapter:mktdata}.
 
 
-For the case of Dupire's local volatility, no calibration is required. Instead we must perform an interpolation in order to find the implied volatility surface from the data mentioned before and, with it, find the local volatility function. From this, we can easily obtain the prices of European options from the Monte Carlo pricer described in subsections \ref{subsection:Simulating stock prices} and \ref{subsection:Pricing options from simulations}. These prices (and their implied volatilities) can then be compared to their true market values.
+For the case of Dupire's local volatility, because it is nonparametric, no calibration is required. Instead we must perform an interpolation in order to find the implied volatility surface from the data mentioned before and, with it, find the local volatility function. From this, we can easily obtain the prices of European options from the Monte Carlo pricer described in subsections \ref{subsection:Simulating stock prices} and \ref{subsection:Pricing options from simulations}. These prices (and their implied volatilities) can then be compared to their true market values. As for the stochastic volatility models above, we will also run the Monte Carlo pricer a large number of times, $N_{\mathrm{reps}}$, to produce the simulated function and its 90\% confidence intervals.
 
-Some parameters will be used throughout all the simulations, namely the initial stock price, $S_0$, the risk-free interest rate, $r$, and the time step size (used in the Monte Carlo simulations), $\Delta t$. Their values are shown in \autoref{tab:defaultparam}.
+The Monte Carlo pricers of each model will then be modified to price Barrier options instead of the European options used in the calibration. These results will be compared with one another, though no validation is possible due to a lack of data.
+
+
+In order for the models to be comparable, we need to make sure that the same global parameters are used in all the adjustments and simulations, namely the initial stock price, $S_0$, the risk-free interest rate, $r$, the time step size (used in the Monte Carlo simulations), $\Delta t$, the number of pricer repetitions (to be averaged, producing the expected simulated function and its respective confidence intervals), $N_{\mathrm{reps}}$, and the number of paths simulated, $N_{\mathrm{paths}}$. Their values are shown in \autoref{tab:defaultparam}.
 \begin{table}[H]
     \centering
         \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}lcr@{}}
+\begin{tabular}{@{}lcccr@{}}
 \toprule
-$S_0$($\EUR$) & $r$($\SI{}{\per\year}$) & $\Delta t$(days) \\ \midrule
-1 & 0 & 0.5 \\
+$S_0$($\EUR$) & $r$($\SI{}{\per\year}$) & $\Delta t$(days) & $N_{\mathrm{paths}}$ & $N_{\mathrm{reps}}$ \\ \midrule
+1 & 0 & 0.5 & 100 000 & 100\\
 \bottomrule
 \end{tabular}
   \caption[Parameters used throughout all simulations.]{Parameters used throughout all simulations.}
@@ -28,15 +31,28 @@ $S_0$($\EUR$) & $r$($\SI{}{\per\year}$) & $\Delta t$(days) \\ \midrule
 
 
 
+
+
 \section{Constant Volatility Model}
+To find how well our models perform, we need some reference against which to compare them. One clear possibility is to assume a constant volatility throughout the options' duration. 
+
+Because we are fitting the volatility function - which, in this case, is a constant value - to a set of volatility data - which is not constant - these adjustments are expected to badly represent the data. Any other minimally decent model is expected to outperform this constant volatility assumption.
+
+With this constant volatility model, we can choose to fit the datasets with different maturities independently of one another or together in a larger data set. In other words, we can do several fits, one for each maturity, or a single one, for all maturities together. The former will be useful when benchmarking the Static SABR model, since for that model the adjustments will also be performed independently (Static SABR performs badly for multiple maturities). The latter will be more appropriate when studying the remaining models - Dupire, Heston and Dynamic SABR - since these are fitted to the whole implied volatility surface (i.e. multiple maturities together). For this reason, both will be presented and briefly studied.
+
+
+\newpage
+\subsection{Independent Fits}
+We begin by presenting the results of fitting a constant volatility function to the sets of data with different maturities independently.
+
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol1.eps}}
-    \subfigure[$T=42$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol2.eps}}
-    \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol3.eps}}
-    \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol4.eps}}
+    \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol1.png}}
+    \subfigure[$T=42$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol2.png}}
+    \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol3.png}}
+    \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol4.png}}
   \end{subfigmatrix}
-  \caption[Implied volatility functions fitted independently to the implied volatility data for different maturities under constant volatility model, plotted with their respective Monte Carlo simulated functions along with their confidence intervals.]{Implied volatility functions (red lines) fitted independently to the implied volatility data (crosses) for different maturities under constant volatility model, plotted with their respective Monte Carlo simulated functions (light-blue dot-dashed lines) along with their 90\% confidence intervals (blue region).}
+  \caption[Implied volatility functions fitted independently to the implied volatility data for different maturities under constant volatility model, plotted with their respective Monte Carlo simulated functions along with their confidence intervals.]{Implied volatility functions (red lines) fitted \emph{independently} to the implied volatility data (crosses) for different maturities under constant volatility model, plotted with their respective Monte Carlo simulated functions (light-blue dot-dashed lines) along with their 90\% confidence intervals (blue region).}
   \label{fig:ConstVol}
 \end{figure}
 
@@ -61,9 +77,9 @@ $T$ (days) & $\sigma_{imp,\mathrm{mdl}}$ ($\SI{}{\year\tothe{-1/2}}$) & Cost \\ 
 \begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}lccccccr@{}}
+\begin{tabular}{@{}ccccSccS@{}}
 \toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) &$\mathrm{Error}_{\sigma}(\%)$&$C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
+$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
 \multirow{7}{*}{21} & 0.50 & 0.7082 & \multirow{7}{*}{0.3174} & 55.2 & 0.50001 & 0.50000 & 0.003 \\
 &0.75 & 0.4632 &  & 31.5 & 0.25065 & 0.25002 & 0.3 \\
 &0.90 & 0.2989 &  & 6.2 & 0.10439 & 0.10540 & 1.0 \\
@@ -94,9 +110,101 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 &1.50 & 0.2521 &  & 0.1 & 8.58$\times10^{-4}$ & 8.51$\times10^{-4}$ & 0.8 \\
 \bottomrule
 \end{tabular}
-  \caption[Comparison between fitted results and original data under constant volatility model.]{Comparison between fitted functions and original data under constant volatility model.}
+  \caption[Comparison between fitted results (fitted independently) and original data under constant volatility model.]{Comparison between fitted functions (fitted independently) and original data under constant volatility model.}
   \label{tab:CV}
 \end{table}
+
+By observing the fit results in \autoref{tab:ConstVolPar} we see that the cost function decreases with the maturity. This is indeed what is expected, since the implied volatility surface becomes flatter as maturity increases, as can be seen from the market data (and as we can see in \autoref{fig:DupImpV}), making the constant volatility function a better approximation in such cases.
+
+
+One other property that we can observe is that the volatility also decreases with maturity. The reason behind this is the simple fact that earlier maturities present higher implied volatilities, pulling the constant volatility function upwards.
+
+
+We now focus on the simulated results in \autoref{fig:ConstVol}.
+
+First, we must note that the simulation performs extremely well for strikes near $S_0$. Notice that the simulated function (dot-dashed blue line) perfectly follows the constant volatility theoretical result (full red line) in this region, with the confidence intervals clearly indistinguishable from the mean. This suggests that the simulation is working as expected.
+
+Secondly, we notice that in the case of the earliest maturity (i.e. 21 days), for strikes much larger than $S_0$ (e.g. $K=1.5S_0$), the simulated implied volatilities go to zero, even though they should remain constant. The reason behind this has already been discussed in subsection \ref{subsection:Pricing options from simulations} and relates to the very, very small number of paths that reach such high strikes and end up contributing to the option price (which is then converted to an implied volatility). For the case of strike $K=1.5S_0$, and maturity $T=21$ days, the number of paths that reach the strike is approximately 0.25 - sometimes a single path is able to surpass this threshold, but usually none do. This problem is not observed for the remaining maturities for the simple reason that, because they are given more time to evolve, more paths are able to reach these high strikes.
+
+Finally we must discuss the large deviation for strikes lower than $S_0$, happening for all maturities. To explain this we require the information presented in \autoref{fig:ImpVolPrice}, relating the implied volatility with the option's market price. We saw that the implied volatility was extremely sensitive to prices very close to their lower bounds: $S_0-Ke^{-rT}$. If we now look, for example, at the market price of the option with strike $K=\SI{0.5}{\EUR}$ and maturity $T=21$ days, which is $C=\SI{0.500013}{\EUR}$, and we compare it with the lower bound of this price, $S_0-Ke^{-rT}=\SI{0.5}{\EUR}$, we can clearly see that they are extremely close, with a difference of only $0.0026\%$. We can then conclude that, in this case, we are in the extremely high sensitivity region of the functions shown in \autoref{fig:ImpVolPrice}.
+The Monte Carlo pricer behaves very well for such low strikes because a very large number of paths contribute to the option price (the opposite of what we saw before for high strikes). Despite this, because there will always be some noise associated with the simulation, the simulated price is sure to present some very slight variation, which is enough to cause some of the simulated implied volatilities to go to zero (or to increase), explaining the large confidence intervals.
+
+These two last problems are not inherent to the constant volatility model. Indeed they will be observed, to some extent, in all the models we will show next.
+
+
+
+
+\newpage
+
+\subsection{Coupled Fits}
+We now present the results of fitting a constant volatility function all the implied volatility data, regardless of maturity.
+
+\begin{figure}[H]
+  \begin{subfigmatrix}{2}
+    \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol12.png}}
+    \subfigure[$T=42$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol22.png}}
+    \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol32.png}}
+    \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol42.png}}
+  \end{subfigmatrix}
+  \caption[Implied volatility functions fitted simultaneously to the implied volatility data for different maturities under constant volatility model, plotted with their respective Monte Carlo simulated functions along with their confidence intervals.]{Implied volatility functions (red lines) fitted \emph{simultaneously} to the implied volatility data (crosses) for different maturities under constant volatility model, plotted with their respective Monte Carlo simulated functions (light-blue dot-dashed lines) along with their 90\% confidence intervals (blue region).}
+  \label{fig:ConstVol2}
+\end{figure}
+
+
+\begin{table}[H]
+    \centering
+        \renewcommand{\arraystretch}{0.8}
+\begin{tabular}{@{}lr@{}}
+\toprule
+ $\sigma_{imp,\mathrm{mdl}}$ ($\SI{}{\year\tothe{-1/2}}$) & Cost \\ \midrule
+0.2838 & 0.124760 \\
+\bottomrule
+\end{tabular}
+  \caption[Fitted parameters for all maturities (fitted simultaneously) under constant volatility model.]{Fitted parameters for all maturities (fitted simultaneously) under constant volatility model.}
+  \label{tab:ConstVolPar2}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{0.8}
+\begin{tabular}{@{}ccccSccS@{}}
+\toprule
+$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
+\multirow{7}{*}{21} & 0.50 & 0.7082 & \multirow{7}{*}{0.2838} & 59.9 & 0.50001 & 0.50000 & 0.003 \\
+ & 0.75 & 0.4632 &  & 38.7 & 0.25065 & 0.25000 & 0.3 \\
+ & 0.90 & 0.2989 &  & 5.0 & 0.10439 & 0.10364 & 0.7 \\
+ & 1.00 & 0.2425 &  & 17.0 & 0.02792 & 0.03267 & 17.0 \\
+ & 1.10 & 0.2314 &  & 22.6 & 2.42$\times10^{-3}$ & 5.19$\times10^{-3}$ & 114.4 \\
+ & 1.25 & 0.2699 &  & 5.1 & 5.34$\times10^{-5}$ & 8.98$\times10^{-5}$ & 67.9 \\
+ & 1.50 & 0.3433 &  & 17.3 & 5.75$\times10^{-7}$ & 0.07$\times10^{-7}$ & 98.8 \\\midrule
+\multirow{7}{*}{42} & 0.50 & 0.5556 & \multirow{7}{*}{0.2838} & 48.9 & 0.50005 & 0.50000 & 0.01 \\
+ & 0.75 & 0.3876 &  & 26.8 & 0.25186 & 0.25021 & 0.7 \\
+ & 0.90 & 0.2824 &  & 0.5 & 0.11069 & 0.11084 & 0.1 \\
+ & 1.00 & 0.2461 &  & 15.3 & 0.04006 & 0.04620 & 15.3 \\
+ & 1.10 & 0.2354 &  & 20.6 & 8.52$\times10^{-3}$ & 14.02$\times10^{-3}$ & 64.5 \\
+ & 1.25 & 0.2525 &  & 12.4 & 6.21$\times10^{-4}$ & 13.36$\times10^{-4}$ & 115.3 \\
+ & 1.50 & 0.2968 &  & 4.4 & 1.58$\times10^{-5}$ & 0.83$\times10^{-5}$ & 47.6 \\\midrule
+\multirow{7}{*}{63} & 0.50 & 0.4789 & \multirow{7}{*}{0.2838} & 40.7 & 0.50009 & 0.50000 & 0.02 \\
+ & 0.75 & 0.3452 && 17.8 & 0.25296 & 0.25097 & 0.8 \\
+ & 0.90 & 0.2658 && 6.8 & 0.11533 & 0.11786 & 2.2 \\
+ & 1.00 & 0.2401 && 18.2 & 0.04787 & 0.05656 & 18.2 \\
+ & 1.10 & 0.2330 && 21.8 & 0.01421 & 0.02227 & 56.7 \\
+ & 1.25 & 0.2438 && 16.4 & 1.80$\times10^{-3}$ & 3.93$\times10^{-3}$ & 118.2 \\
+ & 1.50 & 0.2749 && 3.2 & 7.66$\times10^{-5}$ & 10.87$\times10^{-5}$ & 42.0 \\\midrule
+\multirow{7}{*}{126} & 0.50 & 0.3878 & \multirow{7}{*}{0.2838} & 26.8 & 0.50035 & 0.50001 & 0.1 \\
+ & 0.75 & 0.2954 && 3.9 & 0.25694 & 0.25589 & 0.4 \\
+ & 0.90 & 0.2444 && 16.1 & 0.12716 & 0.13611 & 7.0 \\
+ & 1.00 & 0.2295 && 23.7 & 0.06467 & 0.07992 & 23.6 \\
+ & 1.10 & 0.2269 && 25.1 & 0.02862 & 0.04317 & 50.8 \\
+ & 1.25 & 0.2340 && 21.3 & 7.57$\times10^{-3}$ & 14.99$\times10^{-3}$ & 98.0 \\
+ & 1.50 & 0.2521 && 12.6 & 8.58$\times10^{-4}$ & 19.67$\times10^{-4}$ & 129.3 \\
+\bottomrule
+\end{tabular}
+  \caption[Comparison between fitted results (fitted simultaneously) and original data under constant volatility model.]{Comparison between fitted functions (fitted simultaneously) and original data under constant volatility model.}
+  \label{tab:CV2}
+\end{table}
+
 
 
 
@@ -164,9 +272,9 @@ $T_{min}$(days) & $T_{max}$(days) & $\Delta T$(days) & $K_{min}$($\EUR$) & $K_{m
 \begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}lccccccr@{}}
+\begin{tabular}{@{}ccccSccS@{}}
 \toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) &$\mathrm{Error}_{\sigma}(\%)$&$C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& $\mathrm{Error}_{C}(\%)$\\ \midrule
+$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
 \multirow{7}{*}{21} & 0.50 & 0.7082 & 0.2319 & 67.3 & 0.50001 & 0.50000 & 0.003 \\
  & 0.75 & 0.4632 & 0.3740 & 19.3 & 0.25065 & 0.25011 & 0.2 \\
  & 0.90 & 0.2989 & 0.2845 & 4.8 & 0.10439 & 0.10368 & 0.7 \\
@@ -239,10 +347,10 @@ The influence of each parameter of the Static SABR model on the shape of the imp
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSABR1.eps}}
-    \subfigure[$T=42$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSABR2.eps}}
-    \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSABR3.eps}}
-    \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSABR4.eps}}
+    \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSABR1.png}}
+    \subfigure[$T=42$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSABR2.png}}
+    \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSABR3.png}}
+    \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSABR4.png}}
   \end{subfigmatrix}
   \caption[Implied volatility functions fitted independently to the implied volatility data for different maturities under the static SABR model, plotted with their respective Monte Carlo simulated functions along with their 90\% confidence intervals.]{Implied volatility functions (red lines) fitted independently to the implied volatility data (crosses) for different maturities under the static SABR model, plotted with their respective Monte Carlo simulated functions (light-blue dot-dashed lines) along with their 90\% confidence intervals (blue region).}
   \label{fig:SS}
@@ -269,9 +377,9 @@ The influence of each parameter of the Static SABR model on the shape of the imp
 \begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}lccccccr@{}}
+\begin{tabular}{@{}ccccSccS@{}}
 \toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) &$\mathrm{Error}_{\sigma}(\%)$&$C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& $\mathrm{Error}_{C}(\%)$\\ \midrule
+$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
 \multirow{7}{*}{21} & 0.50 & 0.7082 & 0.7209 & 1.8 & 0.50001 & 0.50002 & 0.001 \\
 &0.75 & 0.4632 & 0.4428 & 4.4 & 0.25065 & 0.25047 & 0.1 \\
 &0.90 & 0.2989 & 0.3105 & 3.9 & 0.10439 & 0.10501 & 0.6 \\
@@ -342,10 +450,10 @@ The influence of each parameter of the Heston model on the shape of the implied 
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{H1.eps}}
-    \subfigure[$T=42$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{H2.eps}}
-    \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{H3.eps}}
-    \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{H4.eps}}
+    \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{H1.png}}
+    \subfigure[$T=42$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{H2.png}}
+    \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{H3.png}}
+    \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{H4.png}}
   \end{subfigmatrix}
   \caption[Implied volatility functions fitted simultaneously to the implied volatility data for different maturities under the Heston model, plotted with their respective Monte Carlo simulated functions along with their 90\% confidence intervals.]{Implied volatility functions (red lines) fitted simultaneously to the implied volatility data (crosses) for different maturities under the Heston model, plotted with their respective Monte Carlo simulated functions (light-blue dot-dashed lines) along with their 90\% confidence intervals (blue region).}
   \label{fig:H}
@@ -356,8 +464,8 @@ The influence of each parameter of the Heston model on the shape of the implied 
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{HS.eps}}
-    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{HSC.eps}}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{HS.png}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{HSC.png}}
   \end{subfigmatrix}
     \caption[Implied volatility surface and corresponding contour plot of the function fitted simmultaneously to the implied volatility data for different maturities under the Heston model, plotted against the original market data and the fitted functions shown in \autoref{fig:H}.]{Implied volatility surface (left) and corresponding contour plot (right) of the function fitted simmultaneously to the implied volatility data for different maturities under the Heston model, plotted against the original market data (blue circles) and the fitted functions shown in \autoref{fig:H} (red lines).}\label{fig:HS}
 \end{figure}   
@@ -365,8 +473,8 @@ The influence of each parameter of the Heston model on the shape of the implied 
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{HSSim.eps}}
-    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{HSCSim.eps}}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{HSSim.png}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{HSCSim.png}}
   \end{subfigmatrix}
     \caption[Implied volatility surface and corresponding contour plot of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:HR}, under the Heston model, plotted against the original market data and the simulated functions shown in \autoref{fig:H}.]{Implied volatility surface (left) and corresponding contour plot (right) of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:HR}, under the dynamic SABR model, plotted against the original market data (blue circles) and the simulated functions shown in \autoref{fig:H} (red dot-dashed lines).}\label{fig:HSSim}
 \end{figure} 
@@ -390,9 +498,9 @@ $\kappa$ & $\overline{\nu}$ & $\nu_0$ & $\rho$ & $\eta$ & Cost \\ \midrule
 \begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}lccccccr@{}}
+\begin{tabular}{@{}ccccSccS@{}}
 \toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) &$\mathrm{Error}_{\sigma}(\%)$&$C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& $\mathrm{Error}_{C}(\%)$\\ \midrule
+$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
 \multirow{7}{*}{21} & 0.50 & 0.7082 & 0.6886 & 2.8 & 0.50001 & 0.50001 & 0.001 \\
  & 0.75 & 0.4632 & 0.4604 & 0.6 & 0.25065 & 0.25062 & 0.01 \\
  & 0.90 & 0.2989 & 0.3216 & 7.6 & 0.10439 & 0.10563 & 1.2 \\
@@ -442,10 +550,10 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 \section{Dynamic SABR Model}
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{DS1.eps}}
-    \subfigure[$T=42$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{DS2.eps}}
-    \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{DS3.eps}}
-    \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{DS4.eps}}
+    \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{DS1.png}}
+    \subfigure[$T=42$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{DS2.png}}
+    \subfigure[$T=63$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{DS3.png}}
+    \subfigure[$T=126$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{DS4.png}}
   \end{subfigmatrix}
   \caption[Implied volatility functions fitted simultaneously to the implied volatility data for different maturities under the dynamic SABR model, plotted with their respective Monte Carlo simulated functions along with their 90\% confidence intervals.]{Implied volatility functions (red lines) fitted simultaneously to the implied volatility data (crosses) for different maturities under the dynamic SABR model, plotted with their respective Monte Carlo simulated functions (light-blue dot-dashed lines) along with their 90\% confidence intervals (blue region).}
   \label{fig:DS}
@@ -454,8 +562,8 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{DSS.eps}}
-    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{DSSC.eps}}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{DSS.png}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{DSSC.png}}
   \end{subfigmatrix}
     \caption[Implied volatility surface and corresponding contour plot of the function fitted simmultaneously to the implied volatility data for different maturities under the dynamic SABR model, plotted against the original market data and the fitted functions shown in \autoref{fig:DS}.]{Implied volatility surface (left) and corresponding contour plot (right) of the function fitted simmultaneously to the implied volatility data for different maturities under the dynamic SABR model, plotted against the original market data (blue circles) and the fitted functions shown in \autoref{fig:DS} (red lines).}\label{fig:DSS}
 \end{figure}   
@@ -464,8 +572,8 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{DSSSim.eps}}
-    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{DSSCSim.eps}}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{DSSSim.png}}
+    \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{DSSCSim.png}}
   \end{subfigmatrix}
     \caption[Implied volatility surface and corresponding contour plot of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:DSR}, under the dynamic SABR model, plotted against the original market data and the simulated functions shown in \autoref{fig:DS}.]{Implied volatility surface (left) and corresponding contour plot (right) of the function simulated using the Monte Carlo procedure with the fitted parameters shown in \autoref{tab:DSR}, under the dynamic SABR model, plotted against the original market data (blue circles) and the simulated functions shown in \autoref{fig:DS} (red dot-dashed lines).}\label{fig:DSSSim}
 \end{figure} 
@@ -488,9 +596,9 @@ $\alpha$ & $\beta$ & $\rho_0$ & $a$ & $\nu_0$ & $b$ & Cost \\ \midrule
 \begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}lccccccr@{}}
+\begin{tabular}{@{}ccccSccS@{}}
 \toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) &$\mathrm{Error}_{\sigma}(\%)$&$C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& $\mathrm{Error}_{C}(\%)$\\ \midrule
+$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
 \multirow{7}{*}{21} & 0.50 & 0.7082 & 0.7625 & 7.7 & 0.50001 & 0.50003 & 0.004 \\
  & 0.75 & 0.4632 & 0.3765 & 18.7 & 0.25065 & 0.25012 & 0.2 \\
  & 0.90 & 0.2989 & 0.2843 & 4.9 & 0.10439 & 0.10367 & 0.7 \\
@@ -534,8 +642,6 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-1/2}}$) 
 
 $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 
-\hl{should we include the market values in all comparison tables?}
-
 \hl{put units in fitted parameters}
 
 \hl{is implied vol measured in yr-1/2}
@@ -554,4 +660,31 @@ $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 
 \hl{in the results section, the dashed lines look not-dashed}
 
-\hl{align values in tables}
+
+\hl{mention the oscillating errors in heston due to integration}
+
+\hl{mention noise in Monte Carlo far in/far out of the money - because very few stocks reach the strike, we are averaging over a very limited number of paths, which is very noisy}
+
+\hl{save files as .png}
+
+\hl{change labels from "simulated function" to something else}
+
+\hl{sabr negative prices}
+
+\hl{update coupled const vol table}
+
+\hl{mention how we convert prices in the Monte Carlo pricer into implied vols}
+
+\hl{mention the sensitivity of implied vol to the prices}
+
+\hl{monte carlo is noisy}
+
+\hl{explain the effect of barrier level on the price of barrier options}
+
+\hl{mention why noise in mc pricer will be problematic when option price is near the lower bound and why it only happens for K lower than S0 (because for K above S0, the bound is 0)}
+
+\hl{mention the small percentage of points that reach the very high strike price of 1.5 (see MATLAB folder)}
+
+\hl{!!!mention the implied vol sensitivity to option price but changing maturity.}
+
+\hl{barriers might be broken in between time steps in the simulations. because we are discretizing the time and not using continuous time, this introduces an error}

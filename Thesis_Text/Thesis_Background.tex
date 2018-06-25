@@ -42,7 +42,7 @@ American options grant the right to buy/sell (call/put) the underlying asset at 
 \end{equation}
 \noindent where we now define $t^*$ (with $0\leq t^*\leq T$) as the exercise date.
 
-It should be obvious that the price of American options will always be greater or equal to the prices of similar European options. The reason behind this is the fact that, with European contracts our exercise decision is restricted to a single day, whereas with American options we have that same day as well as several others to make this choice.
+It should be obvious that the price of American options will always be greater than or equal to the prices of similar European options. The reason behind this is the fact that with European contracts our exercising decision is restricted to a single day, whereas with American options we have that same day as well as several others to make this choice.
 
 
 \subsection{Exotic Options}
@@ -50,7 +50,7 @@ While European and American options are, by far, the most traded types, \emph{Ex
 
 
 \subsubsection{Barrier Options}
-A \emph{Barrier option} behaves similarly to a European option with the difference that it only becomes active (or void) if the value of its underlying asset reaches a particular value, called the \emph{barrier level}, $B$, at any point in time until the option's maturity.
+A \emph{Barrier option} behaves similarly to a European option with the difference that it only becomes active (or becomes worthless) if the value of its underlying asset reaches a particular value, called the \emph{barrier level}, $B$, at any point in time until the option's maturity.
 
 There are four main types of Barrier option:
 \begin{itemize}
@@ -63,9 +63,7 @@ There are four main types of Barrier option:
 Because all of the previously described Barrier option types are handled similarly, we can easily adapt the models from one type to another. Thus, for simplicity, we will henceforth assume that all Barrier options are of the up-and-in type.
 
 Using the up-and-in Barrier option type as an example, if the asset price, $S(t)$, remains below the barrier level $B$ throughout the whole option duration, even if at the maturity the asset's value is higher than the strike price, the option's payoff would nonetheless be zero. On the contrary, if this threshold was surpassed at any point during this period, the option's payoff would be similar to that of its European equivalent.
-
-
-The payoff function of this type of option is given by
+The payoff function of this type of option is therefore given by
 \begin{equation}\label{barrier}
 \begin{split}
 &\text{Payoff}_{Barr,\ call}(K,T)=\begin{cases} 
@@ -80,12 +78,12 @@ The payoff function of this type of option is given by
 \end{equation}
 
 
-Though Exotic options are used by banks and investors everyday, we will mainly focus on European options: not only are these the most common types of option traded, as we mentioned before, but data is also readily available for many different maturities and strike prices, making European options ideal for model calibration and validation.
+Though Exotic options are used by banks and investors everyday, we will mainly focus on European options: not only are these the most common type of option traded, as we mentioned before, but data is also readily available for many different maturities and strike prices, making European options ideal for model calibration and validation, which will be the main goal of this thesis.
 Barrier options will nonetheless be implemented and studied, though no benchmark will be used to verify the models' validity in this case.
 
 
 \section{Option Prices and Payoffs}
-It is important to emphasize the difference between an option's payoff and its profit for investors. Because options grant the right to buy/sell some asset, no investors would exercise an option if this action was disadvantageous to them (i.e. negative payoff value). Thus, the payoff of an option is always positive (it can also, obviously, be zero). This might sound like an arbitrage possibility (i.e. the chance of making profit without risk - which is illegal), but in reality options have a price that investors have to pay in order to acquire them. This means that even if the option's payoff is positive, if this value is lower than the price an investor paid to buy the option, that investor will actually lose money. The profit of an option is thus the difference between its payoff and its price, which can be negative.
+It is important to emphasize the difference between an option's payoff and its profit for investors. Because options grant the right to buy/sell some asset, no investors would exercise an option if this action was disadvantageous to them (i.e. negative payoff value). Thus, the payoff of an option is always positive (it can also, obviously, be zero). This might sound like an arbitrage possibility (i.e. the chance of making profit without risk), but in reality options have a price that investors have to pay in order to acquire them. This means that even if the option's payoff is positive, if this value is lower than the price an investor paid to buy the option, that investor will actually lose money. The profit of an option is thus the difference between its payoff and its price, which can be negative.
 With this concept in mind, we can price options by setting their expected profit to be the same as a risk-neutral investment, (e.g. bank deposit). The price of an option can thus be deduced as it's expected future payoff, discounted back to the present
 \begin{equation}
 \text{Price}(K,t^*)=e^{-rt^*}\mathbb{E}\left[\text{Payoff}(K,t^*)\right],
@@ -151,7 +149,7 @@ d\Pi&=-dV+\pdv{V}{S}dS\\
 \end{equation}
 
 Because the portfolio's value doesn't change with the Brownian motion $W$, it follows that it is \emph{riskless}.
-To avoid any arbitrage possibilities (i.e. making profit without risk, which is illegal), the value of this portfolio must be the same as a risk-free asset. The value of a portfolio with such an asset would change with time as
+To avoid any arbitrage possibilities (i.e. making profit without risk, which is usually impossible), the value of this portfolio must be the same as a risk-free asset. The value of a portfolio with such an asset would change with time as
 \begin{equation}\label{dpi2}
 d\Pi=r\Pi dt.
 \end{equation}
@@ -186,22 +184,31 @@ With this result, pricing options is fairly straightforward - we simply need to 
 The results published originally by Black \textit{et al.} state that, at time $t$, call and put options can be valued as
 \begin{equation}\label{callputBS}
 \begin{split}
-&C(S(t),t)=N(d_1)S(t)-N(d_2)Ke^{-r(T-t)};\\
-&P(S(t),t)=-N(-d_1)S(t)+N(-d_2)Ke^{-r(T-t)},
+&C=N(d_1)S_0-N(d_2)Ke^{-rT};\\
+&P=-N(-d_1)S_0+N(-d_2)Ke^{-rT},
 \end{split}
 \end{equation}
 \noindent where $N(\cdot)$ is the cumulative distribution function of the standard normal distribution and where $d_1$, $d_2$ are given by
 \begin{equation}\label{d1d2}
 \begin{split}
-&d_1=\frac{1}{\sigma\sqrt{T-t}}\left[\ln\left(\frac{S_t}{K}\right)+\left(r+\frac{\sigma^2}{2}\right)(T - t)\right];\\
-&d_2=d_1-\sigma\sqrt{T-t}.\\
+&d_1=\frac{1}{\sigma\sqrt{T}}\left[\ln\left(\frac{S_0}{K}\right)+\left(r+\frac{\sigma^2}{2}\right)T\right];\\
+&d_2=d_1-\sigma\sqrt{T}.\\
 \end{split}
 \end{equation}
 \noindent This is a very important result that can be used to precisely price European options, so long as all the parameters are exactly known (which never occurs).
 
 
-As a final consideration, from eq.\eqref{callputBS} we can derive the relationship between $C(S,t)$ and $P(S,t)$, known as the \emph{put-call parity}
+From eq.\eqref{callputBS} we can also derive the relationship between $C$ and $P$, known as the \emph{put-call parity}
 \begin{equation}
-C(S(t),t)=S(t)-Ke^{-r(T-t)}+P(S(t),t).
+C=S_0-Ke^{-rT}+P.
 \end{equation}
 \noindent Because of this duality, we can always easily obtain the prices of put options from the prices of call options with the same underlying asset, maturity and strike. For this reason, some of the results presented in later sections only apply to call options, though we can just as easily find their put option equivalent.
+
+
+Finally, we can obtain a lower bound for the prices of European call and put options. Using some non-arbitrage arguments it can be shown that
+\begin{equation}\label{bound}
+\begin{split}
+C&\geq \max\left[S_0-Ke^{-rT}\right];\\
+P&\geq \max\left[Ke^{-rT}-S_0\right].
+\end{split}
+\end{equation}

@@ -41,9 +41,9 @@ In other words, it would be the stock price volatility that the seller/buyer of 
 
 Because eq.\eqref{callputBS} is not invertible, we need to use some numerical procedure (e.g. Newton's method) to find the value of implied volatility that matches the market and model prices, i.e. we must find, numerically, the solution to the equation
 \begin{equation}\label{impvolform}
-C(\sigma_{imp},S(t),t)-C_{\mathrm{mkt}}=0,
+C(\sigma_{imp})-C_{\mathrm{mkt}}=0,
 \end{equation}
-\noindent where $C(\sigma_{imp},\cdot)$ corresponds to the result of eq.\eqref{callputBS} using $\sigma_{imp}$ as (implied) volatility and $C_{\mathrm{mkt}}$ to the price of the option observed in the market.
+\noindent where $C(\sigma_{imp})$ corresponds to the result of eq.\eqref{callputBS} using $\sigma_{imp}$ as (implied) volatility and $C_{\mathrm{mkt}}$ to the price of the option observed in the market.
 
 Because eq.\eqref{callputBS} is monotonic w.r.t. the volatility, we can obtain the implied volatility of an option from its price and vice versa. This duality is so fundamental that investors often disclose options by providing their implied volatility instead of their price~\cite{Wilmott}, as is indeed the case for the data we will use later.
 
@@ -73,6 +73,17 @@ The dependence of the implied volatility on the maturity date is more complex, b
 It can also be shown that the implied volatility is the same for calls and puts~\cite{Hull}, though the causes of the volatility smile/skew for put options are the opposite of the ones described before, for calls.
 
 
+
+We saw in eq.\eqref{impvolform} that the implied volatility depends on the option's market price. As we will see in later sections, it is quite important to visualize this relation. Therefore we present in \autoref{fig:ImpVolPrice} the implied volatility functions w.r.t. the option's market price for three different strike prices.
+
+
+\begin{figure}[!htb]
+    \centering
+      \includegraphics[width=.65\columnwidth]{ImpVolC.eps}
+      \caption[Relationship between the implied volatility and the price of a call option.]{Relationship between the implied volatility and the price of a call option. The parameters used were $T=21$ days, interest rate $r=\SI{0.01}{\per\year}$ and initial stock price $S_0=\SI{1}{\EUR}$. The stike prices are $K=\SI{0.9}{\EUR}$, $K=\SI{0.75}{\EUR}$ and $K=\SI{0.5}{\EUR}$ for the red full line, the blue dot-dashed line and the green dot-dashed line, respectively.}\label{fig:ImpVolPrice}
+    \end{figure}
+
+We can see that the implied volatility goes to zero extremely fast when we approach the lower bound of the call option's price, $S_0-Ke^{-rT}$ (from eq.\eqref{bound}) - the lower bounds for the option prices with strikes $K=\SI{0.9}{\EUR}$, $K=\SI{0.75}{\EUR}$ and $K=\SI{0.5}{\EUR}$ are, respectively, $C=\SI{0.1007}{\EUR}$, $C=\SI{0.2506}{\EUR}$ and $C=\SI{0.5004}{\EUR}$). We can also observe that this property is more pronounced for lower strikes. This observation will become very important in later sections.
 
 
 
@@ -124,8 +135,9 @@ Taking the first derivative of this result with respect to the strike price $K$,
 \end{equation}
 The second derivative results in
 \begin{equation}\label{d2cdk2}
-\pdv{^2C}{K^2}=e^{-r(T-t)}p(S,t,S',T).
+\pdv{^2C}{K^2}=e^{-r(T-t)}p(S,t,K,T).
 \end{equation}
+\noindent assuming $p(S,t,\infty,T)=0$.
 
 We now make a brief detour to derive the Fokker-Planck equation (following the procedure shown in \cite{Wilmott}), which we require for the next steps.
 We begin by assuming a trinomial model: at each time step, our stock price can only increase or decrease by an amount $dS$, with probabilities $\phi^+$ and $\phi^-$, respectively, or remain the same, with probability $(1-\phi^+-\phi^-)$.
@@ -162,7 +174,7 @@ p(S,t,S',T)=\phi^-p(S'+dS,t-dt,S',T)+(1-\phi^+-\phi^-)(S',t-dt,S',T)+\phi^+p(S'-
 p(S,t,S',T)=&\ \phi^-\left(p(S',t,S',T)+dS\frac{dp}{dS'}+\frac{1}{2}(dS)^2\frac{d^2p}{dS^2}-dt\frac{dp}{dt'}\right)\\
 &+(1-\phi^+-\phi^-)\left(p(S',t,S',T)-dt\frac{dp}{dt'}\right)\\
 &+\phi^+\left(p(S',t,S',T)-dS\frac{dp}{dS'}+\frac{1}{2}(dS)^2\frac{d^2p}{dS^2}-dt\frac{dp}{dt'}\right)\\
-=&\frac{1}{2}\frac{dt}{dS^2}\sigma^2S^2(dS)^2\frac{d^2p}{dS^2}-\frac{dt}{dS^2}rS(dS)^2\frac{dp}{dS},
+=&\frac{1}{2}\frac{dt}{dS'^2}\sigma^2S'^2(dS)^2\frac{d^2p}{dS'^2}-\frac{dt}{dS'^2}rS'(dS)^2\frac{dp}{dS'},
 \end{split}
 \end{equation}
 \noindent from which we can derive the famous Fokker-Planck equation (with rather sloppy notation) as
@@ -178,7 +190,7 @@ From eq. \ref{deriv0} we can easily derive
 \end{equation}
 Using eq. \ref{FokkerPlanck}, we can transform this relation into
 \begin{equation}
-\pdv{C}{T}=-rC+e^{-r(T-t)}\int_K^\infty(S'-K)\left(\frac{1}{2}\sigma^2\pdv{^2(S'^2p)}{S'^2}-r\pdv{(S'p)}{S'}\right)dS'.
+\pdv{C}{T}=-rC+e^{-r(T-t)}\int_K^\infty(S'-K)\left(\frac{1}{2}\pdv{^2(\sigma^2S'^2p)}{S'^2}-r\pdv{(S'p)}{S'}\right)dS'.
 \end{equation}
 
 We now split the terms in the integral to evaluate them independently. We integrate the second term by parts as
@@ -194,21 +206,23 @@ We now split the terms in the integral to evaluate them independently. We integr
 Turning now to the first term of the integral, we integrate twice by parts
 \begin{equation}
 \begin{split}
-\int_K^\infty(S'-K)\left(\frac{1}{2}\sigma^2\pdv{^2(S'^2p)}{S'^2}\right)dS'&=\frac{1}{2}\sigma^2(S'-K)\pdv{(S'^2p)}{S'}\bigg|_{S'=K}^\infty-\frac{1}{2}\sigma^2\int_K^\infty\left(\pdv{(S'^2p)}{S'}\right)dS'\\
-&=\frac{1}{2}\sigma^2S'^2p\big|_{S'=K}^\infty=\frac{1}{2}\sigma^2K^2p\\
-&=\frac{1}{2}e^{r(T-t)}\sigma^2K^2\pdv{^2C}{K^2},
+\int_K^\infty(S'-K)\left(\frac{1}{2}\pdv{^2(\sigma^2S'^2p)}{S'^2}\right)dS'&=\frac{1}{2}(S'-K)\pdv{(\sigma^2S'^2p)}{S'}\bigg|_{S'=K}^\infty-\frac{1}{2}\int_K^\infty\left(\pdv{(\sigma^2S'^2p)}{S'}\right)dS'\\
+&=\frac{1}{2}\sigma^2S'^2p\big|_{S'=K}^\infty=\frac{1}{2}\sigma^2(K,T)K^2p(S,t,K,T)\\
+&=\frac{1}{2}e^{r(T-t)}\sigma^2(K,T)K^2\pdv{^2C}{K^2},
 \end{split}
 \end{equation}
 \noindent where in the last step we used eq.\eqref{d2cdk2} and again assumed that $p$ goes to zero sufficiently fast.
 
 Collecting all the terms, we obtain
 \begin{equation}
-\pdv{C}{T}=\frac{1}{2}\sigma^2K^2\pdv{^2C}{K^2}-rK\pdv{C}{K}.
+\pdv{C}{T}=\frac{1}{2}\sigma^2(K,T)K^2\pdv{^2C}{K^2}-rK\pdv{C}{K}.
 \end{equation}
 \noindent from which, by rearranging all the terms and applying the variable change $\sigma(K,T)\implies \sigma(S,t)$, we get
 \begin{equation}
 \sigma(S,t)=\sqrt{\frac{\displaystyle\pdv{C}{T}+rS\pdv{C}{K}}{\displaystyle\frac{1}{2}S^2\pdv{^2C}{K^2}}}.
 \end{equation}
+\noindent assuming all the derivatives are evaluated at $K=S$ and $T=t$.
+
 \end{proof}
 
 As can be seen, we need to differentiate the option prices with respect to their strikes and maturities. To achieve this, we need first to gather, from the market, a large number of prices for options with different maturities and strikes. We then implement some interpolation on these values to obtain an option price surface (with $K$ and $T$ as variables). Finally, we calculate the gradients of this interpolated surface and input them into eq.\eqref{dupire} to obtain the local volatility surface.
@@ -474,10 +488,10 @@ The parameters $\beta$ and $\nu$ correspond, respectively to the \emph{skewness}
 
 
 
-In the original article, the authors claim that $\beta$ can be fitted from historical market data, but usually investors choose this value heuristically, depending on the type of assets traded. Typical values used are $\beta=1$ (stochastic lognormal model), used for foreign exchange options, $\beta=0$ (stochastic normal model), typical for interest rate options and $\beta=0.5$ (stochastic CIR model), also common for interest rate options.
-We will leave this parameter free upon implementation, assuming no heuristics.
+In the original article, the authors claim that $\beta$ can be fitted from historical market data, but usually investors choose this value heuristically, depending on the type of assets traded. Typical values used are $\beta=1$ (stochastic lognormal model), used for foreign exchange options, $\beta=0$ (stochastic normal model), typical for interest rate options and $\beta=0.5$ (stochastic CIR model), also common for interest rate options~\cite{Hagan}.
+We will leave this parameter free when fitting the model to the market data, assuming no heuristics.
 
-One of the main problems with the static SABR model is the fact that, unlike the Heston model, the stochastic volatility process is not mean-reverting. This shortcoming enables the volatility to evolve unrestrictedly which is problematic - it may become negative, which is clearly absurd, or it may become extremely large, which is troublesome. Labordère~\cite{Labordere} proposed a mean-reverting correction to static SABR, but we will study the original model by Hagan \textit{et al.}, as it is more commonly used.
+One of the main problems with the static SABR model is the fact that, unlike the Heston model, the stochastic volatility process is not mean-reverting. This shortcoming enables the volatility to evolve unrestrictedly which is problematic - it may become negative, which is clearly absurd, or it may become extremely large, which is troublesome. Labordère~\cite{Labordere} proposed a mean-reverting correction to static SABR, but we will study the original model by Hagan \textit{et al.}, as it is more commonly used. We should still note that while negative volatilities make no sense in the real world, by examining eq.\eqref{dF} we can see that this should pose no problem upon simulations, since this effect would be equivalent to inverting the Brownian motion process (i.e. $dW\implies-dW$), which is obviously allowed.
 
 One of the main reasons why static SABR is so popular is due to its quasi-closed-form solutions that enable us to quickly find the implied volatilities of options priced under this model. With the corrections done by Oblój on Hagan's original formula~\cite{Obloj}, it can be shown that these implied volatilities are given by
 \begin{equation}\label{sabr}
@@ -493,7 +507,7 @@ z=\frac{\nu\left(f^{1-\beta}-K^{1-\beta}\right)}{\alpha(1-\beta)},
 \begin{equation}
 x(z)=\log\left\{\frac{\sqrt{1-2\rho z+z^2}+z-\rho}{1-\rho}\right\},
 \end{equation}
-\noindent where we have used $f=S_0e^{rT}$.
+\noindent where we have used $f=S_0e^{rT}$. The proof of this solution is quite lengthy and will not be replicated here, but it can be found in Hagan~\cite{Hagan}.
 
 Similarly to the Heston model, we again need to find the set of parameters that minimize the difference between the implied volatilities obtained from the model and those obtained from market data. This calibration procedure will also be studied in Chapter \ref{chapter:implementation}.
 

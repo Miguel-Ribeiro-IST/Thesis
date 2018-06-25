@@ -92,16 +92,21 @@ In \autoref{fig:Steps} we can see how smaller subintervals better resemble a tru
 \label{subsection:Pricing options from simulations}
 To price options using the Monte Carlo algorithm, we generate $M$ paths by recursively calculating $\{S_i(t),\ \ i=1,\ldots,M\}$, using either of the discretization methods described before.
 
-When the stock price at the maturity, $S_i(T)$, is obtained for all paths, the option's payoff for each path is calculated from eqs.\eqref{callput}-\eqref{barrier}. We then average all these results and discount them back to the present, obtaining the option's value
-\begin{equation}
+When the stock price at the maturity, $S_i(T)$, is obtained for all paths, the option's payoff for each path is calculated using eqs.\eqref{callput}-\eqref{barrier}. We then average all these results and discount them back to the present, obtaining the option's value
+\begin{equation}\label{mcpricer}
 \begin{split}
 &C(K,T)=e^{-rT}\frac{1}{M}\sum_{i=1}^M\text{Payoff}_{call}(K,T);\\
 &P(K,T)=e^{-rT}\frac{1}{M}\sum_{i=1}^M\text{Payoff}_{put}(K,T),
 \end{split}
 \end{equation}
-\noindent where $\text{Payoff}_{\cdot}(K,T)$ denotes the payoff function of the chosen option type (e.g. European, Asian).
+\noindent where $\text{Payoff}_{\cdot}(K,T)$ denotes the payoff function of the chosen option type (e.g. European, Barrier, ...).
  
- 
+
+Despite its versatility, the Monte Carlo method can be a very noisy estimator for the price of options, in particular for options with very high strike prices. To understand this problem, notice that the payoff function of European options is zero for stocks below the strike. If we have a very large strike, very few of the simulated paths will actually cross the strike at maturity and contribute to the calculation of the option's price (all the other paths will contribute with a payoff of zero). The averaging procedure shown in eq.\eqref{mcpricer} will therefore be performed on an extremely small subset of paths, which will be noisy.
+We could counter this effect by simulating a larger and larger number of paths, so that we always have a significant number of paths above the strike, contributing to the option's price, though this comes at the cost of increased computation times.
+Furthermore, on the limit, there will always be a strike high enough that none of the simulated paths reach it, meaning that the option's value for that simulation would be zero. This does not hold in real life, since there is always a positive price for any option, even for extremely high strikes.
+
+
  
 \section{Model Calibration}
 \label{section:Model Calibration}

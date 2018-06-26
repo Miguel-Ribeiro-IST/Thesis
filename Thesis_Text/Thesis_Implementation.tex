@@ -107,8 +107,28 @@ We could counter this effect by simulating a larger and larger number of paths, 
 Furthermore, on the limit, there will always be a strike high enough that none of the simulated paths reach it, meaning that the option's value for that simulation would be zero. This does not hold in real life, since there is always a positive price for any option, even for extremely high strikes.
 
 
+\section{Surface Interpolation (Dupire)}
+To apply Dupire's local volatility model, as shown in eq.\eqref{dupire2}, we need to generate the implied volatility surface from the market data. Because we only have data for a finite set of maturities and strikes, the implied volatility surface must be obtained by some form of interpolation and extrapolation. From this interpolated surface we must also calculate the gradients needed for the local volatility formula.
+
+Since the data we have is not evenly distributed (e.g. we have strikes $K=0.5$, $0.75$, $0.9$ and $1$, which have different intervals between them), we must choose an interpolation algorithm appropriately. 
  
-\section{Model Calibration}
+One possible method is known as \emph{Delaunay triangulation}~\cite{Isaac}. In short, assuming in 2-dimensional data, this interpolation algorithm generates a triangulation between points $P_1$, $P_2$ and $P_3$ if the circumscribed circle of these points contains no other points $P_j$ inside. A scheme of this interpolation method is shown in \autoref{fig:Delaunay}.
+
+\begin{figure}[!htb]
+    \centering
+      \includegraphics[width=.4\columnwidth]{Delaunay.eps}
+      \caption[Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles don't contain any other points inside. A circle for which this property does not hold is also represented, though no triangulation is possible in this case.]{Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles (green) don't contain any other points inside. A circle for which this property does not hold (orange dashed) is also represented, though no triangulation is possible in this case.\\{\small Source: \url{https://www.ti.inf.ethz.ch/ew/Lehre/CG13/lecture/Chapter\%206.pdf}}}\label{fig:Delaunay}
+    \end{figure}
+
+ We can easily adapt this algorithm to 3-dimensions (as is the case of our data), using spheres instead of circles.
+The resulting interpolated surface will simply be a set of merged triangles. Though this is usually a good approximation, it will produce wrong results when calculating the second derivatives used in the local volatility formula. If we used the first version of Dupire's formula, shown in eq.\eqref{dupire}, where this value is in the denominator, the resulting local volatility surface would become highly unrealistic. However, because the formula in eq.\eqref{dupire2}, which we will use, is not so sensitive to this value, no significant problems are expected.
+
+The function \emph{scatteredInterpolant}, implemented in MATLAB, applies this Delaunay triangulation to a set of scattered data, and will therefore be used in the implied volatility surface generation.
+
+
+
+ 
+\section{Model Calibration (Heston and SABR)}
 \label{section:Model Calibration}
 Both SABR and Heston stochastic volatility models contain variables that need to be calibrated in order to appropriately replicate market option prices.
 

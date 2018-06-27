@@ -34,6 +34,11 @@ The Monte Carlo pricers of each model will then be modified to price Barrier opt
 \section{Constant Volatility Model}
 To find how well our models perform, we need some reference against which to compare them. One clear possibility is to assume a constant volatility throughout the options' duration, since this is the simplest possible case.
 
+The equation that generates each stock price path is therefore given by
+\begin{equation}
+dS(t)=rS(t)dt+\sigma S(t)dW(t).
+\end{equation}
+
 Because we are fitting the volatility function - which, in this case, is a constant value - to a set of volatility data - which is not constant - these adjustments are expected to badly represent the data. Any other minimally decent model is expected to outperform this constant volatility benchmark.
 
 With this constant volatility model, we can choose to fit the datasets with different maturities independently of one another or together in a single coupled dataset. In other words, we can do several fits, one for each maturity, or a single one, for all maturities together. The former will be useful when benchmarking the Static SABR model, since for that model the adjustments will also be performed independently (Static SABR performs badly for multiple maturities). The latter will be more appropriate when studying the remaining models - Dupire, Heston and Dynamic SABR - since these fit the whole implied volatility surface (i.e. multiple maturities together). Thus, both versions will be implemented and briefly studied.
@@ -217,10 +222,16 @@ If we now compare the cost function values, we see that the cost of the dependen
 As for the plots in \autoref{fig:ConstVol2} they look very similar to those in \autoref{fig:ConstVol}, so not much more can be added regarding their analysis.
 
 
+
+
+
 \newpage
 \section{Dupire Model}
-
-Dupire's model was defined in eq.\eqref{dupire2} as is given by
+The stochastic differential equation for the stock price paths under the local volatility model was hypothesized to be given by
+\begin{equation}\label{dupmodds}
+dS(t)=rS(t)dt+\sigma(S,t)S(t)dW(t),
+\end{equation}
+\noindent where $\sigma(S,t)$ can be obtained through Dupire's model, defined in subsection \ref{subsection:Dupire}, which is given by
 \begin{equation}
 \sigma(S,t)=\sqrt{\frac{\displaystyle\sigma_{imp}^2+2t\sigma_{imp}\pdv{\sigma_{imp}}{T}+2rSt\sigma_{imp}\pdv{\sigma_{imp}}{K}}{\displaystyle\left(1+Sd_1\sqrt{t}\pdv{\sigma_{imp}}{K}\right)^2+S^2t\sigma_{imp}\left(\pdv{^2\sigma_{imp}}{K^2}-d_1\left(\pdv{\sigma_{imp}}{K}\right)^2\sqrt{t}\right)}},
 \end{equation}
@@ -229,24 +240,49 @@ Dupire's model was defined in eq.\eqref{dupire2} as is given by
 d_1=\frac{\log(S_0/S)+\left(r+\frac{1}{2}\sigma_{imp}^2\right)t}{\sigma_{imp}\sqrt{t}}.
 \end{equation}
 
-As we can see, we must produce the implied volatility surface from the market data. Because we only have data for a finite set of maturities and strikes, the implied volatility surface must be obtained by some form of interpolation and extrapolation. \hl{continue here}
+As we mentioned in Section \ref{section:Surface Interpolation (Dupire)}, we must produce the implied volatility surface from the market data using an interpolation algorithm. Applying the Delaunay triangulation defined earlier, we obtain the implied volatility surface shown in \autoref{fig:DupImpV}, along with its contour plot.
+From this surface we can easily extract (numerically) the gradients required for the local volatility formula.
+
+
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{ImpliedV.eps}}
+    \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.cm 0.85cm},clip]{ImpliedV.eps}}
     \subfigure[$\sigma_{imp}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{ImpliedVC.eps}}
   \end{subfigmatrix}
-    \caption[Implied volatility surface and corresponding contour plot of the function interpolated linearly between the original data points.]{Implied volatility surface (left) and corresponding contour plot (right) of the function interpolated linearly between the original data points (blue circles).}\label{fig:DupImpV}
+    \caption[Implied volatility surface and corresponding contour plot of the function interpolated linearly between the original data points using Delaunay triangulation.]{Implied volatility surface (left) and corresponding contour plot (right) of the function interpolated linearly between the original data points (blue circles) using Delaunay triangulation.}\label{fig:DupImpV}
 \end{figure}   
 
 
+Observing this interpolated surface we see that its curvature decreases with maturity - the volatility smile becomes less prominent for later maturities.
+
+
+We now should now be able to generate the \emph{local} volatility surface. To do this, we simply evaluate the interpolated implied volatility surface, as well as all the required gradients, at multiple points $K_j$, $T_i$ to produce the local volatility $\sigma(K_j,T_i)$. The points should be uniformly spaced in a grid - with $K_min$ and $K_max$ being the smallest and largest strike $K_j$ in the grid, with intervals $\Delta K$ between the strikes, and with $T_min$ and $T_max$ the smallest and largest maturity $T_i$, with intervals $\Delta T$. These parameters are shown in \autoref{tab:DupR}.
+Interpolating again between these points we are able to generate the local volatility surface, shown in \autoref{fig:DupLocVol}. We now simply need to make a variable change $\sigma(K,T)\implies \sigma(S,t)$ to be able to input this value into eq.\eqref{dupmodds}.
+
+
+\begin{table}[H]
+    \centering
+        \renewcommand{\arraystretch}{0.8}
+\begin{tabular}{@{}cccccc@{}}
+\toprule
+$T_{min}$(days) & $T_{max}$(days) & $\Delta T$(days) & $K_{min}$($\EUR$) & $K_{max}$($\EUR$) & \multicolumn{1}{c}{$\Delta K$($\EUR$)}\\ \midrule
+21 & 126 & 10.5 & 0.4 & 1.6 & \multicolumn{1}{c}{0.05} \\ \bottomrule
+\end{tabular}
+  \caption[Parameters used in the interpolation section of Dupire's model.]{Parameters used in the interpolation section of Dupire's model.}
+  \label{tab:DupR}
+\end{table}
+
+
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[$\sigma_{loc}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{LocalV.eps}}
+    \subfigure[$\sigma_{loc}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.cm 0.85cm},clip]{LocalV.eps}}
     \subfigure[$\sigma_{loc}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{LocalVC.eps}}
   \end{subfigmatrix}
     \caption[Local volatility surface and corresponding contour plot of the function obtained with Dupire's formula from the interpolated implied volatility surface.]{Local volatility surface (left) and corresponding contour plot (right) of the function obtained with Dupire's formula (eq.\eqref{dupire2}) from the interpolated implied volatility surface in \autoref{fig:DupImpV}.}\label{fig:DupLocVol}
 \end{figure}   
+
+Having obtained the local volatility surface, simulating the stock price paths is quite easy. We just need evaluate the surface at the point $(S_i,t_j)$ when we are at the time step $t_j$ of the simulation with a stock price path at $S_i$. To price options, we now simply need to apply the Monte Carlo pricing algorithm. The results of such simulations is shown in \autoref{fig:Dup}, along with the confidence intervals and the original market data. To prevent volatilities from becoming too high we implemented a maximum cutoff value of $\sigma_{max}$=$\SI{1.5}{\year\tothe{-1/2}}$, limiting the volatilities obtained from the surface.
 
 
 \begin{figure}[H]
@@ -261,6 +297,15 @@ As we can see, we must produce the implied volatility surface from the market da
 \end{figure}
 
 
+As before, we now see the very large confidence intervals for very low strikes. The cause of this behavior was identified on the constant volatility model (with independent fits). Also here we can see the low implied volatilities for high strikes in the earliest maturities. This has also already been discussed.
+
+The great improvement of Dupire's model over the constant volatility model is the presence of the implied volatility smiles in the simulated implied volatilities. Furthermore, these smiles follow the market data almost perfectly for strikes near $S_0$.
+We can therefore conclude that the model greatly outperforms the constant volatility model presented earlier.
+
+The plots shown in \autoref{fig:Dup} can be thought of as slices of a simulated implied volatility surface. Ideally, this surface would look exactly like the one shown in \autoref{fig:DupImpV}. However, because we are now simulating the prices, there should exist some variation. Furthermore, in the regions where the pricer performs badly (i.e. large strikes for early maturities and low strikes), we expect there to be a very high amount of noise. This simulated surface is shown in \autoref{fig:DupS}, along with the simulated functions of the earlier plots.
+
+
+
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
     \subfigure[$\sigma_{imp}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 1.9cm 0.85cm},clip]{DupS.eps}}
@@ -269,19 +314,8 @@ As we can see, we must produce the implied volatility surface from the market da
     \caption[Implied volatility surface and corresponding contour plot simulated with Monte Carlo under Dupire's local volatility model plotted against the original market data and the generated functions shown in \autoref{fig:Dup}.]{Implied volatility surface (left) and corresponding contour plot (right) simulated with Monte Carlo under Dupire's local volatility model plotted against the original market data (blue circles) and the generated functions shown in \autoref{fig:Dup} (red dot-dashed lines).}\label{fig:DupS}
 \end{figure}   
 
-\begin{table}[H]
-    \centering
-        \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}ccccccccc@{}}
-\toprule
-\multicolumn{6}{c|}{Interpolation} & \multicolumn{3}{c}{Simulation} \\ \midrule
-$T_{min}$(days) & $T_{max}$(days) & $\Delta T$(days) & $K_{min}$($\EUR$) & $K_{max}$($\EUR$) & \multicolumn{1}{c|}{$\Delta K$($\EUR$)} & $N_{paths}$ & $N_{reps}$ & $\sigma_{max}$($\SI{}{\year\tothe{-1/2}}$) \\ \midrule
-21 & 126 & 10.5 & 0.4 & 1.6 & \multicolumn{1}{c|}{0.05} & 50000 & 30 & 2 \\ \bottomrule
-\end{tabular}
-  \caption[Parameters used in the interpolation and simulation sections of Dupire's model.]{Parameters used in the interpolation and simulation sections of Dupire's model.}
-  \label{tab:DupR}
-\end{table}
 
+As expected, the amount of noise is quite overwhelming in the regions where the Monte Carlo pricer performs badly. For the regions where the strike approaches $S_0$, the behavior is quite different and the simulations closely follow the data, as expected.
 
 
 \begin{table}[H]
@@ -709,3 +743,11 @@ $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 \hl{why is the coupled constant implied volatility the average of the independent fits of the constant implied vols?}
 
 \hl{explain why stock prices follow a GBM}
+
+\hl{how is extrapolation done in dupires model}
+
+\hl{put numerical formula for gradients}
+
+\hl{create a cost function for the simulated volatility functions besides the already existing cost for the theoretical values}
+
+\hl{put the same limits on the contour plots of all the surfaces for comparability}

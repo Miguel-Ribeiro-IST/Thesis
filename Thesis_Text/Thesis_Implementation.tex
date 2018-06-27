@@ -108,6 +108,7 @@ Furthermore, on the limit, there will always be a strike high enough that none o
 
 
 \section{Surface Interpolation (Dupire)}
+\label{section:Surface Interpolation (Dupire)}
 To apply Dupire's local volatility model, as shown in eq.\eqref{dupire2}, we need to generate the implied volatility surface from the market data. Because we only have data for a finite set of maturities and strikes, the implied volatility surface must be obtained by some form of interpolation and extrapolation. From this interpolated surface we must also calculate the gradients needed for the local volatility formula.
 
 Since the data we have is not evenly distributed (e.g. we have strikes $K=0.5$, $0.75$, $0.9$ and $1$, which have different intervals between them), we must choose an interpolation algorithm appropriately. 
@@ -121,7 +122,7 @@ One possible method is known as \emph{Delaunay triangulation}~\cite{Isaac}. In s
     \end{figure}
 
  We can easily adapt this algorithm to 3-dimensions (as is the case of our data), using spheres instead of circles.
-The resulting interpolated surface will simply be a set of merged triangles. Though this is usually a good approximation, it will produce wrong results when calculating the second derivatives used in the local volatility formula. If we used the first version of Dupire's formula, shown in eq.\eqref{dupire}, where this value is in the denominator, the resulting local volatility surface would become highly unrealistic. However, because the formula in eq.\eqref{dupire2}, which we will use, is not so sensitive to this value, no significant problems are expected.
+The resulting interpolated surface will simply be a set of merged triangles, with the data points serving as a vertices. Though this is usually a good approximation, it will produce wrong results when calculating the second derivatives used in the local volatility formula. If we used the first version of Dupire's formula, shown in eq.\eqref{dupire}, where this value is in the denominator, the resulting local volatility surface would become highly unrealistic. However, since we will use the formula in eq.\eqref{dupire2}, which is not so sensitive to this value, no significant problems are expected.
 
 The function \emph{scatteredInterpolant}, implemented in MATLAB, applies this Delaunay triangulation to a set of scattered data, and will therefore be used in the implied volatility surface generation.
 

@@ -509,6 +509,11 @@ x(z)=\log\left\{\frac{\sqrt{1-2\rho z+z^2}+z-\rho}{1-\rho}\right\},
 \end{equation}
 \noindent where we have used $f=S_0e^{rT}$. The proof of this solution is quite lengthy and will not be replicated here, but it can be found in Hagan~\cite{Hagan}.
 
+For the particular case where $f=K$, we have a $0/0$ indeterminate form. This poses no problem because the closed form solution actually simplifies to~\cite{Hagan}
+\begin{equation}
+\sigma_{SABR}(K,f=K,T)\approx\frac{\alpha}{K^{1-\beta}}.\left\{1+T\left[\frac{(1-\beta)^2}{24}\frac{\alpha^2}{K^{2(1-\beta)}}+\frac{1}{4}\frac{\rho\beta\nu\alpha}{K^{1-\beta}}+\frac{2-3\rho^2}{24}\nu^2\right]\right\}.
+\end{equation}
+
 Similarly to the Heston model, we again need to find the set of parameters that minimize the difference between the implied volatilities obtained from the model and those obtained from market data. This calibration procedure will also be studied in Chapter \ref{chapter:implementation}.
 
 

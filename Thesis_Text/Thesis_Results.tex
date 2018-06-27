@@ -380,18 +380,36 @@ d\sigma=\nu\sigma dW_2,
 
 The closed form solution, shown in eq.\eqref{sabr}, enables us to obtain the theoretical implied volatilities of options priced under this model and will be used in the calibration process.
 
-The influence of each parameter of the Static SABR model on the shape of the implied volatility curve is shown in \autoref{fig:SSparam}.
+Before calibrating the model to the market data, we should study the influence of each parameter of this model on the shape of the implied volatility curve, in order to better interpret the results. This influence is represented in \autoref{fig:SSparam}, where we vary a single parameter at a time, keeping all the others constant, thus directly observing that parameter's influence.
+
+
+We should note that the influence of the parameters is more complicated than we show here. On the one hand, their impact depends on the maturity. However, for this effect to become evident, we would have to repeat all the plots in \autoref{fig:SSparam} for several maturities, which would simply become too cumbersome and is out of the scope of this thesis.
+On the other hand, the parameters have correlated effects on the curve shape. These influences would be quite difficult to represent. Furthermore, they are discussed in the original article by Hagan~\cite{Hagan}, and will, for these reasons, not be discussed here.
+That being said, we can still have a general view of each parameter's impact on the curve.
+
+%\vspace{\fill}
+%\newpage
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[Dependence on $\alpha$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSalpha.eps}}
-    \subfigure[Dependence on $\beta$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSbeta.eps}}
-    \subfigure[Dependence on $\rho$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSrho.eps}}
-    \subfigure[Dependence on $\nu$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSnu.eps}}
+    \subfigure[Dependence on $\alpha$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSalpha.eps}\label{SSa}}
+    \subfigure[Dependence on $\beta$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSbeta.eps}\label{SSb}}
+    \subfigure[Dependence on $\rho$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSrho.eps}\label{SSr}}
+    \subfigure[Dependence on $\nu$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{SSnu.eps}\label{SSn}}
   \end{subfigmatrix}
   \caption[Dependence of the implied volatility curve on each of the Static SABR model parameters.]{Dependence of the implied volatility curve on each of the Static model SABR parameters. The default parameters used were $S_0=1\EUR$, $T=42$ days and $r=0$. Furthermore, on all plots, except when the dependence on a parameter is represented, the parameters used were $\alpha=0.2$, $\beta=1$, $\rho=-0.5$ and $\nu=1.5$.}
   \label{fig:SSparam}
 \end{figure}
+
+In Figure \autoref{SSa} we see that the parameter $\alpha$, which corresponds to the initial value of the volatility process, has quite an impact on the implied volatility curve. This parameter essentially controls the height of the curve. This is indeed expected, because the implied volatility and the stochastic (local) volatility are inherently related. Increasing $\alpha$ is expected to shift the volatility process to higher values, thus increasing the implied volatility.
+
+The influence of the parameter $\beta$, which is an exponent in the stock price process, is represented in Figure \autoref{SSb}. The impact of this parameter seems to be almost negligible. Indeed, at a single point in time, the implied volatility curve barely changes, but this parameter becomes very important when time passes and the stock prices move (as they do when being simulated), because it controls how the curve shifts when such movements occur. If the stock price increases, the implied volatility curve at that time should shifts to the right. For $\beta=0$, the curve also shifts downwards, whereas for $\beta=1$ it doesn't. This behavior is studied in detail in the original article by Hagan~\cite{Hagan}.
+Despite this, because in Static SABR we are only fitting data for a single maturity, this parameter should barely have any influence in the resulting implied volatility function, though it will become quite relevant in the Dynamic SABR model.
+
+In Figure \autoref{SSr} is represented the effect of the parameter $\rho$, the correlation between the stock price and the volatility processes.
+We can see that this parameter impacts the skewness of the implied volatility curve. Because this parameter relates the stock price and volatility, in the case of a negative $\rho$ when the prices increase (decrease), the volatilities decrease (increase), so that options with higher (lower) strikes have lower (higher) associated volatilities. This justifies why we have a lower implied volatility for higher strikes when the correlation is negative.
+
+Finally, the impact of the parameter $\nu$, the volatility of the volatility process, is shown in Figure \autoref{SSn}. This parameter seems to control the curvature of the implied volatility curve. We can see that higher values of $\nu$ result in greater changes in the volatility process, enabling, at times, the volatility to become quite large. This allows the stock price process to evolve quite erratically, thus making it easier for prices to reach higher strikes. This effect pushes the implied volatility upwards. The inverse effect is true and a low $\nu$ will restrict the stochastic volatility process to become quite limited, preventing the stock prices from changing too much, and restraining them from reaching high strikes, pulling the implied volatility curve downwards.
 
 
 \begin{figure}[H]
@@ -751,3 +769,5 @@ $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 \hl{create a cost function for the simulated volatility functions besides the already existing cost for the theoretical values}
 
 \hl{put the same limits on the contour plots of all the surfaces for comparability}
+
+\hl{explain why we have implied volatility smile: when things go bad/well, they go really bad/well.}

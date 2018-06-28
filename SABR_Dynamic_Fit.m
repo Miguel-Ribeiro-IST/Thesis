@@ -34,9 +34,9 @@ B=B(B(:,1)<=times(matur),:);
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
 %[alpha, rho0, nu0, a, b, beta]
-x0 = [0.2, -0.2, 0.8, 1,   1,   0.75];
+x0 = [0.2, -0.42, 2.45, 1.14,   2.62,   0.75];
 lb = [0,   -1,   0,   0,   0,   0];
-ub = [5,   1,    5,   100, 100, 1];
+ub = [5,   1,    5,   25, 25, 1];
 %{
 optimvars=Optimizer(S0,B,r,x0,OptAlg,lb,ub);
 alpha=optimvars(1);

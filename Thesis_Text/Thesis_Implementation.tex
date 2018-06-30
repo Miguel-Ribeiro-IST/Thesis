@@ -4,10 +4,10 @@
 \label{section:Option Pricing}
 The theoretical models presented in Chapter \ref{chapter:background} attempt to replicate the movements of real-world stock prices. With these predictions, we should be able to better reproduce real option prices than if we assumed a simple constant volatility, as did Black \textit{et al.}
 
-Currently, the two most used methods to computationally price options are known as \emph{finite differences}~\cite{Hull} and \emph{Monte Carlo}~\cite{Glasserman}.
+Currently, the two most used methods to computationally price options are known as \emph{finite differences}~\citep{Hull} and \emph{Monte Carlo}~\citep{Glasserman}.
 
 The finite differences method is an extremely fast procedure when used to price either European or American-type options, making it very appealing in these circumstances. However, when applied to other option types whose value depends on the stock prices until maturity (e.g. Asian options), the algorithm becomes very slow, rendering it almost useless.
-The implementation of both Heston and SABR models (presented before) using finite differences can nonetheless be found in deGraaf~\cite{deGraaf}.
+The implementation of both Heston and SABR models (presented before) using finite differences can nonetheless be found in deGraaf~\citep{deGraaf}.
 
 
 With the Monte Carlo algorithm, we begin by simulating a very large number of stock price paths (e.g. 100,000 simulations). The option's payoff is then calculated for each of these simulated paths and averaged, providing a fairly good estimate of the option's value. This algorithm can be easily adapted to price exotic options, making it very attractive in such cases.
@@ -17,7 +17,7 @@ For these reasons, the Monte Carlo method will be used for the analysis of the m
 
 \subsection{Simulating stock prices}
 \label{subsection:Simulating stock prices}
-As stated, to implement the Monte Carlo algorithm, one needs to simulate stock price paths. However, by analyzing eq.\eqref{GBM}, we can see that the stock prices depend on a Brownian motion process which, due to its self-similarity, is not differentiable~\cite{Mikosch}. It follows that stock price paths can never be exactly simulated. Despite this, we can approximate the movement of stock price paths by discretizing the Brownian motion process in time, thus avoiding its self-similarity problem. We now introduce two of the most common discretization procedures.
+As stated, to implement the Monte Carlo algorithm, one needs to simulate stock price paths. However, by analyzing eq.\eqref{GBM}, we can see that the stock prices depend on a Brownian motion process which, due to its self-similarity, is not differentiable~\citep{Mikosch}. It follows that stock price paths can never be exactly simulated. Despite this, we can approximate the movement of stock price paths by discretizing the Brownian motion process in time, thus avoiding its self-similarity problem. We now introduce two of the most common discretization procedures.
 
 \subsubsection{Euler–Maruyama discretization}
 One of the simplest and most used discretization methods is known as \emph{Euler–Maruyama discretization}, and can be applied to stochastic differential equations of the type
@@ -41,7 +41,7 @@ Due to its simplicity, the Euler–Maruyama discretization method is the most co
 
 
 \subsubsection{Milstein Discretization}
-For stochastic volatility models, such as Heston and SABR, where the volatility itself follows a stochastic process, the Euler–Maruyama discretization may not be sufficiently accurate. In these cases, we can apply the more precise Milstein method~\cite{Milstein}, defined as
+For stochastic volatility models, such as Heston and SABR, where the volatility itself follows a stochastic process, the Euler–Maruyama discretization may not be sufficiently accurate. In these cases, we can apply the more precise Milstein method~\citep{Milstein}, defined as
 \begin{equation}
 X_{n+1}=X_n+a(X_n)\Delta t+b(X_n)\Delta W_n+\frac{1}{2}b(X_n)b'(X_n)((\Delta W_n)^2-\Delta t),
 \end{equation}
@@ -113,7 +113,7 @@ To apply Dupire's local volatility model, as shown in eq.\eqref{dupire2}, we nee
 
 Since the data we have is not evenly distributed (e.g. we have strikes $K=0.5$, $0.75$, $0.9$ and $1$, which have different intervals between them), we must choose an interpolation algorithm appropriately. 
  
-One possible method is known as \emph{Delaunay triangulation}~\cite{Isaac}. In short, assuming in 2-dimensional data, this interpolation algorithm generates a triangulation between points $P_1$, $P_2$ and $P_3$ if the circumscribed circle of these points contains no other points $P_j$ inside. A scheme of this interpolation method is shown in \autoref{fig:Delaunay}.
+One possible method is known as \emph{Delaunay triangulation}~\citep{Isaac}. In short, assuming in 2-dimensional data, this interpolation algorithm generates a triangulation between points $P_1$, $P_2$ and $P_3$ if the circumscribed circle of these points contains no other points $P_j$ inside. A scheme of this interpolation method is shown in \autoref{fig:Delaunay}.
 
 \begin{figure}[!htb]
     \centering
@@ -202,7 +202,7 @@ Fortunately, as mentioned, both Heston and SABR have closed-form solutions, show
 There are several possible methods to find the parameter set that minimizes the cost function shown in eq.\eqref{cost}.
 Our main concern when choosing the best algorithms for calibration is the nonlinearity of the cost function. This is problematic because several local minima might exist and an unsuitable algorithm may get stuck in these points, causing the globally optimal solution to not be found.
 
-With this issue in mind, we selected a powerful algorithm known as \emph{CMA-ES}~\cite{Hansen2} (short for Covariance Matrix Adaptation Evolution Strategy), which we will summarize below. It should be noted that we will only provide a general idea of how this optimizer works. For detailed descriptions, the original source should be consulted.
+With this issue in mind, we selected a powerful algorithm known as \emph{CMA-ES}~\citep{Hansen2} (short for Covariance Matrix Adaptation Evolution Strategy), which we will summarize below. It should be noted that we will only provide a general idea of how this optimizer works. For detailed descriptions, the original source should be consulted.
 
 The optimization algorithm will search the $D$-dimensional sample space ($D$ corresponds to the number of parameters of each model), for the optimal solution. Each point in this space corresponds to a possible set of parameters, $\theta$.
 
@@ -226,7 +226,7 @@ We classify each of these points according to their fitness (i.e. the cost funct
 
 
 At each iteration, the new mean is produced from a weighted average of the points, with the weights proportional to each point's fitness.
-The method for the covariance matrix update is rather complex and depends not only on the $\mu$ best samples but also on the values of the covariance matrices used in previous iterations. All the basic equations required for the implementation of this optimizer can be found in Appendix \ref{chapter:CMAESAlg}. For a more detailed explanation, as well as other aspects of the algorithm, see Hansen \cite{Hansen}.
+The method for the covariance matrix update is rather complex and depends not only on the $\mu$ best samples but also on the values of the covariance matrices used in previous iterations. All the basic equations required for the implementation of this optimizer can be found in Appendix \ref{chapter:CMAESAlg}. For a more detailed explanation, as well as other aspects of the algorithm, see Hansen \citep{Hansen}.
 
 These sampling-classification-adaptation steps are repeated until some stopping criterion is met, such as a fixed number of iterations or an minimum error threshold.
 When the stopping criterion is met, the mean vector of the last iteration is assumed as the optimal parameter vector.
@@ -250,9 +250,9 @@ Define covariance matrix $\mathbf{C}=I$\;
 \end{algorithm}
 \
 
-The complexity of the covariance matrix updating process makes the CMA-ES a very robust optimization algorithm, enabling it to find the global optimum of highly nonlinear functions~\cite{DilaoCMA}.
+The complexity of the covariance matrix updating process makes the CMA-ES a very robust optimization algorithm, enabling it to find the global optimum of highly nonlinear functions~\citep{DilaoCMA}.
 Furthermore, unlike many other optimizers, the CMA-ES is almost non-parametric. It simply requires an starting guess, to generate the starting mean vector, and the algorithm is expected to converge to a global minimum.
 As for disadvantages, because we have to generate a set of samples at each iteration, if this generation process is slow, the convergence may stall significantly, particularly when many parameters are used in the model. Other algorithms may perform faster than CMA-ES, but CMA-ES is expected to outperform them in terms of precision.
 
-This optimizer was implemented by Hansen in MATLAB (as well as in other computer languages) as a function named \emph{purecmaes}~\cite{CMAES} and will be used with only very slight changes, to account for the volatility models used used.
+This optimizer was implemented by Hansen in MATLAB (as well as in other computer languages) as a function named \emph{purecmaes}~\citep{CMAES} and will be used with only very slight changes, to account for the volatility models used used.
 

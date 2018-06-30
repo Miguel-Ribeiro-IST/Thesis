@@ -6,7 +6,7 @@ Before completely focusing on the mechanics of options, what influences their pr
 
 
 \subsection{European Options}
-\emph{European options} are the most traded type of option in the OTC market~\cite{InvEuro}. They are not only extremely useful to investors, but also very simple to study and comparatively easy to price. For all these reasons, they have been the subject of much research and are deeply understood. Furthermore, because of their high availability, they are very useful in model calibration and validation.
+\emph{European options} are the most traded type of option in the OTC market~\citep{InvEuro}. They are not only extremely useful to investors, but also very simple to study and comparatively easy to price. For all these reasons, they have been the subject of much research and are deeply understood. Furthermore, because of their high availability, they are very useful in model calibration and validation.
 
 
 As stated before, call and put European options enable their buyers to respectively buy and sell the underlying asset \emph{at the maturity} for the fixed strike price.
@@ -31,7 +31,7 @@ The same reasoning can be made for European put type options, such that the payo
 
 
 \subsection{American Options}
-\emph{American options} are more complex than European and thus harder to price. While European options dominate the OTC market, their American counterparts are the most traded type of option in exchanges~\cite{InvAmer}. Because of their great importance, many models have been developed to find the prices of these options~\cite{Longstaff}.
+\emph{American options} are more complex than European and thus harder to price. While European options dominate the OTC market, their American counterparts are the most traded type of option in exchanges~\citep{InvAmer}. Because of their great importance, many models have been developed to find the prices of these options~\citep{Longstaff}.
 
 American options grant the right to buy/sell (call/put) the underlying asset at any point in time \emph{until the maturity date}. Following the logic used in the previous example to find the payoff functions of European calls and puts, we can deduce their American counterparts as
 \begin{equation}
@@ -46,7 +46,7 @@ It should be obvious that the price of American options will always be greater t
 
 
 \subsection{Exotic Options}
-While European and American options are, by far, the most traded types, \emph{Exotic options} should not be neglected. Not only does there exist a great number of Exotic option types, but these are also highly customizable, making this type of derivatives ideal for unconventional investment strategies. Due to their high complexity, these options are only traded in the OTC market, and not in exchanges~\cite{InvExotic}. We will explore one of the most common types of Exotic options - \emph{Barrier} options - though many others exist.
+While European and American options are, by far, the most traded types, \emph{Exotic options} should not be neglected. Not only does there exist a great number of Exotic option types, but these are also highly customizable, making this type of derivatives ideal for unconventional investment strategies. Due to their high complexity, these options are only traded in the OTC market, and not in exchanges~\citep{InvExotic}. We will explore one of the most common types of Exotic options - \emph{Barrier} options - though many others exist.
 
 
 \subsubsection{Barrier Options}
@@ -103,7 +103,7 @@ When selling or buying options, investment banks add some premium to this zero-p
 \section{Black-Scholes Formulae}
 \label{section:Black-Scholes Formulae}
 Due to their high importance, options have been studied in great detail in the past.
-Probably the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price European options - the famous Black-Scholes (BS) model~\cite{Scholes} - still in use in present days~\cite{Wilmott3}.
+Probably the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price European options - the famous Black-Scholes (BS) model~\citep{Scholes} - still in use in present days~\citep{Wilmott3}.
 
 This model states that the price of an European call or put option follows the partial differential equation (PDE)
 
@@ -122,9 +122,9 @@ dV=\pdv{V}{t}dt+\pdv{V}{S}dS+\frac{1}{2}\pdv{^2V}{S^2} (dS)^2.
 
 We now assume that the stock price $S$ follows a geometric Brownian Motion,
 \begin{equation}\label{BSproofGBM}
-dS=rSdt+\sigma SdW,
+dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \end{equation}
-\noindent where $W$ is a Brownian motion process.
+\noindent where $\{W(t),\ t>0\}$ is a Brownian motion process.
 
 It can be shown that $(dW)^2=dt$ and $(dt)^2=dt.dW=0$. With these properties in mind, we can substitute eq.\eqref{BSproofGBM} into eq.\eqref{BSproof}, giving
 \begin{equation}
@@ -162,7 +162,7 @@ Substituting eqs. \eqref{pi} and \eqref{dpi} into eq. \eqref{dpi2} gives
 \end{proof}
 
 
-The risk-free interest rate, $r$, is the interest an investor would receive from any risk-free investment (e.g. treasury bills). No investor should ever invest in risky products whose expected return is lower than this interest (e.g. the lottery), since there's the alternative of obtaining a higher (expected) payoff without the disadvantage of taking risks. In general, this rate changes slightly with time and is unknown, but Black \textit{et al.}, in their original model (eq.\eqref{BS2}), assumed that it remains constant throughout the option's duration and that it is known. Some authors have suggested solutions to deal with this shortcoming, providing models to replicate the behavior of interest rates~\cite{HJM}, but because option prices do not significantly depend on this value~\cite{Wilmott3}, in the remainder of this thesis we shall make the same assumptions as Black \textit{et al.} and set this rate to some constant.
+The risk-free interest rate, $r$, is the interest an investor would receive from any risk-free investment (e.g. treasury bills). No investor should ever invest in risky products whose expected return is lower than this interest (e.g. the lottery), since there's the alternative of obtaining a higher (expected) payoff without the disadvantage of taking risks. In general, this rate changes slightly with time and is unknown, but Black \textit{et al.}, in their original model (eq.\eqref{BS2}), assumed that it remains constant throughout the option's duration and that it is known. Some authors have suggested solutions to deal with this shortcoming, providing models to replicate the behavior of interest rates~\citep{HJM}, but because option prices do not significantly depend on this value~\citep{Wilmott3}, in the remainder of this thesis we shall make the same assumptions as Black \textit{et al.} and set this rate to some constant.
 
 As for the stock price volatility, $\sigma$, since we will explore it to great extent in Chapter \ref{chapter:volatility}, so suffice it to say that it is a measure of the future stock price movement's uncertainty.
 
@@ -180,7 +180,7 @@ dS(t)=rS(t)dt+\sigma S(t)dW(t),
       \caption[Example of Geometric Brownian Motion processes]{Example of three Geometric Brownian Motion processes with maturity $T=\SI{1}{\year}$, interest rate $r=\SI{0.01}{\per\year}$, volatility $\sigma=\SI{0.1}{\year\tothe{-1/2}}$ and initial stock price $S_0=\SI{1}{\EUR}$.}\label{fig:GBM}
     \end{figure}
 
-With this result, pricing options is fairly straightforward - we simply need to solve the PDE in eq.\eqref{BS2} as we would for the diffusion equation's initial value problem~\cite{Dilao}.
+With this result, pricing options is fairly straightforward - we simply need to solve the PDE in eq.\eqref{BS2} as we would for the diffusion equation's initial value problem~\citep{Dilao}.
 The results published originally by Black \textit{et al.} state that, at time $t$, call and put options can be valued as
 \begin{equation}\label{callputBS}
 \begin{split}
@@ -208,7 +208,7 @@ C=S_0-Ke^{-rT}+P.
 Finally, we can obtain a lower bound for the prices of European call and put options. Using some non-arbitrage arguments it can be shown that
 \begin{equation}\label{bound}
 \begin{split}
-C&\geq \max\left[S_0-Ke^{-rT}\right];\\
-P&\geq \max\left[Ke^{-rT}-S_0\right].
+C&\geq \max\left[S_0-Ke^{-rT},0\right];\\
+P&\geq \max\left[Ke^{-rT}-S_0,0\right].
 \end{split}
 \end{equation}

@@ -229,15 +229,15 @@ As for the plots in \autoref{fig:ConstVol2} they look very similar to those in \
 \section{Dupire Model}
 The stochastic differential equation for the stock price paths under the local volatility model was hypothesized to be given by
 \begin{equation}\label{dupmodds}
-dS(t)=rS(t)dt+\sigma(S,t)S(t)dW(t),
+dS(t)=rS(t)dt+\sigma(S(t),t)S(t)dW(t),
 \end{equation}
-\noindent where $\sigma(S,t)$ can be obtained through Dupire's model, defined in subsection \ref{subsection:Dupire}, which is given by
+\noindent where $\sigma(S(t),t)$ can be obtained through Dupire's model, defined in subsection \ref{subsection:Dupire}, which is given by
 \begin{equation}
-\sigma(S,t)=\sqrt{\frac{\displaystyle\sigma_{imp}^2+2t\sigma_{imp}\pdv{\sigma_{imp}}{T}+2rSt\sigma_{imp}\pdv{\sigma_{imp}}{K}}{\displaystyle\left(1+Sd_1\sqrt{t}\pdv{\sigma_{imp}}{K}\right)^2+S^2t\sigma_{imp}\left(\pdv{^2\sigma_{imp}}{K^2}-d_1\left(\pdv{\sigma_{imp}}{K}\right)^2\sqrt{t}\right)}},
+\sigma(S(t),t)=\sqrt{\frac{\displaystyle\sigma_{imp}^2+2t\sigma_{imp}\pdv{\sigma_{imp}}{T}+2r(S(t))t\sigma_{imp}\pdv{\sigma_{imp}}{K}}{\displaystyle\left(1+(S(t))d_1\sqrt{t}\pdv{\sigma_{imp}}{K}\right)^2+(S(t))^2t\sigma_{imp}\left(\pdv{^2\sigma_{imp}}{K^2}-d_1\left(\pdv{\sigma_{imp}}{K}\right)^2\sqrt{t}\right)}},
 \end{equation}
 \noindent where $d_1$ is defined as
 \begin{equation}
-d_1=\frac{\log(S_0/S)+\left(r+\frac{1}{2}\sigma_{imp}^2\right)t}{\sigma_{imp}\sqrt{t}}.
+d_1=\frac{\log(S_0/S(t))+\left(r+\frac{1}{2}\sigma_{imp}^2\right)t}{\sigma_{imp}\sqrt{t}}.
 \end{equation}
 
 As we mentioned in Section \ref{section:Surface Interpolation (Dupire)}, we must produce the implied volatility surface from the market data using an interpolation algorithm. Applying the Delaunay triangulation defined earlier, we obtain the implied volatility surface shown in \autoref{fig:DupImpV}, along with its contour plot.
@@ -375,12 +375,12 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) 
 \section{Static SABR Model}
 As we saw before, the Static SABR model is defined as
 \begin{equation}
-dS=rSdt+e^{-r(T-t)(1-\beta)}\sigma S^\beta dW_1,
+dS(t)=rS(t)dt+e^{-r(T-t)(1-\beta)}\sigma(t)(S(t))^\beta dW_1(t),
 \end{equation}
 \begin{equation}
-d\sigma=\nu\sigma dW_2,
+d\sigma(t)=\nu\sigma(t) dW_2(t),
 \end{equation}
-\noindent with $\alpha=\sigma(0)$ and with $W_1$ and $W_2$ having a correlation of $\rho$.
+\noindent with $\alpha=\sigma(0)$ and with $W_1(t)$ and $W_2(t)$ having a constant correlation of $\rho$.
 
 The closed form solution, shown in eq.\eqref{sabr}, enables us to obtain the theoretical implied volatilities of options priced under this model and will be used in the calibration process.
 
@@ -388,7 +388,7 @@ Before calibrating the model to the market data, we should study the influence o
 
 
 We should note that the influence of the parameters is more complicated than we show here. On the one hand, their impact depends on the maturity. However, for this effect to become evident, we would have to repeat all the plots in \autoref{fig:SSparam} for several maturities, which would simply become too cumbersome and is out of the scope of this thesis.
-On the other hand, the parameters have correlated effects on the curve shape. These influences would be quite difficult to represent. Furthermore, they are discussed in the original article by Hagan~\cite{Hagan}, and will, for these reasons, not be discussed here.
+On the other hand, the parameters have correlated effects on the curve shape. These influences would be quite difficult to represent. Furthermore, they are discussed in the original article by Hagan~\citep{Hagan}, and will, for these reasons, not be discussed here.
 That being said, we can still have a general view of each parameter's impact on the curve.
 
 \vspace{\fill}
@@ -407,7 +407,7 @@ That being said, we can still have a general view of each parameter's impact on 
 
 In Figure \autoref{SSa} we see that the parameter $\alpha$, which corresponds to the initial value of the volatility process, has quite an impact on the implied volatility curve. This parameter essentially controls the height of the curve. This is indeed expected, because the implied volatility and the stochastic (local) volatility are inherently related. Increasing $\alpha$ is expected to shift the volatility process to higher values, thus increasing the implied volatility.
 
-The influence of the parameter $\beta$, which is an exponent in the stock price process, is represented in Figure \autoref{SSb}. The impact of this parameter seems to be almost negligible. Indeed, at a single point in time, the implied volatility curve barely changes, but this parameter becomes very important when time passes and the stock prices move (as they do when being simulated), because it controls how the curve shifts when such movements occur. If the stock price increases, the implied volatility curve at that time should shifts to the right. For $\beta=0$, the curve also shifts downwards, whereas for $\beta=1$ it doesn't. This behavior is studied in detail in the original article by Hagan~\cite{Hagan}.
+The influence of the parameter $\beta$, which is an exponent in the stock price process, is represented in Figure \autoref{SSb}. The impact of this parameter seems to be almost negligible. Indeed, at a single point in time, the implied volatility curve barely changes, but this parameter becomes very important when time passes and the stock prices move (as they do when being simulated), because it controls how the curve shifts when such movements occur. If the stock price increases, the implied volatility curve at that time should shifts to the right. For $\beta=0$, the curve also shifts downwards, whereas for $\beta=1$ it doesn't. This behavior is studied in detail in the original article by Hagan~\citep{Hagan}.
 Despite this, because in Static SABR we are only fitting data for a single maturity, this parameter should barely have any influence in the resulting implied volatility function, though it will become quite relevant in the Dynamic SABR model.
 
 In Figure \autoref{SSr} is represented the effect of the parameter $\rho$, the correlation between the stock price and the volatility processes.
@@ -516,12 +516,12 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) 
 \section{Heston Model}
 The Heston model is defined as
 \begin{equation}
-dS=rSdt+\sqrt{\nu}SdW_1,
+dS(t)=rS(t)dt+\sqrt{\nu(t)}S(t)dW_1(t),
 \end{equation}
 \begin{equation}
-d\nu=\kappa(\overline{\nu}-\nu)dt+\eta\sqrt{\nu}dW_2,
+d\nu(t)=\kappa(\overline{\nu}-\nu(t))dt+\eta\sqrt{\nu(t)}dW_2(t),
 \end{equation}
-\noindent where $\nu_0=\nu(0)$ and with $W_1$ and $W_2$ having a correlation of $\rho$.
+\noindent where $\nu_0=\nu(0)$ and with $W_1(t)$ and $W_2(t)$ having a constant correlation of $\rho$.
 
 The closed form solution, shown in eq.\eqref{CH}, we are able to find the theoretical prices of options priced under this model, which we can easily convert to implied volatilities. These last will be used in the calibration process.
 
@@ -779,7 +779,7 @@ $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 
 \hl{check with Claude if BNPP data assumes a 0 interest rate or not}
 
-\hl{explain why stock prices follow a GBM}
+\hl{explain why stock prices follow a GBM - mention that there exist other diffusion processes}
 
 \hl{how is extrapolation done in dupires model}
 
@@ -790,3 +790,17 @@ $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 \hl{interest rate is not necessarily constant in black scholes! we just assume it is a known function of time}
 
 \hl{check "casas decimais" in the parameters tables (in particular for the cost function value)}
+
+\hl{in multiple volatilities plot, check the label}
+
+\hl{explain how the  lower bound volatility sensitivity plot was obtained}
+
+\hl{explain what C means in the lower bound volatility sensitivity plot}
+
+\hl{redo fokker-planck proof}
+
+\hl{redo heston proof}
+
+\hl{in heston proof, show ito's lemma for two dimensions}
+
+\hl{explain why static sabr only works for one maturity}

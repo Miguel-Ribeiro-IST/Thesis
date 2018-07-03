@@ -11,8 +11,8 @@ S0=17099.4;        %initial stock price
 r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
 sigmamax=1.5;        %maximum value the local volatility can take
-M=10000;           %number of paths to be simulated
-aver=10;
+M=100000;           %number of paths to be simulated
+aver=100;
 %L=T*252*2
 
 
@@ -182,7 +182,7 @@ function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur)
      times=unique(B(:,1));   %array with all maturity dates
      
     %Plot original data points
-    scatter3(B(:,2),B(:,1),B(:,3),30,'LineWidth',0.5,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
+    scatter3(B(:,2),B(:,1),B(:,3),30,'LineWidth',1.75,'MarkerEdgeColor','k','MarkerFaceColor',[1,0.1294,0.1294]);
     hold on;
     
     %set variables to plot the 2D-functions (not the surface)
@@ -201,8 +201,8 @@ function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur)
         mn=mean(DV_tmp,1)';
         if i==2 || i==4 || i==6 || i==12
             DV2(f,:)=mn;
-            DV2max(f,:)=quantile(DV_tmp,0.9,1);
-            DV2min(f,:)=quantile(DV_tmp,0.1,1);
+            DV2max(f,:)=quantile(DV_tmp,0.95,1);
+            DV2min(f,:)=quantile(DV_tmp,0.05,1);
             plot3(K2,ones(1,size(K2,2))*T(i,1),DV2(f,:),'-.','LineWidth',2,'Color',[0.9500    0.200    0.1])
             hold on;
             f=f+1;
@@ -242,6 +242,7 @@ set(get(gca,'YLabel'),'rotation',360/(2*pi)*atan(y(2)/y(1)))
 %Contour Plot
 figure
 contourf(K,T,DV,25)
+caxis([0 1])
 pbaspect([1.5 1 1])
 xlim([0.4,1.6])
 ylim([0.5/12,0.5+0.5/12])
@@ -287,7 +288,7 @@ for iter=1:matur
     
     
     h = get(gca,'Children');
-    lgd=legend([h(3) h(2) h(1)],{'Market Data','Simulated Function (mean)','90% Confidence Interval'},'Location','northeast','FontSize',11);
+    lgd=legend([h(3) h(2) h(1)],{'Market Data','Simulated Function (mean)','95% Confidence Interval'},'Location','northeast','FontSize',11);
     title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
     set(gca,'Children',[h(3) h(2) h(1)])
     

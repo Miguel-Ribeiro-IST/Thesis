@@ -2,7 +2,7 @@
 \label{chapter:implementation}
 \section{Option Pricing}
 \label{section:Option Pricing}
-The theoretical models presented in Chapter \ref{chapter:background} attempt to replicate the movements of real-world stock prices. With these predictions, we should be able to better reproduce real option prices than if we assumed a simple constant volatility, as did Black \textit{et al.}
+The theoretical models presented in \autoref{chapter:background} attempt to replicate the movements of real-world stock prices. With these predictions, we should be able to better reproduce real option prices than if we assumed a simple constant volatility, as did Black \textit{et al.}
 
 Currently, the two most used methods to computationally price options are known as \emph{finite differences}~\citep{Hull} and \emph{Monte Carlo}~\citep{Glasserman}.
 
@@ -12,7 +12,7 @@ The implementation of both Heston and SABR models (presented before) using finit
 
 With the Monte Carlo algorithm, we begin by simulating a very large number of stock price paths (e.g. 100,000 simulations). The option's payoff is then calculated for each of these simulated paths and averaged, providing a fairly good estimate of the option's value. This algorithm can be easily adapted to price exotic options, making it very attractive in such cases.
 In the past, simulating all the stock price paths took prohibitively long computation times and this method was often discarded for this reason. However, with the recent advancements in computer hardware and new algorithmic developments, such as GPU implementation, this shortcoming has been, to some extent, solved, making the Monte Carlo algorithm quite popular in the present.
-For these reasons, the Monte Carlo method will be used for the analysis of the models introduced in Chapter \ref{chapter:background}.
+For these reasons, the Monte Carlo method will be used for the analysis of the models introduced in \autoref{chapter:background}.
 
 
 \subsection{Simulating stock prices}
@@ -82,11 +82,15 @@ Because it is more precise, the Milstein method will be used in the implementati
 
 It is important to note that, the smaller our subintervals $\Delta t$ are, the better is the approximation done when discretizing the Brownian motion process. However, by decreasing $\Delta t$ we increase the number of intervals and with it the number of calculations required to obtain a stock price path. This compromise between computation time and precision must be handled appropriately.
 In \autoref{fig:Steps} we can see how smaller subintervals better resemble a true GBM process, whereas if they become too large this resemblance practically vanishes.
+
 \begin{figure}[!htb]
     \centering
       \includegraphics[width=.65\columnwidth]{Steps.eps}
       \caption[Effect of the subinterval size on the GBM discretization]{Effect of the subinterval size on the GBM discretization with maturity $T=\SI{1}{\year}$, interest rate $r=\SI{0.01}{\per\year}$, volatility $\sigma=\SI{0.1}{\year\tothe{-1/2}}$ and initial stock price $S_0=\SI{1}{\EUR}$. The subinterval size selected was $\Delta t=\SI{0.002}{\year}$, $\Delta t=\SI{0.02}{\year}$ and $\Delta t=\SI{0.1}{\year}$ for the blue, red and orange plot lines, respectively. To emphasize this effect, the underlying Brownian Motion $W(t)$ used to generate all three paths was the same.}\label{fig:Steps}
     \end{figure}
+
+We should also note that this discretization is problematic when we try to price Barrier options. As we stated before, a Barrier option becomes activated/void if the stock price reaches a certain barrier level $B$. When we discretize a continuous stock price process, it might very well happen that at two given consecutive time steps the stock price is below/above this threshold having crossed it at the interval between them, which is not considered in the discretization. Thus, Barrier options will be underpriced or overpriced when priced with Monte Carlo. This problem can be mitigated by simply increasing the number of time steps significantly, though this will increase computation time, and the problem will never completely be nullified.
+
 
 \subsection{Pricing options from simulations}
 \label{subsection:Pricing options from simulations}
@@ -105,7 +109,7 @@ When the stock price at the maturity, $S_i(T)$, is obtained for all paths, the o
 Despite its versatility, the Monte Carlo method can be a very noisy estimator for the price of options, in particular for options with very high strike prices. To understand this problem, notice that the payoff function of European options is zero for stocks below the strike. If we have a very large strike, very few of the simulated paths will actually cross the strike at maturity and contribute to the calculation of the option's price (all the other paths will contribute with a payoff of zero). The averaging procedure shown in eq.\eqref{mcpricer} will therefore be performed on an extremely small subset of paths, which will be noisy.
 We could counter this effect by simulating a larger and larger number of paths, so that we always have a significant number of paths above the strike, contributing to the option's price, though this comes at the cost of increased computation times.
 Furthermore, on the limit, there will always be a strike high enough that none of the simulated paths reach it, meaning that the option's value for that simulation would be zero. This does not hold in real life, since there is always a positive price for any option, even for extremely high strikes.
-
+This problem is further aggravated for Barrier options, since only the paths that are above the strike price at maturity \emph{and} have crossed the barrier level contribute to the option price. This further reduces the number of paths considered and is quite problematic for high barrier levels.
 
 \section{Surface Interpolation (Dupire)}
 \label{section:Surface Interpolation (Dupire)}
@@ -127,6 +131,17 @@ The resulting interpolated surface will simply be a set of merged triangles, wit
 The function \emph{scatteredInterpolant}, implemented in MATLAB, applies this Delaunay triangulation to a set of scattered data, and will therefore be used in the implied volatility surface generation.
 
 
+From the interpolated surface obtained, we need to calculate the gradients. These have to be obtained numerically, as we do not have an analytical formula for the surface. To find them we used the formulas
+\begin{equation}
+\pdv{\sigma_{imp}}{K}(K,T)=\frac{\sigma_{imp}(K+\Delta K,T)-\sigma_{imp}(K-\Delta K,T)}{2\Delta K}
+\end{equation}
+\begin{equation}
+\pdv{^2\sigma_{imp}}{K^2}(K,T)=\frac{\sigma_{imp}(K+\Delta K,T)+\sigma_{imp}(K-\Delta K,T)-2\sigma_{imp}(K,T)}{(\Delta K)^2}
+\end{equation}
+\begin{equation}
+\pdv{\sigma_{imp}}{T}(K,T)=\frac{\sigma_{imp}(K,T+\Delta T)-\sigma_{imp}(K,T)}{\Delta T}
+\end{equation}
+\noindent where $\Delta K$ and $\Delta T$ are some (small) intervals for the strike and maturity, respectively. Note that the derivative of the implied volatility w.r.t. maturity is different from the one w.r.t. strike. This is due to the fact that negative maturities make no mathematical sense, whereas there is no mathematical restriction for negative strikes (though they make no sense in financial terms).
 
  
 \section{Model Calibration (Heston and SABR)}
@@ -136,13 +151,13 @@ Both SABR and Heston stochastic volatility models contain variables that need to
 
 Calibrating the models' parameters means finding the optimal values for these parameters such that the difference between the prices of real market options and options priced under the models' assumptions is minimized. This difference should be measured with a cost function such as
 \begin{equation}
-\mathrm{Cost}(\theta)=\sum_{i=1}^n\sum_{j=1}^mw_{i,j}\left(C_{\mathrm{market}}(T_i,K_j)-C_{\mathrm{model}}(\theta;T_i,K_j)\right)^2,
+\mathrm{Cost}(\theta)=\sum_{i=1}^n\sum_{j=1}^mw_{i,j}\left(C_{\mathrm{mkt}}(T_i,K_j)-C_{\mathrm{mdl}}(T_i,K_j;\theta)\right)^2,
 \end{equation}
-\noindent where we denote $\theta$ as the model's parameter set, $w_i$ corresponds to some weight function and where $C_{\mathrm{model}}(\cdot)$ and $C_{\mathrm{market}}(\cdot)$ denote the model and market option prices, respectively, for maturities $T_i,(i=1,\ldots,n)$ and strikes $K_j,(j=1,\ldots,m)$.
+\noindent where we denote $\theta$ as the model's parameter set, $w_i$ corresponds to some weight function and where $C_{\mathrm{mdl}}(\cdot)$ and $C_{\mathrm{mkt}}(\cdot)$ denote the model and market option prices, respectively, for maturities $T_i,(i=1,\ldots,n)$ and strikes $K_j,(j=1,\ldots,m)$.
 
 Because we are modeling volatilities, and because implied volatilities are more sensitive to slight changes in the parameters, it is more appropriate to use a cost function based on the implied volatility instead of the price, such as
 \begin{equation}\label{cost}
-\boxed{\mathrm{Cost}(\theta)=\sum_{i=1}^n\sum_{j=1}^mw_{i,j}\left(\sigma_{imp,\mathrm{mkt}}(T_i,K_j)-\sigma_{imp,\mathrm{mdl}}(\theta;T_i,K_j)\right)^2,}
+\boxed{\mathrm{Cost}(\theta)=\sum_{i=1}^n\sum_{j=1}^mw_{i,j}\left(\sigma_{imp,\mathrm{mkt}}(T_i,K_j)-\sigma_{imp,\mathrm{mdl}}(T_i,K_j;\theta)\right)^2,}
 \end{equation}
 \noindent where $\sigma_{imp,\mathrm{mkt}}(\cdot)$ and $\sigma_{imp,\mathrm{mdl}}(\cdot)$ correspond to the real-market and model implied volatilities, respectively, for maturities $T_i,(i=1,\ldots,n)$ and strikes $K_j,(j=1,\ldots,m)$. This cost function will be used in the calibration procedure, for the reason stated before.
 
@@ -226,7 +241,7 @@ We classify each of these points according to their fitness (i.e. the cost funct
 
 
 At each iteration, the new mean is produced from a weighted average of the points, with the weights proportional to each point's fitness.
-The method for the covariance matrix update is rather complex and depends not only on the $\mu$ best samples but also on the values of the covariance matrices used in previous iterations. All the basic equations required for the implementation of this optimizer can be found in Appendix \ref{chapter:CMAESAlg}. For a more detailed explanation, as well as other aspects of the algorithm, see Hansen \citep{Hansen}.
+The method for the covariance matrix update is rather complex and depends not only on the $\mu$ best samples but also on the values of the covariance matrices used in previous iterations. All the basic equations required for the implementation of this optimizer can be found in \autoref{chapter:CMAESAlg}. For a more detailed explanation, as well as other aspects of the algorithm, see Hansen \citep{Hansen}.
 
 These sampling-classification-adaptation steps are repeated until some stopping criterion is met, such as a fixed number of iterations or an minimum error threshold.
 When the stopping criterion is met, the mean vector of the last iteration is assumed as the optimal parameter vector.

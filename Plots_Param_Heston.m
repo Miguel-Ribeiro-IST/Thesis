@@ -4,16 +4,16 @@ figure
 HestonVol=@(K,T,kappa,nubar,nu0,rho,chi)HestonPrice(K,T,1,0,kappa,nubar,nu0,rho,chi,"vol");
 K=(0.4:0.01:1.6);
 
-nubar=0.1;
-nu0=0.1;
-rho=-0.5;
+nubar=0.5^2;
+nu0=0.5^2;
+rho=0;
 chi=1;%eta!!!
 kappa=10;
 
-%{
+%%{
 kappa1=1;
 kappa2=25;
-kappa3=100;
+kappa3=1000;
 for i=1:size(K,2)
     HV1(i)=HestonVol(K(i),2/12,kappa1,nubar,nu0,rho,chi);
     HV2(i)=HestonVol(K(i),2/12,kappa2,nubar,nu0,rho,chi);

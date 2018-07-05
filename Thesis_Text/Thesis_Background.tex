@@ -1,7 +1,7 @@
 \chapter{Background}
 \label{chapter:background}
 \section{Option Types}
-Before completely focusing on the mechanics of options, what influences their prices and how we can predict their behavior, we should begin by clearly defining the main option types, their characteristics, as well as their payoff functions. Not only will we approach the two main types of options - European and American - but we will also shortly introduce other less common types, commonly referred to as Exotic options, focusing particularly on Barrier options.
+Before completely focusing on the mechanics of options, what influences their prices and how we can try to predict their behavior, we should begin by clearly defining the main option types, their characteristics, as well as their payoff functions. Not only will we approach the two main types of options - European and American - but we will also shortly introduce other less common types, commonly referred to as Exotic options, focusing particularly on Barrier options.
 
 
 
@@ -42,7 +42,7 @@ American options grant the right to buy/sell (call/put) the underlying asset at 
 \end{equation}
 \noindent where we now define $t^*$ (with $0\leq t^*\leq T$) as the exercise date.
 
-It should be obvious that the price of American options will always be greater than or equal to the prices of similar European options. The reason behind this is the fact that with European contracts our exercising decision is restricted to a single day, whereas with American options we have that same day as well as several others to make this choice.
+It should be obvious that the price of American options will always be greater than or equal to the prices of equivalent European options. The reason behind this is the fact that with European contracts our exercising decision is restricted to a single day, whereas with American options we have that same day as well as several others to make this choice.
 
 
 \subsection{Exotic Options}
@@ -62,7 +62,7 @@ There are four main types of Barrier option:
 
 Because all of the previously described Barrier option types are handled similarly, we can easily adapt the models from one type to another. Thus, for simplicity, we will henceforth assume that all Barrier options are of the up-and-in type.
 
-Using the up-and-in Barrier option type as an example, if the asset price, $S(t)$, remains below the barrier level $B$ throughout the whole option duration, even if at the maturity the asset's value is higher than the strike price, the option's payoff would nonetheless be zero. On the contrary, if this threshold was surpassed at any point during this period, the option's payoff would be similar to that of its European equivalent.
+We now deduce the payoff function of this type of Exotic contract. Using the up-and-in Barrier option type as an example, if the asset price, $S(t)$, remains below the barrier level $B$ throughout the whole option duration, even if at the maturity the asset's value is higher than the strike price, the option's payoff would nonetheless be zero. On the contrary, if this threshold was surpassed at any point during this period, the option's payoff would be similar to that of its European equivalent.
 The payoff function of this type of option is therefore given by
 \begin{equation}\label{barrier}
 \begin{split}
@@ -78,17 +78,23 @@ The payoff function of this type of option is therefore given by
 \end{equation}
 
 
+Before simulating Barrier options and studying their behavior, we can deduce the effect of the barrier level $B$ on the overall price of the option. For an up-and-in Barrier option, if the barrier level is too high, the price of the option will be very low. This is due to the fact that the likelihood of a stock price increasing enough to surpass such a high barrier level, activating the option, is very low. On the other hand, if the barrier level is very close to $S_0$, the probability of the stock price reaching this threshold is approximately $1$. Thus, the price of such an option would be very similar to that of its European equivalent.
+With these two examples, we can conclude that the higher the barrier level, the lower the Barrier option price.
+
+
+
+
 Though Exotic options are used by banks and investors everyday, we will mainly focus on European options: not only are these the most common type of option traded, as we mentioned before, but data is also readily available for many different maturities and strike prices, making European options ideal for model calibration and validation, which will be the main goal of this thesis.
 Barrier options will nonetheless be implemented and studied, though no benchmark will be used to verify the models' validity in this case.
 
 
 \section{Option Prices and Payoffs}
-It is important to emphasize the difference between an option's payoff and its profit for investors. Because options grant the right to buy/sell some asset, no investors would exercise an option if this action was disadvantageous to them (i.e. negative payoff value). Thus, the payoff of an option is always positive (it can also, obviously, be zero). This might sound like an arbitrage possibility (i.e. the chance of making profit without risk), but in reality options have a price that investors have to pay in order to acquire them. This means that even if the option's payoff is positive, if this value is lower than the price an investor paid to buy the option, that investor will actually lose money. The profit of an option is thus the difference between its payoff and its price, which can be negative.
+It is important to emphasize the difference between an option's payoff and its profit for investors. Because options grant the right to buy/sell some asset, no investors would exercise an option if this action was disadvantageous to them (i.e. negative payoff value, which is very unlikely to occur~\citep{Wilmott}). Thus, the payoff of an option is always positive (it can also, obviously, be zero). This might sound like an arbitrage possibility (i.e. the chance of making profit without risk), but in reality options have a price that investors have to pay in order to acquire them. This means that even if the option's payoff is positive, if this value is lower than the price an investor paid to buy the option, that investor will actually lose money. The profit of an option is thus the difference between its payoff and its price, which can be negative.
 With this concept in mind, we can price options by setting their expected profit to be the same as a risk-neutral investment, (e.g. bank deposit). The price of an option can thus be deduced as it's expected future payoff, discounted back to the present
 \begin{equation}
 \text{Price}(K,t^*)=e^{-rt^*}\mathbb{E}\left[\text{Payoff}(K,t^*)\right],
 \end{equation}
-\noindent where $t^*$ denotes the time at which the option is exercised and $r$ corresponds to the risk-free interest rate, which we will approach in Section \ref{section:Black-Scholes Formulae}.
+\noindent where $t^*$ denotes the time at which the option is exercised and $r$ corresponds to the risk-free interest rate, which we will approach in \autoref{section:Black-Scholes Formulae}.
 In particular, with eqs.\eqref{callput} in mind, the price functions of European call and put options is clearly given by
 \begin{equation}\label{callprice}
 \begin{split}
@@ -105,7 +111,7 @@ When selling or buying options, investment banks add some premium to this zero-p
 Due to their high importance, options have been studied in great detail in the past.
 Probably the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price European options - the famous Black-Scholes (BS) model~\citep{Scholes} - still in use in present days~\citep{Wilmott3}.
 
-This model states that the price of an European call or put option follows the partial differential equation (PDE)
+This model states that the price of an European (call or put) option follows the partial differential equation (PDE)
 
 \begin{equation}\label{BS2}
 \boxed{\pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}+rS\pdv{V}{S}-rV=0,}
@@ -126,10 +132,10 @@ dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \end{equation}
 \noindent where $\{W(t),\ t>0\}$ is a Brownian motion process.
 
-It can be shown that $(dW)^2=dt$ and $(dt)^2=dt.dW=0$. With these properties in mind, we can substitute eq.\eqref{BSproofGBM} into eq.\eqref{BSproof}, giving
+It can be shown that $(dW)^2=dt$, $(dt)^2=0$ and $(dt).(dW)=0$. With these properties in mind, we can substitute eq.\eqref{BSproofGBM} into eq.\eqref{BSproof}, giving
 \begin{equation}
 \begin{split}
-dV=&\pdv{V}{t}dt+\pdv{V}{S}\left(rSdt+\sigma SdW\right)+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}dt\\
+dV=&\pdv{V}{t}dt+\pdv{V}{S}\left(rSdt+\sigma SdW\right)+\frac{1}{2}\left(rSdt+\sigma SdW\right)^2\pdv{^2V}{S^2}\\
 =&\left(rS\pdv{V}{S}+\pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}\right)dt+\sigma S\pdv{V}{S}dW.
 \end{split}
 \end{equation}
@@ -148,13 +154,13 @@ d\Pi&=-dV+\pdv{V}{S}dS\\
 \end{split}
 \end{equation}
 
-Because the portfolio's value doesn't change with the Brownian motion $W$, it follows that it is \emph{riskless}.
-To avoid any arbitrage possibilities (i.e. making profit without risk, which is usually impossible), the value of this portfolio must be the same as a risk-free asset. The value of a portfolio with such an asset would change with time as
+Because the portfolio's value doesn't change with the Brownian motion $\{W(t),\ t>0\}$, it follows that it must be \emph{riskless}.
+To avoid any arbitrage possibilities (i.e. making profit without risk, which is very unlikely to happen), the value of this portfolio must be the same as any risk-free asset. The value of a portfolio with such an asset would change with time as
 \begin{equation}\label{dpi2}
 d\Pi=r\Pi dt.
 \end{equation}
 
-Substituting eqs. \eqref{pi} and \eqref{dpi} into eq. \eqref{dpi2} gives
+Substituting eqs.\eqref{pi} and\eqref{dpi} into eq.\eqref{dpi2} gives
 \begin{equation}
 \pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}+rS\pdv{V}{S}-rV=0.
 \end{equation}
@@ -162,9 +168,9 @@ Substituting eqs. \eqref{pi} and \eqref{dpi} into eq. \eqref{dpi2} gives
 \end{proof}
 
 
-The risk-free interest rate, $r$, is the interest an investor would receive from any risk-free investment (e.g. treasury bills). No investor should ever invest in risky products whose expected return is lower than this interest (e.g. the lottery), since there's the alternative of obtaining a higher (expected) payoff without the disadvantage of taking risks. In general, this rate changes slightly with time and is unknown, but Black \textit{et al.}, in their original model (eq.\eqref{BS2}), assumed that it remains constant throughout the option's duration and that it is known. Some authors have suggested solutions to deal with this shortcoming, providing models to replicate the behavior of interest rates~\citep{HJM}, but because option prices do not significantly depend on this value~\citep{Wilmott3}, in the remainder of this thesis we shall make the same assumptions as Black \textit{et al.} and set this rate to some constant.
+The risk-free interest rate, $r$, is the interest an investor would receive from any risk-free investment (e.g. treasury bills). No investor should ever invest in risky products whose expected return is lower than this interest (e.g. the lottery), since there's the alternative of obtaining a higher (expected) payoff without the disadvantage of taking risks. In general, this rate changes slightly with time and is unknown. Black \textit{et al.}, in their original model (eq.\eqref{BS2}), assumed that this rate is a known function of time. Some authors have suggested solutions to deal with this shortcoming, providing stochastic models to replicate the behavior of interest rates~\citep{HJM}, but because option prices do not significantly depend on this value~\citep{Wilmott3}, in the remainder of this thesis we shall set this rate to some constant.
 
-As for the stock price volatility, $\sigma$, since we will explore it to great extent in Chapter \ref{chapter:volatility}, so suffice it to say that it is a measure of the future stock price movement's uncertainty.
+As for the stock price volatility, $\sigma$, since we will explore it to great extent in \autoref{chapter:volatility}, suffice it to say for now that it is a measure of the future stock price movement's uncertainty.
 
 Some companies decide to grant their shareholders a part of the profits generated, known as \emph{dividends}. This action decreases the company's total assets, which decreases the value of stocks, changing option prices. Because this occurrence is based on human behavior, it is extremely hard to model. Furthermore, Black \textit{et al.} assumed in their models that no dividends were paid throughout the option's duration. For both these reasons, we will set dividend payment to zero in all our models.
 
@@ -174,6 +180,8 @@ One other important assumption of the BS model is that stock prices follow a sto
 dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \end{equation}
 \noindent with $\{W(t),\ t>0\}$ defining a one-dimensional Brownian motion and where we define $S_0=S(0)$ as the stock price at time $t=0$. An example of such processes is represented in \autoref{fig:GBM}.
+
+Many other diffusion processes exist, and this choice made by Black \textit{et al.} might seem a bit arbitrary, but there is actually a reason behind it. Changes in the stock price are geometric and not arithmetic. If an asset of price $\SI{1000}{\EUR}$ changed by $\SI{9}{\EUR}$, we would barely take notice. If another asset of price $\SI{10}{\EUR}$ changed by $\SI{9}{\EUR}$, the drop would be quite surprising, even though the change was the same in both assets. This seems to indicate that changes in the stock price depend on the stock price itself and justifies the choice made by Black \textit{et al.} to model stock prices using a Geometric Brownian Motion process.
 \begin{figure}[!htb]
     \centering
       \includegraphics[width=.65\columnwidth]{GBM.eps}
@@ -195,10 +203,10 @@ The results published originally by Black \textit{et al.} state that, at time $t
 &d_2=d_1-\sigma\sqrt{T}.\\
 \end{split}
 \end{equation}
-\noindent This is a very important result that can be used to precisely price European options, so long as all the parameters are exactly known (which never occurs).
+\noindent This is a very important result that can be used to precisely price European options, so long as all the parameters are exactly known and remain constant throughout the option's duration. Both assumptions are never true for any real market option, though.
 
 
-From eq.\eqref{callputBS} we can also derive the relationship between $C$ and $P$, known as the \emph{put-call parity}
+From eq.\eqref{callputBS} we can also derive the relationship between the call and put prices, $C$ and $P$, known as the \emph{put-call parity}, given by
 \begin{equation}
 C=S_0-Ke^{-rT}+P.
 \end{equation}

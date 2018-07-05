@@ -2,46 +2,43 @@
 
  \nomgroup{G}
 
-  \item [{$\alpha$}]\begingroup Angle of attack.\nomeqref {0}
+  \item [{$\sigma$}]\begingroup Stock price volatility.\nomeqref {0}
 		\nompageref{xvii}
-  \item [{$\beta$}]\begingroup Angle of side-slip.\nomeqref {0}
+  \item [{$\nu$}]\begingroup Stock price variance.\nomeqref {0}
 		\nompageref{xvii}
-  \item [{$\kappa$}]\begingroup Thermal conductivity coefficient.\nomeqref {0}
+  \item [{$\theta$}]\begingroup Model parameter set.\nomeqref {0}
 		\nompageref{xvii}
-  \item [{$\mu$}]\begingroup Molecular viscosity coefficient.\nomeqref {0}
-		\nompageref{xvii}
-  \item [{$\rho$}]\begingroup Density.\nomeqref {0}\nompageref{xvii}
 
  \nomgroup{R}
 
-  \item [{$C_D$}]\begingroup Coefficient of drag.\nomeqref {0}
+  \item [{$S$}]\begingroup Stock price.\nomeqref {0}\nompageref{xvii}
+  \item [{$r$}]\begingroup Risk-free interest rate.\nomeqref {0}
 		\nompageref{xvii}
-  \item [{$C_L$}]\begingroup Coefficient of lift.\nomeqref {0}
+  \item [{$K$}]\begingroup Option strike price.\nomeqref {0}
 		\nompageref{xvii}
-  \item [{$C_M$}]\begingroup Coefficient of moment.\nomeqref {0}
+  \item [{$T$}]\begingroup Option maturity date.\nomeqref {0}
 		\nompageref{xvii}
-  \item [{$p$}]\begingroup Pressure.\nomeqref {0}\nompageref{xvii}
-  \item [{$\bf u$}]\begingroup Velocity vector.\nomeqref {0}
+  \item [{$V$}]\begingroup Option price.\nomeqref {0}\nompageref{xvii}
+  \item [{$C$}]\begingroup Call option price.\nomeqref {0}
 		\nompageref{xvii}
-  \item [{$u,v,w$}]\begingroup Velocity Cartesian components.\nomeqref {0}
+  \item [{$P$}]\begingroup Put option price.\nomeqref {0}
 		\nompageref{xvii}
 
  \nomgroup{S}
 
-  \item [{$\infty$}]\begingroup Free-stream condition.\nomeqref {0}
+  \item [{$Euro$}]\begingroup European type option.\nomeqref {0}
 		\nompageref{xvii}
-  \item [{$i,j,k$}]\begingroup Computational indexes.\nomeqref {0}
+  \item [{$Amer$}]\begingroup American type option.\nomeqref {0}
 		\nompageref{xvii}
-  \item [{$n$}]\begingroup Normal component.\nomeqref {0}
+  \item [{$Barr$}]\begingroup Barrier type option.\nomeqref {0}
 		\nompageref{xvii}
-  \item [{$x,y,z$}]\begingroup Cartesian components.\nomeqref {0}
+  \item [{$call$}]\begingroup Call type option.\nomeqref {0}
 		\nompageref{xvii}
-  \item [{ref}]\begingroup Reference condition.\nomeqref {0}
+  \item [{$put$}]\begingroup Put type option.\nomeqref {0}
 		\nompageref{xvii}
-
- \nomgroup{T}
-
-  \item [{*}]\begingroup Adjoint.\nomeqref {0}\nompageref{xvii}
-  \item [{T}]\begingroup Transpose.\nomeqref {0}\nompageref{xvii}
+  \item [{mkt}]\begingroup Market data.\nomeqref {0}\nompageref{xvii}
+  \item [{mdl}]\begingroup Model result.\nomeqref {0}\nompageref{xvii}
+  \item [{$imp$,$i$}]\begingroup Implied (related to volatility).\nomeqref {0}
+		\nompageref{xvii}
 
 \end{thenomenclature}

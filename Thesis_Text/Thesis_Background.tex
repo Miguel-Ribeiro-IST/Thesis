@@ -91,7 +91,7 @@ Barrier options will nonetheless be implemented and studied, though no benchmark
 \section{Option Prices and Payoffs}
 It is important to emphasize the difference between an option's payoff and its profit for investors. Because options grant the right to buy/sell some asset, no investors would exercise an option if this action was disadvantageous to them (i.e. negative payoff value, which is very unlikely to occur~\citep{Wilmott}). Thus, the payoff of an option is always positive (it can also, obviously, be zero). This might sound like an arbitrage possibility (i.e. the chance of making profit without risk), but in reality options have a price that investors have to pay in order to acquire them. This means that even if the option's payoff is positive, if this value is lower than the price an investor paid to buy the option, that investor will actually lose money. The profit of an option is thus the difference between its payoff and its price, which can be negative.
 With this concept in mind, we can price options by setting their expected profit to be the same as a risk-neutral investment, (e.g. bank deposit). The price of an option can thus be deduced as it's expected future payoff, discounted back to the present
-\begin{equation}
+\begin{equation}\label{pricepayoff}
 \text{Price}(K,t^*)=e^{-rt^*}\mathbb{E}\left[\text{Payoff}(K,t^*)\right],
 \end{equation}
 \noindent where $t^*$ denotes the time at which the option is exercised and $r$ corresponds to the risk-free interest rate, which we will approach in \autoref{section:Black-Scholes Formulae}.

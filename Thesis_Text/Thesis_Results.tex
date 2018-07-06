@@ -1,19 +1,17 @@
 \chapter{Results}
 \label{chapter:results}
-In this chapter we will implement all the models described before: constant volatility, Dupire's local volatility, Heston's stochastic volatility and both static and dynamic SABR models.
+Having described the implementation of all the models introduced in \autoref{chapter:volatility} and the calibration and interpolation methods referenced in \autoref{chapter:implementation}, in this chapter we study the results of the calibration and compare all the models.
 
-With the exception of Dupire's local volatility, will perform the calibration described in \autoref{section:Model Calibration} for all models: we will minimize the cost function in eq. \eqref{cost} with the weight function shown in eq. \eqref{weight}. The model values for the implied volatilities, $\sigma_{imp,\mathrm{mdl}}$, will be obtained through the closed form solutions for each of the models. We will apply the CMA-ES optimization algorithm to find the optimal solution.
+We will calibrate the SABR and Heston models' parameters to a dataset of implied volatilities for European options with different maturities and strike prices. This data was kindly provided by \emph{BNP Paribas} and is represented in \autoref{chapter:mktdata}. As stated, the closed form solutions will be used in this calibration procedure. After the calibration, we are able to produce a function from these closed-form solutions using the models' calibrated parameters. These functions - henceforth named \emph{theoretical functions} - should, in principle, closely fit the implied volatility data.
 
-To validate the models' closed-form solutions, after finding the optimal parameters we will input them into a Monte Carlo pricer (adapted to each model), and calculate the simulated option price with each model's calibrated parameters. This price will then be converted into an implied volatility (using eq.\eqref{impvolform}) in order for the simulation to be comparable to the data and the closed form solutions. To better grasp the behavior of the simulations we will repeat them a large number of times, $N_{\mathrm{reps}}$, averaging the results to produce a function - henceforth named \emph{simulated function} -  and extracting from them the 95\% confidence intervals of the simulations - these confidence intervals are obtained by sorting the simulated implied volatilities for each strike and extracting both the 95\% highest and the 5\% lowest.
-
-
-We will fit all our functions to a dataset of implied volatilities for European options with different maturities and strike prices. This data was kindly provided by \emph{BNP Paribas} and is shown in \autoref{chapter:mktdata}.
+To validate the SABR and Heston models' closed-form solutions, after finding the optimal parameters with the calibration procedure, we will input them into a Monte Carlo pricer, adapted to each model, and calculate the simulated option prices of each calibrated model. This price will then be converted into an implied volatility (using eq.\eqref{impvolform}) in order for the simulation to be comparable to the data and the closed form solutions. To better grasp the behavior of the simulations we will repeat them a large number of times, $N_{\mathrm{reps}}$, averaging the results to produce a function - henceforth named \emph{simulated function} -  and extracting from them the 95\% confidence intervals of the simulations - these confidence intervals are obtained by sorting the simulated implied volatilities for each strike and extracting both the 95\% highest and the 5\% lowest.
 
 
-For the case of Dupire's local volatility, because it is nonparametric, no calibration is required. Instead we must perform an interpolation in order to find the implied volatility surface from the data mentioned before and, with it, find the local volatility function. From this, we can easily obtain the prices of European options from the Monte Carlo pricer described in subsections \ref{subsection:Simulating stock prices} and \ref{subsection:Pricing options from simulations}. These prices (and their implied volatilities) can then be compared to their true market values. As for the stochastic volatility models above, we will also run the Monte Carlo pricer a large number of times, $N_{\mathrm{reps}}$, to produce the simulated function and its 95\% confidence intervals.
+
+As for Dupire's local volatility data, the required Delaunay triangulation introduced in \autoref{section:Surface Interpolation (Dupire)} will be performed on the aforementioned data. The resulting interpolation will be used to obtain the local volatility surface, which will be input into a Monte Carlo pricer to generate the option price under this model's assumptions. As done for the Heston and SABR models, we will run this pricer a large number of times, $N_{\mathrm{reps}}$, to obtain the average simulated function and the 95\% confidence intervals.
 
 
-In order for the models to be comparable, we need to make sure that the same global parameters are used in all the adjustments and simulations, namely the initial stock price, $S_0$, the risk-free interest rate, $r$, the time step size (used in the Monte Carlo simulations), $\Delta t$, the number of pricer repetitions (to be averaged, producing the expected simulated function and the confidence intervals), $N_{\mathrm{reps}}$, and the number of paths simulated, $N_{\mathrm{paths}}$. Their values are shown in \autoref{tab:defaultparam}.
+In order for the models to be comparable, we need to make sure that the same global parameters are used in all the adjustments and simulations, namely the initial stock price, $S_0$, the risk-free interest rate, $r$, the number of pricer repetitions (to be averaged, producing the expected simulated function and the confidence intervals), $N_{\mathrm{reps}}$, and the time step size and the number of paths simulated, $\Delta t$ and $N_{\mathrm{paths}}$, both used in the Monte Carlo simulations. Their values are shown in \autoref{tab:defaultparam}.
 \begin{table}[H]
     \centering
         \renewcommand{\arraystretch}{0.8}
@@ -39,9 +37,9 @@ The equation that generates each stock price path is therefore given by
 dS(t)=rS(t)dt+\sigma S(t)dW(t).
 \end{equation}
 
-Because we are fitting the volatility function - which, in this case, is a constant value - to a set of volatility data - which is not constant - these adjustments are expected to badly represent the data. Any other minimally decent model is expected to outperform this constant volatility benchmark.
+As we can see in \autoref{fig:mktdata}, the implied volatility data is not constant, so we can expect the theoretical implied volatility curve (which, in this case will be a horizontal line) to fit the data very badly.
 
-With this constant volatility model, we can choose to fit the datasets with different maturities independently of one another or together in a single coupled dataset. In other words, we can do several fits, one for each maturity, or a single one, for all maturities together. The former will be useful when benchmarking the Static SABR model, since for that model the adjustments will also be performed independently (Static SABR performs badly for multiple maturities). The latter will be more appropriate when studying the remaining models - Dupire, Heston and Dynamic SABR - since these fit the whole implied volatility surface (i.e. multiple maturities together). Thus, both versions will be implemented and briefly studied.
+With this constant volatility model, we can choose to fit the datasets with different maturities independently of one another or together in a single general dataset. In other words, we can do several fits, one for each maturity, or a single one, for all maturities together. The former will be useful when benchmarking the Static SABR model, since for that model the adjustments will also be performed independently (Static SABR performs badly for multiple maturities). The latter will be more appropriate when studying the remaining models - Dupire, Heston and Dynamic SABR - since these fit the whole implied volatility surface (i.e. multiple maturities together). Thus, both versions will be implemented and briefly studied.
 
 
 \newpage
@@ -49,7 +47,7 @@ With this constant volatility model, we can choose to fit the datasets with diff
 We begin by presenting the results of fitting a constant volatility function to the sets of data with different maturities \emph{independently}.
 
 
-In \autoref{fig:ConstVol} we show the plots of each fit along with the provided market data. We also present the simulated functions and the simulations' confidence intervals.
+In \autoref{fig:ConstVol} we show the plots of each fitted implied volatility curve - the \emph{theoretical functions} - along with the provided market data. We also present the results of the Monte Carlo pricer - the \emph{simulated functions} - and the simulations' confidence intervals.
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
     \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol1.png}}
@@ -61,7 +59,7 @@ In \autoref{fig:ConstVol} we show the plots of each fit along with the provided 
   \label{fig:ConstVol}
 \end{figure}
 
-The fitted parameter, which, in this case, is only the constant implied volatility, is presented in \autoref{tab:ConstVolPar} for each of the maturities, along with the cost function's value (eq.\eqref{cost}) under this (fitted) model.
+The fitted parameter, which, in this case, is only the constant implied volatility, is presented in \autoref{tab:ConstVolPar} for each of the maturities, along with the respective cost function's value (eq.\eqref{cost}).
 
 \begin{table}[H]
     \centering
@@ -120,26 +118,25 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) 
   \label{tab:CV}
 \end{table}
 
-By observing the fit results in \autoref{tab:ConstVolPar} we see that the cost function decreases with the maturity. This is indeed what is expected, since the implied volatility surface becomes flatter as maturity increases, as can be seen from the market data (and also as we can see in \autoref{fig:DupImpV}), making the constant volatility function a better approximation in such cases, and decreasing the cost function's value.
+By observing the fit results in \autoref{tab:ConstVolPar} we see that the cost function decreases with the maturity. This is indeed what is expected, since the implied volatility surface becomes flatter as maturity increases, as can be seen from the market data (and also as we can see in \autoref{fig:DupImpV}). This makes the constant volatility function a better approximation in such cases, which decreases the cost function's value.
 
 
-One other property that we can observe is that the constant implied volatility also decreases with maturity. The reason behind this is the simple fact that earlier maturities contain higher implied volatilities, which pull the constant volatility function upwards.
+One other property that we can observe is that the constant implied volatility also decreases with maturity. The reason behind this is the simple fact that earlier maturities contain higher implied volatilities (for the strikes far from $S_0$), which pull the constant volatility function upwards.
 
 
 We now focus on the simulated results in \autoref{fig:ConstVol}.
-
 First, we can see that the theoretical functions (full red lines) clearly don't represent the market data. This is indeed what is expected. After all, if a constant volatility model was enough to price options, the more complex models would not be needed.
 
-Secondly, by comparing the theoretical and simulated functions, we must note that the simulation performs extremely well for strikes near $S_0$. Notice that the simulated function (dot-dashed blue line) perfectly follows the constant volatility theoretical result (full red line) in this region, with the confidence intervals collapsed into the simulated function indicating that all simulations produced the same result. This suggests that the simulation is working as expected.
+Secondly, by comparing the theoretical and simulated functions, we must note that the simulation performs extremely well for strikes near $S_0$. Notice that the simulated function (dot-dashed blue line) perfectly follows the constant volatility theoretical result (full red line) in this region, with the confidence intervals collapsed into the simulated function indicating that all simulations produced the same result. This suggests that the simulation is working as expected for this particular region.
 
-Thirdly, we notice that on the earliest maturity (i.e. 21 days), for strikes much larger than $S_0$ (e.g. $K=1.5S_0$), the simulated implied volatilities go to zero, even though they should remain constant. The reason behind this has already been discussed in \autoref{subsection:Pricing options from simulations} and relates to the very, very small number of paths that reach such high strikes and end up contributing to the option price (which is then converted to an implied volatility). For the case of strike $K=1.5S_0$, and maturity $T=21$ days, the number of paths that reach the strike is indeed approximately 0.25 out of 100000 - sometimes a single path is able to breach this strike, but usually none do. This problem is not observed for the remaining maturities for the simple reason that, because they are given more time to evolve, more paths are able to reach these high strikes.
-To solve solve this problem we could significantly increase the number of simulations, so that the number of paths that are able to reach these high strikes is enough to produce a valid. The problem with this solution is the very significant increase in the computation time required, which makes it impractical.
-If we lowered the number of simulated paths from 100000 paths to any other number, the problem described before would become even more aggravated, and the later maturities would also display the problem observed in the earliest maturity.
+Thirdly, we notice that on the earliest maturity (i.e. 21 days), for strikes much larger than $S_0$ (e.g. $K=1.5S_0$), the simulated implied volatilities go to zero, even though they should remain constant. The reason behind this has already been discussed in \autoref{subsection:Pricing options from simulations} and relates to the very, very small number of paths that reach such high strikes and end up contributing to the option price (which is then converted to an implied volatility). For the case of strike $K=1.5S_0$, and maturity $T=21$ days, the number of paths that reach the strike is indeed approximately $0.25$ out of $100\,000$ (i.e. one out of four Monte Carlo simulations of 100000 paths contains a single path that is able to reach succh a high strike). This problem is not observed for the remaining maturities for the simple reason that, because they are given more time to evolve, more paths are able to reach these high strikes.
+To solve this problem we could significantly increase the number of simulations, so that the number of paths that are able to reach these high strikes is enough to produce a good estimate of the option price. The problem with this solution is the very significant increase in the computation time required, which makes it impractical.
+If we lowered the number of simulated paths from $100\,000$ to any other smaller amount, the problem described before would become even more severe, and the later maturities would eventually also display the problem observed in the earliest maturity.
 
-Finally we must discuss the large confidence intervals for strikes lower than $S_0$, occurring over all maturities. To explain this we require the information presented in \autoref{fig:ImpVolPrice}, relating the implied volatility with the option's market price. We saw that the implied volatility was extremely sensitive to option prices very close to their lower bounds, $S_0-Ke^{-rT}$. If we now look, for example, at the market price of the option with strike $K=\SI{0.5}{\EUR}$ and maturity $T=21$ days, which is $C=\SI{0.500013}{\EUR}$, and we compare it with its lower bound, $S_0-Ke^{-rT}=\SI{0.5}{\EUR}$, we can clearly see that they are extremely close, with a difference of only $0.0026\%$. We can then conclude that, in this case, we are in the extremely high sensitivity region of the implied volatility functions shown in \autoref{fig:ImpVolPrice}.
-The Monte Carlo pricer behaves very well for the lower strikes since a very large number of paths contribute to the option price (the opposite of what we described before for high strikes). Despite this, because there will always be some noise associated with the simulations, the generated price is sure to present some very slight variation when executed multiple times, which is enough to cause some of the simulated implied volatilities to go to approximately zero (or to increase), which explains the large confidence intervals. For options with strikes near $S_0$ and above the market option price is much farther from its lower bound, so that we are above the high sensitivity region. Indeed, the lower bound of options with strikes equal to or above $S_0$ is 0 (assuming interest rate $r=0$).
+Finally we must discuss the large confidence intervals for strikes much lower than $S_0$, occurring over all maturities. To explain this we require the information presented in \autoref{fig:ImpVolPrice}, relating the implied volatility with the option's market price. We saw that the implied volatility was extremely sensitive to option prices very close to their lower bounds, $S_0-Ke^{-rT}$. If we now look, for example, at the market price of the option with strike $K=\SI{0.5}{\EUR}$ and maturity $T=21$ days, which is $C=0.500013\SI{}{\EUR}$, and we compare it with its lower bound, $S_0-Ke^{-rT}=\SI{0.5}{\EUR}$ (assuming the parameters shown in \autoref{tab:defaultparam}), we can clearly see that they are extremely close, with a difference of only $0.0026\%$. We can then conclude that, in this case, we are in the extremely high sensitivity region of the implied volatility functions shown in \autoref{fig:ImpVolPrice}.
+Even though the Monte Carlo pricer is expected to behave very well for the lower strikes (a very large number of paths contribute to the option price, so a low amount of noise is produced - the opposite of what we described before for high strikes), because there will always be \emph{some} noise associated with the simulations, the pricer is expected to produce some very slighty different results when executed multiple times, which is enough to cause some of the simulated implied volatilities to go to approximately zero or to increase significantly, which explains the large confidence intervals. For options with strikes near $S_0$ and above, the market option price is much farther from its lower bound, so that we are far from the high sensitivity region. Indeed, the lower bound of options with strikes equal to or above $S_0$ is 0 (assuming interest rate $r=0$).
 
-These two last problems are not inherent to the constant volatility model. Indeed they will be observed, to some extent, in all the models we will study next.
+These two last problems are not only applicable to the constant volatility model and will also be observed in all the other models.
 
 
 
@@ -147,9 +144,9 @@ These two last problems are not inherent to the constant volatility model. Indee
 \newpage
 
 \subsection{Dependent Fits}
-We now present the results obtained from the adjustment of a constant volatility function to all the implied volatility data, regardless of maturity.
+We now present the results obtained from the fit of a constant volatility function to all the implied volatility data, regardless of maturity.
 
-In \autoref{fig:ConstVol2} are shown the theoretical and simulated functions as well as the provided market data.
+In \autoref{fig:ConstVol2} we shown the theoretical and simulated functions as well as the provided market data.
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
     \subfigure[$T=21$ days]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{ConstVol12.png}}
@@ -219,7 +216,7 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) 
 
 First, when we compare the implied volatility fitted to all the maturities with the results of the independent fits (in \autoref{tab:ConstVolPar}) we see that the former is actually the average of the latter. \hl{why?}
 
-If we now compare the cost function values, we see that the cost of the dependent fit ($0.1248$), is actually larger than the sum of cost of the independent fits ($0.0635+0.0282+0.0164+0.0069=0.1150$). This is indeed expected: when fitting all maturities at once, the optimizer will find the implied volatility that minimizes the cost for all maturities, which will not be the one that minimizes the cost of each single maturity, so that the sum of the errors is higher.
+If we now compare their cost function values, we see that the cost of the dependent fit ($0.1248$), is larger than the sum of the costs of the independent fits ($0.0635+0.0282+0.0164+0.0069=0.1150$). This is indeed expected: when fitting all maturities at once, the optimizer will find the implied volatility that minimizes the cost for all maturities, which will not be the one that minimizes the cost of each single maturity.
 
 As for the plots in \autoref{fig:ConstVol2} they look very similar to those in \autoref{fig:ConstVol}, so not much more can be added regarding their analysis.
 
@@ -234,7 +231,7 @@ The stochastic differential equation for the stock price paths under the local v
 dS(t)=rS(t)dt+\sigma(S(t),t)S(t)dW(t),
 \end{equation}
 \noindent where $\sigma(S(t),t)$ can be obtained through Dupire's model, defined in \autoref{subsection:Dupire}, which is given by
-\begin{equation}
+\begin{equation}\label{dupmodds2}
 \sigma(S(t),t)=\sqrt{\frac{\displaystyle\sigma_{imp}^2+2t\sigma_{imp}\pdv{\sigma_{imp}}{T}+2r(S(t))t\sigma_{imp}\pdv{\sigma_{imp}}{K}}{\displaystyle\left(1+(S(t))d_1\sqrt{t}\pdv{\sigma_{imp}}{K}\right)^2+(S(t))^2t\sigma_{imp}\left(\pdv{^2\sigma_{imp}}{K^2}-d_1\left(\pdv{\sigma_{imp}}{K}\right)^2\sqrt{t}\right)}},
 \end{equation}
 \noindent where $d_1$ is defined as
@@ -242,7 +239,7 @@ dS(t)=rS(t)dt+\sigma(S(t),t)S(t)dW(t),
 d_1=\frac{\log(S_0/S(t))+\left(r+\frac{1}{2}\sigma_{imp}^2\right)t}{\sigma_{imp}\sqrt{t}}.
 \end{equation}
 
-As we mentioned in \autoref{section:Surface Interpolation (Dupire)}, we must produce the implied volatility surface from the market data using an interpolation algorithm. Applying the Delaunay triangulation defined earlier, we obtain the implied volatility surface shown in \autoref{fig:DupImpV}, along with its contour plot.
+As we mentioned in \autoref{section:Surface Interpolation (Dupire)}, we must produce the implied volatility surface from the market data using an interpolation algorithm. Applying the Delaunay triangulation defined earlier, we obtain the implied volatility surface, shown in \autoref{fig:DupImpV} along with its contour plot.
 From this surface we can easily extract (numerically) the gradients required for the local volatility formula.
 
 
@@ -259,8 +256,8 @@ From this surface we can easily extract (numerically) the gradients required for
 Observing this interpolated surface we see that its curvature decreases with maturity - the volatility smile becomes less prominent for later maturities.
 
 
-We now should now be able to generate the \emph{local} volatility surface. To do this, we simply evaluate the interpolated implied volatility surface, as well as all the required gradients, at multiple points $K_j$, $T_i$ to produce the local volatility $\sigma(K_j,T_i)$. The points should be uniformly spaced in a grid - with $K_min$ and $K_max$ being the smallest and largest strike $K_j$ in the grid, with intervals $\Delta K$ between the strikes, and with $T_min$ and $T_max$ the smallest and largest maturity $T_i$, with intervals $\Delta T$. These parameters are shown in \autoref{tab:DupR}.
-Interpolating again between these points we are able to generate the local volatility surface, shown in \autoref{fig:DupLocVol}. We now simply need to make a variable change $\sigma(K,T)\implies \sigma(S,t)$ to be able to input this value into eq.\eqref{dupmodds}.
+We now should now be able to generate the \emph{local} volatility surface. To do this, we simply evaluate the interpolated implied volatility surface, as well as all the required gradients, at multiple points $K_j$, $T_i$ to produce multiple local volatility values $\sigma(K_j,T_i)$ with eq.\eqref{dupmodds2}. The points should be uniformly spaced in a grid, with $K_{min}$ and $K_{max}$ being the smallest and largest strikes in the grid, with intervals $\Delta K$ between the strikes, and with $T_{min}$ and $T_{max}$ the smallest and largest maturities, with intervals $\Delta T$. These parameters are shown in \autoref{tab:DupR}.
+Interpolating again between these local volatility values we are able to generate the local volatility surface, which we show in \autoref{fig:DupLocVol}, along with its respective contour plot. We now simply need to make a variable change $\sigma(K,T)\implies \sigma(S,t)$ to be able to simulate stock price paths under this local volatility model, as we explain next.
 
 
 \begin{table}[H]
@@ -284,7 +281,9 @@ $T_{min}$(days) & $T_{max}$(days) & $\Delta T$(days) & $K_{min}$($\EUR$) & $K_{m
     \caption[Local volatility surface and corresponding contour plot of the function obtained with Dupire's formula from the interpolated implied volatility surface.]{Local volatility surface (left) and corresponding contour plot (right) of the function obtained with Dupire's formula (eq.\eqref{dupire2}) from the interpolated implied volatility surface in \autoref{fig:DupImpV}.}\label{fig:DupLocVol}
 \end{figure}   
 
-Having obtained the local volatility surface, simulating the stock price paths is quite easy. We just need evaluate the surface at the point $(S_i,t_j)$ when we are at the time step $t_j$ of the simulation with a stock price path at $S_i$. To price options, we now simply need to apply the Monte Carlo pricing algorithm. The results of such simulations is shown in \autoref{fig:Dup}, along with the confidence intervals and the original market data. To prevent volatilities from becoming too high we implemented a maximum cutoff value of $\sigma_{max}$=$\SI{1.5}{\year\tothe{-1/2}}$, limiting the volatilities obtained from the surface.
+To simulate a stock price path we just need to sample the surface at the point $(S_i,t_j)$ when we are at the time step $t_j$ of the simulation with a stock price $S_i$ and assume that value as the local volatility, to be used on the generation of the next time step. We iterate this procedure for all paths and all time steps until we reach the maturity. Having obtained all the simulated stock prices at maturity, pricing the option is done as usual.
+
+The results of these simulations are shown in \autoref{fig:Dup}, along with the confidence intervals and the original market data. To prevent volatilities from becoming too high we implemented a maximum cutoff value of $\sigma_{max}$=$\SI{1.5}{\year\tothe{-1/2}}$, limiting the volatilities sampled from the surface.
 
 \vspace{\fill}
 \newpage
@@ -301,12 +300,12 @@ Having obtained the local volatility surface, simulating the stock price paths i
 \end{figure}
 
 
-As before, we now see the very large confidence intervals for very low strikes. The cause of this behavior was identified on the constant volatility model (with independent fits). Also here we can see the low implied volatilities for high strikes in the earliest maturities. This has also already been discussed.
+As before, we now see the very large confidence intervals for very low strikes. The cause of this behavior was identified on the constant volatility model (with independent fits). We can also observe the low implied volatilities for high strikes in the earliest maturities, which has also already been discussed previously.
 
 The great improvement of Dupire's model over the constant volatility model is the presence of the implied volatility smiles in the simulated implied volatilities. Furthermore, these smiles follow the market data almost perfectly for strikes near $S_0$.
-We can therefore conclude that the model greatly outperforms the constant volatility model presented earlier.
+We can therefore conclude that the model greatly outperforms the constant volatility model presented earlier, which is unsurprising.
 
-The plots shown in \autoref{fig:Dup} can be thought of as slices of a simulated implied volatility surface. Ideally, this surface would look exactly like the one shown in \autoref{fig:DupImpV}. However, because we are now simulating the prices, there should exist some variation. Furthermore, in the regions where the pricer performs badly (i.e. large strikes for early maturities and low strikes), we expect there to be a very high amount of noise. This simulated surface is shown in \autoref{fig:DupS}, along with the simulated functions of the earlier plots.
+The simulations shown in the plots of \autoref{fig:Dup} can be thought of as slices of a simulated implied volatility surface. Ideally, this surface would look exactly like the one shown in \autoref{fig:DupImpV}. However, in the regions where the simulations behave badly (large strikes for early maturities and low strikes), we expect there to be a very high amount of noise. This simulated surface is shown in \autoref{fig:DupS}, along with the simulated functions of the earlier plots (red dashed lines) and the market data (red circles). The respective contour plot is also represented.
 
 
 
@@ -319,7 +318,7 @@ The plots shown in \autoref{fig:Dup} can be thought of as slices of a simulated 
 \end{figure}   
 
 
-As expected, the amount of noise is quite overwhelming in the regions where the Monte Carlo pricer performs badly. For the regions where the strike approaches $S_0$, the behavior is quite different and the simulations closely follow the data, as expected.
+As expected, the amount of noise is quite overwhelming in the regions where the Monte Carlo pricer performs badly. For the regions where the strike approaches $S_0$, the picture is quite different and the simulations closely follow the data, as expected.
 
 \vspace{\fill}
 \newpage
@@ -952,3 +951,5 @@ $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 \hl{in plot of implied vol vs. option price, put C mkt in axis label}
 
 \hl{put year in all bibliographic references}
+
+\hl{modify the Delaunay triangulation figure to have thicker lines}

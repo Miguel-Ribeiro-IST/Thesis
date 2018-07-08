@@ -242,7 +242,7 @@ We classify each of these points according to their fitness (i.e. the cost funct
 
 
 At each iteration, the new mean is produced from a weighted average of the points, with the weights proportional to each point's fitness.
-The method for the covariance matrix update is rather complex and depends not only on the $\mu$ best samples but also on the values of the covariance matrices used in previous iterations. All the basic equations required for the implementation of this optimizer can be found in \autoref{chapter:CMAESAlg}. For a more detailed explanation, as well as other aspects of the algorithm, see Hansen \citep{Hansen}.
+The method for the covariance matrix update is rather complex and depends not only on the $\mu$ best samples but also on the values of the covariance matrices used in previous iterations. All the basic equations required for the implementation of this optimizer can be found in \autoref{chapter:CMAESAlg}. For a more detailed explanation, as well as other aspects of the algorithm, see Hansen ~\citep{Hansen}.
 
 These sampling-classification-adaptation steps are repeated until some stopping criterion is met, such as a fixed number of iterations or an minimum error threshold.
 When this stopping criterion is verified, the mean vector of the last iteration is assumed as the optimal parameter vector, $\theta^{*}$.

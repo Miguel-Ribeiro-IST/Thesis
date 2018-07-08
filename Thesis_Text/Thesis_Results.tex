@@ -696,11 +696,10 @@ To model these functions we chose
 \end{equation}
 \noindent with $\rho_0\in[-1,1]$, $\nu_0>0$, $a>0$ and $b>0$.
 
-With these assumptions, the closed form solution of the implied volatility of options priced under this model was given in eq.\eqref{dynsabr}.
 
-The parameters used in the Dynamic SABR model are similar to those used in the Static SABR model and an easy connection can be made between them. Their influence on the implied volatility curve will therefore be the same and, for this reason, we will not consider it again here.
+The parameters used in the Dynamic SABR model are similar to those used in the Static SABR model and an easy connection can be made between them. Their influence on the implied volatility curve will therefore be the same and, for this reason, they will not be considered again here.
 
-We fitted the Dynamic SABR model to the implied volatility data for all maturities. The fitted theoretical curves (obtained with the closed-form solution) and their simulated counterparts are shown in \autoref{fig:DS}.
+We fitted the Dynamic SABR model to the implied volatility data for all maturities. The fitted theoretical curves (obtained with the closed-form solution in eq.\eqref{dynsabr}) and their simulated counterparts are shown in \autoref{fig:DS}.
 
 
 
@@ -732,16 +731,16 @@ $\alpha$ & $\beta$ & $\rho_0$ & $a$ & $\nu_0$ & $b$ & Cost \\ \midrule
 \end{table}
 
 
-We now consider the adjustments above. Observing the theoretical curves in \autoref{fig:DS} we can see that they fit the market data relatively well, especially for the later maturities. For the maturity of 21 days, the theoretical curve doesn't seem to follow the market values accurately, however. Comparing these results with those obtained with the Heston model, we see that Dynamic SABR actually performs worse.
+We now consider the adjustments above. Observing the theoretical curves in \autoref{fig:DS} we can see that they fit the market data relatively well, especially for the later maturities, though for the earlier maturities the fit doesn't appear to be so good.
 
 Considering now the simulated curves, we again see that they accurately follow the theoretical curve for the regions around $S_0$, behaving very badly for the low strike regions and for high strikes with low maturities. This has been observed before in all models and is therefore expected.
 
 If we now compare the cost function of the Dynamic SABR model (Cost$=0.0108$), shown in \autoref{tab:DSR}, with the sum of the costs of the independent fits for the Static SABR ($\Sigma_{\mathrm{Costs}}=0.000415+0.000166+0.000102+0.000055=0.000738$), in \autoref{tab:SSR}, the former is much greater than that of the latter.
 This is unsurprising, since the Static SABR fits only a small amount of data for a single maturity and Dynamic SABR attempts to model a whole surface.
 
-Comparing the cost resulting from the Heston model (Cost$=0.002529$) with that from Dynamic SABR, we see that even though both models fit the same data on a range of different maturities, Heston outperforms the Dynamic SABR quite significantly. This was expected from the comparison of the theoretical functions in Figures \ref{fig:H} and \ref{fig:DS}.
+Comparing the cost resulting from the Heston model (Cost$=0.002529$) with that from Dynamic SABR, we see that even though both models fit the same data on a range of different maturities, Heston outperforms the Dynamic SABR quite significantly. This is further corroborated by the comparison of the theoretical functions in Figures \ref{fig:H} and \ref{fig:DS}, from which it is clear that the Heston model's curves seemed to better fit the data.
 
-Finally comparing cost of the Dynamic SABR model with the constant volatility assumption for dependent fits (Cost=$=0.1248$), shown in \autoref{tab:ConstVolPar2}, the results improve by approximately $91\%$, compared to the $98\%$ improvement seen with the Heston model. Despite performing worse than Heston, the improvement against the constant volatility model is still striking.
+Finally comparing cost of the Dynamic SABR model with the constant volatility assumption for dependent fits (Cost$=0.1248$), shown in \autoref{tab:ConstVolPar2}, the results improve by approximately $91\%$, compared to the $98\%$ improvement seen with the Heston model. Despite performing worse than Heston, the improvement against the constant volatility model is still striking, though unsurprising.
 
 As we did for the Heston model, we now present the theoretical and simulated implied volatility surfaces of which the plots in \autoref{fig:DS} are slices. 
 These surfaces and their respective contour plots are shown in Figures \ref{fig:DSS} and \ref{fig:DSSSim}.
@@ -815,10 +814,10 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) 
 \newpage
 
 \section{Mishaps Found in Implementation}
-During the implementation of all the models, some problems were found. They were all solved and the models were able to perform as expected, as we saw in the previous section. For future reference, and to prevent others from repeating the same problems, we now summarize not only the problems observed but also their causes and how we were able to solve them.
+During the implementation of all the models, some problems were found. They were mostly solved and the models were able to perform as expected, as we saw in the previous section. For future reference, and to prevent others from repeating the same mistakes, we now summarize not only the problems observed but also their causes and how we were able to solve them or~at least reduce their impact.
 
 \subsection{Dupire Model}
-While implementing the Dupire model we noticed that the local volatility surface produced by the model was heavily dependent on the chosen interpolation method. Moreover, we found that it was particularly sensitive to the intervals $\Delta K$ and $\Delta T$ chosen in the interpolation. If chosen to be too large, the gradients wouldn't be able to capture the surface curvature and the local volatility surface would look unrealistic. If chosen to be too small, because we used Delaunay's triangulation method as interpolation, which creates triangular planes between three points, the second derivative would be zero if $K$, $K+\Delta K$ and $K-\Delta K$ were all evaluated inside the same triangle, which is bound to be true for the majority of points if $\Delta K$ is small enough. This would output a wrong second derivative.
+While implementing the Dupire model we noticed that the local volatility surface produced by the model was heavily dependent on the chosen interpolation method. Moreover, we found that it was particularly sensitive to the intervals $\Delta K$ and $\Delta T$ chosen in the interpolation. If chosen to be too large, the gradients wouldn't be able to capture the surface curvature and the local volatility surface would look unrealistic. If chosen to be too small, because we used Delaunay's triangulation method as interpolation, which creates triangular planes between three points, the second derivative would be (wrongly) zero if $K$, $K+\Delta K$ and $K-\Delta K$ were all evaluated inside the same triangle, which is bound to be true for the majority of points if $\Delta K$ is small enough.
 Thus, the intervals $\Delta K$ and $\Delta T$ have to be chosen very carefully.
 
 As an example, in \autoref{fig:DupBad} we present how different choices for these intervals affects the local volatility surface.
@@ -832,13 +831,13 @@ As an example, in \autoref{fig:DupBad} we present how different choices for thes
 \end{figure} 
 
 There exist two possible alternatives to solve this problem.
-On the one hand, we could significantly increase the number of data points. This would ensure that the triangle size from Delaunay's triangulation is small enough for the numerical second derivative to produce realistic results. The problem is that more data isn't always available, and this alternative may not be possible.
-The other possible path, which was the one chosen in this work, is to test several values for the intervals and observe which of them produces the most realistic gradients and the most realistic local volatility surface. This alternative has the caveat that the choice for the intervals is very subjective.
+On the one hand, we could significantly increase the number of data points. This would ensure that the size of the planar triangles from Delaunay's triangulation is small enough for the numerical derivatives to produce realistic results. The problem is that more data isn't always available, and this alternative may not be possible.
+The other possible path, which was the one implemented, is to test several values for the intervals and observe which of them produces the most realistic gradients and the most realistic local volatility surface. This alternative has the caveat that the choice for the intervals is very subjective and that we lose a great deal of robustness because an interval that is appropriate for a given data set is expected to perform poorly on other data sets.
 
 \subsection{Heston Model}
 In the Heston model, we need to evaluate some integrals to find the closed-form solutions of call prices.
-These integrals are evaluated between $0$ and $\infty$, and because they are not analytically solvable, they have to be calculated numerically.
-We thus obviously need to define some numerical limits for the integrals, since numerical integration until $\infty$ is impossible. Cui \textit{et al.}\citep{Cui} showed that these integrals only have to be evaluated until a $u\approx100$, because the integrands decrease fast enough that they become negligible after this point. During our implementation, this threshold proved to be insufficient when we evaluated the integrals for the earliest maturity with strikes far below and far above $S_0$. For such regions, some erratic oscillating behavior was found, which we represent in \autoref{fig:Hbad}.
+These integrals are evaluated between $0$ and $\infty$, and, because they are not analytically solvable, they have to be calculated numerically.
+We thus obviously need to define some numerical limits for the integrals, since numerical integration until $\infty$ is impossible. Cui \textit{et al.}~\citep{Cui} showed that usually these integrals only have to be evaluated until $\approx100$, because the integrands decrease fast enough that they become negligible after this point. During our implementation, this threshold proved to be insufficient when we evaluated the integrals for the earlier maturities with strikes far below and far above $S_0$. For such regions, some erratic oscillating behavior was found, which we represent in \autoref{fig:Hbad}. This behavior was not described by Cui \textit{et al.} because they didn't study the implied volatility curve for such high/low strikes.
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
@@ -848,16 +847,16 @@ We thus obviously need to define some numerical limits for the integrals, since 
     \caption[Bla bla bla bla]{Bla bla bla bla}\label{fig:Hbad}
 \end{figure} 
 
-This problem was solved simply by increasing the integration limits until $xxxx$ \hl{put integration limit here}.
+This problem was solved simply by increasing the numerical integration limits until $xxxx$ \hl{put integration limit here}.
 
 
 
 \subsection{SABR Model}
-One problem related to the SABR models is the fact that stock prices might become negative, which is unrealistic. This event is very rare and was usually only found in one of the simulated paths out of 100000.
-The reason why this problem only occurred for the SABR models and not for Heston is due to the fact that the volatility process in the former is not mean reverting.
-This detail enables the volatility process to evolve without restrain. If the volatility process becomes extremely large, the jumps in the stock price process become also very large. In the limit, it is perfectly possible that one of these jumps decreases the stock price process past zero. For the Heston model this problem is not observed because the volatility process (we used the variance process, but they are equivalent) is mean-reverting, so that the volatility doesn't evolve unrestrained.
+One problem related to the SABR models is the fact that stock prices might become negative, which is clearly absurd. This event is very rare and was usually only found in one of the simulated paths out of 100000.
+The reason why this problem only occurred for the SABR models and wasn't observed in Heston is due to the fact that the volatility process in the former is not mean reverting.
+This detail enables the volatility process to evolve without restrain. If the volatility process becomes extremely large, the jumps in the stock price process become equally extremely large. In the limit, it is perfectly possible that one of these jumps decreases the stock price process past zero. For the Heston model this problem is not observed because the volatility process (we used the variance process, but they are equivalent) is mean-reverting, so that the volatility doesn't evolve unrestrained.
 
-This negative price shortcoming is more problematic in the SABR model because in the stock price process one of the terms is a stock price with an exponent $\beta$. If $\beta\neq0$ and $\beta\neq1$ and $S(t)<0$, this process will become complex, and the whole pricing procedure fails.
+This negative price shortcoming is more problematic in the SABR model because, in the stock price process, one of the terms is a stock price with an exponent $\beta$. If $\beta\neq0$ and $\beta\neq1$ and $S(t)<0$, the resulting $S(t+\Delta t)$ will become imaginary, and the whole pricing procedure fails.
 
 To solve this problem we simply cut the negative stock price paths to zero, preventing them from becoming negative.
 
@@ -877,12 +876,14 @@ S(t+\Delta t)=\sigma(t).\left(\ldots\right)+\ldots,
 \noindent the results obtained become wrong.
 This is expected because the whole correlation mechanism, relating the two stochastic processes through the variable $\rho$, falls apart when we use the first formula.
 
+Though this might seem trivial, some care must be taken when implementing the Monte Carlo pricer to use the updating equations in the correct order.
+
 \section{Barrier Options}
 
 The Monte Carlo algorithms developed to price the European options in the previous sections under each of the models can be easily adapted to price Barrier options.
-We are only required to check at each time step if the stock price process crossed the barrier level or not and, at the maturity, only keep the processes that did. This discretization poses a problem when pricing Barrier options, because these contracts assume a continuous time frame. This has been discussed in \autoref{subsection:Simulating stock prices}. Furthermore, as we discussed in \autoref{subsection:Pricing options from simulations}, the problem we observed before with the low number of simulated paths contributing to the price of an option with a very high strike and an early maturity is further aggravated with this Exotic option contract.
+We are only required to check at each time step if the stock price process crossed the barrier level or not and, at the maturity, only keep the processes that did. This discretization poses a problem when pricing Barrier options, because these contracts assume a continuous time frame. This has been discussed in \autoref{subsection:Simulating stock prices}. Furthermore, as we discussed in \autoref{subsection:Pricing options from simulations}, the problem we observed before with the low number of simulated paths contributing to the prices of options with very high strikes and an early maturities is further aggravated with this Exotic option contract.
 
-Despite these expected shortcomings, we priced several Barrier options with different barrier levels and under the all the different models described before. In these simulations we assumed a single maturity of 21 days and the calibrated parameters for each of the models, shown earlier in this Chapter. The results of these simulations are shown in \autoref{fig:Barrier}.
+Despite these expected shortcomings, we priced several Barrier options with different barrier levels and using all the different models described before. In these simulations we assumed a single maturity of 21 days and the calibrated parameters for each of the models, shown earlier in this chapter. The results of these simulations are shown in \autoref{fig:Barrier}.
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
@@ -916,8 +917,9 @@ Despite these expected shortcomings, we priced several Barrier options with diff
 
 \hlc[red]{explain why static sabr only works for one maturity}
 
-\hlc[red]{why does rho decrease with maturity in static sabr}
+\hlc[red]{why does rho/nu decrease with maturity in static sabr}
 
+\hlc[red]{why does implied volatility surface become flatter with maturity}
 
 \hl{check notation:}
 

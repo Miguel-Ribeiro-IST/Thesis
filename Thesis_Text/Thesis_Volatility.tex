@@ -150,7 +150,7 @@ The second derivative results in
 \end{equation}
 \noindent assuming $p(S,t,\infty,T)=0$.
 
-We now make a brief detour to derive the Fokker-Planck equation (following the procedure shown in \citep{Wilmott}), which we require for the next steps. This equation is widely used in stochastic calculus, and is applicable to stochastic processes in general.
+We now make a brief detour to derive the Fokker-Planck equation (following the procedure shown in ~\citep{Wilmott}), which we require for the next steps. This equation is widely used in stochastic calculus, and is applicable to stochastic processes in general.
 To make its proof simpler, we make a simplification assuming that the stochastic process is a stock price following a trinomial model: at each time step, the stock price can only increase or decrease by an amount $dS$, with probabilities $\phi^+$ and $\phi^-$, respectively, or remain the same, with probability $(1-\phi^+-\phi^-)$. The resulting equation still works, however, for any general stochastic process.
 
 
@@ -363,7 +363,7 @@ We now define the forward price as $F(t)=S(t)e^{r(T-t)}$, and introduce the vari
 \begin{equation}\label{hestonproof2}
 -\pdv{C^*}{\tau}+\frac{1}{2}\nu\pdv[2]{C^*}{x}+\rho\eta\nu\pdv{C^*}{x}{\nu}+\frac{1}{2}\eta^2\nu\pdv[2]{C^*}{\nu}-\frac{1}{2}\nu\pdv{C^*}{x}+\kappa(\overline{\nu}-\nu)\pdv{C^*}{\nu}=0,
 \end{equation}
-\noindent which has a solution of the form \citep{duffie}
+\noindent which has a solution of the form ~\citep{duffie}
 \begin{equation}\label{hestonproof3}
 C^*(x,\nu,\tau)=Ce^{rT}=\left(S_0P_1-e^{-rT}KP_0\right)e^{rT}=K\left[e^xP_1(x,\nu,\tau)-P_0(x,\nu,\tau)\right].
 \end{equation}

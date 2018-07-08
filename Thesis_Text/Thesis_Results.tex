@@ -134,7 +134,7 @@ To solve this problem we could significantly increase the number of simulations,
 If we lowered the number of simulated paths from $100\,000$ to any other smaller amount, the problem described before would become even more severe, and the later maturities would eventually also display the problem observed in the earliest maturity.
 
 Finally we must discuss the large confidence intervals for strikes much lower than $S_0$, occurring over all maturities. To explain this we require the information presented in \autoref{fig:ImpVolPrice}, relating the implied volatility with the option's market price. We saw that the implied volatility was extremely sensitive to option prices very close to their lower bounds, $S_0-Ke^{-rT}$. If we now look, for example, at the market price of the option with strike $K=\SI{0.5}{\EUR}$ and maturity $T=21$ days, which is $C=0.500013\SI{}{\EUR}$, and we compare it with its lower bound, $S_0-Ke^{-rT}=\SI{0.5}{\EUR}$ (assuming the parameters shown in \autoref{tab:defaultparam}), we can clearly see that they are extremely close, with a difference of only $0.0026\%$. We can then conclude that, in this case, we are in the extremely high sensitivity region of the implied volatility functions shown in \autoref{fig:ImpVolPrice}.
-Even though the Monte Carlo pricer is expected to behave very well for the lower strikes (a very large number of paths contribute to the option price, so a low amount of noise is produced - the opposite of what we described before for high strikes), because there will always be \emph{some} noise associated with the simulations, the pricer is expected to produce some very slighty different results when executed multiple times, which is enough to cause some of the simulated implied volatilities to go to approximately zero or to increase significantly, which explains the large confidence intervals. For options with strikes near $S_0$ and above, the market option price is much farther from its lower bound, so that we are far from the high sensitivity region. Indeed, the lower bound of options with strikes equal to or above $S_0$ is 0 (assuming interest rate $r=0$).
+Even though the Monte Carlo pricer is expected to be a great estimator for the lower strikes (a very large number of paths contribute to the option price, so a low amount of noise is produced - the opposite of what we described before for high strikes), because there will always be \emph{some} noise associated with the simulations, the pricer is expected to produce some very slighty different results when executed multiple times, which is enough to cause some of the simulated implied volatilities to go to approximately zero or to increase significantly, which explains the large confidence intervals. For options with strikes near $S_0$ and above, the market option price is much farther from its lower bound, so that we are far from the high sensitivity region. Indeed, the lower bound of options with strikes equal to or above $S_0$ is 0 (assuming interest rate $r=0$).
 
 These two last problems are not only applicable to the constant volatility model and will also be observed in all the other models.
 
@@ -253,10 +253,10 @@ From this surface we can easily extract (numerically) the gradients required for
 \end{figure}   
 
 
-Observing this interpolated surface we see that its curvature decreases with maturity - the volatility smile becomes less prominent for later maturities.
+Observing this interpolated surface we see that its curvature decreases with maturity - the volatility smile becomes less prominent for later maturities - which can also be observed in the provided data.
 
 
-We now should now be able to generate the \emph{local} volatility surface. To do this, we simply evaluate the interpolated implied volatility surface, as well as all the required gradients, at multiple points $K_j$, $T_i$ to produce multiple local volatility values $\sigma(K_j,T_i)$ with eq.\eqref{dupmodds2}. The points should be uniformly spaced in a grid, with $K_{min}$ and $K_{max}$ being the smallest and largest strikes in the grid, with intervals $\Delta K$ between the strikes, and with $T_{min}$ and $T_{max}$ the smallest and largest maturities, with intervals $\Delta T$. These parameters are shown in \autoref{tab:DupR}.
+We are now be able to generate the \emph{local} volatility surface. To do this, we simply evaluate the interpolated implied volatility surface, as well as all the required gradients, at multiple points $K_j$, $T_i$ to produce multiple local volatility values $\sigma(K_j,T_i)$ with eq.\eqref{dupmodds2}. The points should be uniformly spaced in a grid, with $K_{min}$ and $K_{max}$ being the smallest and largest strikes in the grid, with intervals $\Delta K$ between the strikes, and with $T_{min}$ and $T_{max}$ the smallest and largest maturities, with intervals $\Delta T$. These parameters are shown in \autoref{tab:DupR}.
 Interpolating again between these local volatility values we are able to generate the local volatility surface, which we show in \autoref{fig:DupLocVol}, along with its respective contour plot. We now simply need to make a variable change $\sigma(K,T)\implies \sigma(S,t)$ to be able to simulate stock price paths under this local volatility model, as we explain next.
 
 
@@ -281,7 +281,7 @@ $T_{min}$(days) & $T_{max}$(days) & $\Delta T$(days) & $K_{min}$($\EUR$) & $K_{m
     \caption[Local volatility surface and corresponding contour plot of the function obtained with Dupire's formula from the interpolated implied volatility surface.]{Local volatility surface (left) and corresponding contour plot (right) of the function obtained with Dupire's formula (eq.\eqref{dupire2}) from the interpolated implied volatility surface in \autoref{fig:DupImpV}.}\label{fig:DupLocVol}
 \end{figure}   
 
-To simulate a stock price path we just need to sample the surface at the point $(S_i,t_j)$ when we are at the time step $t_j$ of the simulation with a stock price $S_i$ and assume that value as the local volatility, to be used on the generation of the next time step. We iterate this procedure for all paths and all time steps until we reach the maturity. Having obtained all the simulated stock prices at maturity, pricing the option is done as usual.
+To simulate a stock price path we need to sample the surface at the point $(S_i,t_j)$ when we are at the time step $t_j$ of the simulation with a stock price $S_i$ and assume that value as the local volatility, to be used on the generation of the next stock price value, $S_{i+1}$. We iterate this procedure for all paths until we reach the maturity. Having obtained all the simulated stock prices at maturity, pricing the option is done as usual.
 
 The results of these simulations are shown in \autoref{fig:Dup}, along with the confidence intervals and the original market data. To prevent volatilities from becoming too high we implemented a maximum cutoff value of $\sigma_{max}$=$\SI{1.5}{\year\tothe{-1/2}}$, limiting the volatilities sampled from the surface.
 
@@ -300,7 +300,7 @@ The results of these simulations are shown in \autoref{fig:Dup}, along with the 
 \end{figure}
 
 
-As before, we now see the very large confidence intervals for very low strikes. The cause of this behavior was identified on the constant volatility model (with independent fits). We can also observe the low implied volatilities for high strikes in the earliest maturities, which has also already been discussed previously.
+As before, we now see the very large confidence intervals for very low strikes. The cause of this behavior was identified on the constant volatility model (with independent fits). We can also observe the low implied volatilities for high strikes in the earliest maturities, which has also already been discussed.
 
 The great improvement of Dupire's model over the constant volatility model is the presence of the implied volatility smiles in the simulated implied volatilities. Furthermore, these smiles follow the market data almost perfectly for strikes near $S_0$.
 We can therefore conclude that the model greatly outperforms the constant volatility model presented earlier, which is unsurprising.
@@ -374,22 +374,22 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) 
 
 \newpage
 \section{Static SABR Model}
-As we saw before, the Static SABR model is defined as
+As we saw before, in the Static SABR model stock prices and volatilities are governed by the stochastic differential equations
 \begin{equation}
 dS(t)=rS(t)dt+e^{-r(T-t)(1-\beta)}\sigma(t)(S(t))^\beta dW_1(t),
 \end{equation}
 \begin{equation}
 d\sigma(t)=\nu\sigma(t) dW_2(t),
 \end{equation}
-\noindent with $\alpha=\sigma(0)$ and with $W_1(t)$ and $W_2(t)$ having a constant correlation of $\rho$.
+\noindent with $\alpha=\sigma(0)$ and where $W_1(t)$ and $W_2(t)$ have a constant correlation of $\rho$.
 
-The closed form solution, shown in eq.\eqref{sabr}, enables us to obtain the theoretical implied volatilities of options priced under this model and will be used in the calibration process.
+The closed-form solution, shown in eq.\eqref{sabr}, enables us to obtain the theoretical implied volatilities of options priced under this model and will be used in the calibration process.
 
-Before calibrating the model to the market data, we should study the influence of each parameter of this model on the shape of the implied volatility curve, in order to better interpret the results. This influence is represented in \autoref{fig:SSparam}, where we vary a single parameter at a time, keeping all the others constant, thus directly observing that parameter's influence.
+Before calibrating the model to the market data, we should study the influence of each parameter of this model on the shape of the implied volatility curve, in order to better interpret the results. This influence is represented in \autoref{fig:SSparam}, where we vary one parameter at a time, keeping all the others constant, thus directly observing that parameter's influence.
 
 
 We should note that the influence of the parameters is more complicated than we show here. On the one hand, their impact depends on the maturity. However, for this effect to become evident, we would have to repeat all the plots in \autoref{fig:SSparam} for several maturities, which would simply become too cumbersome and is out of the scope of this thesis.
-On the other hand, the parameters have correlated effects on the curve shape. These influences would be quite difficult to represent. Furthermore, they are discussed in the original article by Hagan~\citep{Hagan}, and will, for these reasons, not be discussed here.
+On the other hand, the parameters have combined effects on the curve shape. These influences would be quite difficult to represent. Furthermore, they are discussed in the original article by Hagan~\citep{Hagan}, and will, for these reasons, not be discussed here.
 That being said, we can still have a general view of each parameter's impact on the curve.
 
 \vspace{\fill}
@@ -406,18 +406,21 @@ That being said, we can still have a general view of each parameter's impact on 
   \label{fig:SSparam}
 \end{figure}
 
-In Figure \autoref{SSa} we see that the parameter $\alpha$, which corresponds to the initial value of the volatility process, has quite an impact on the implied volatility curve. This parameter essentially controls the height of the curve. This is indeed expected, because the implied volatility and the stochastic (local) volatility are inherently related. Increasing $\alpha$ is expected to shift the volatility process to higher values, thus increasing the implied volatility.
+In Figure \autoref{SSa} we see that the parameter $\alpha$, which corresponds to the initial value of the volatility process, has quite an impact on the implied volatility curve. We can see that this parameter seems to control the height of the curve. This is indeed expected, because the implied volatility and the stochastic (local) volatility are inherently related. Increasing $\alpha$ is expected to shift the volatility process to higher values, thus increasing the implied volatility.
 
-The influence of the parameter $\beta$, which is an exponent in the stock price process, is represented in Figure \autoref{SSb}. The impact of this parameter seems to be almost negligible. Indeed, at a single point in time, the implied volatility curve barely changes, but this parameter becomes very important when time passes and the stock prices move (as they do when being simulated), because it controls how the curve shifts when such movements occur. If the stock price increases, the implied volatility curve at that time should shifts to the right. For $\beta=0$, the curve also shifts downwards, whereas for $\beta=1$ it doesn't. This behavior is studied in detail in the original article by Hagan~\citep{Hagan}.
+The influence of the parameter $\beta$, which is an exponent in the stock price process, is represented in Figure \autoref{SSb}. The impact of this parameter seems to be almost negligible. Indeed, at a single point in time, the implied volatility curve barely depends on this value, but this parameter becomes very important when time passes and the stock prices change. Hagan \textit{et al.}~\citep{Hagan} show that $\beta$ controls how the curve shifts when the stock prices move: if the stock price increases, the implied volatility curve at that time should shift to the right; for $\beta=0$, the curve also shifts downwards, whereas for $\beta=1$ it doesn't.
 Despite this, because in Static SABR we are only fitting data for a single maturity, this parameter should barely have any influence in the resulting implied volatility function, though it will become quite relevant in the Dynamic SABR model.
 
 In Figure \autoref{SSr} is represented the effect of the parameter $\rho$, the correlation between the stock price and the volatility processes.
-We can see that this parameter impacts the skewness of the implied volatility curve. Because this parameter relates the stock price and volatility, in the case of a negative $\rho$ when the prices increase (decrease), the volatilities decrease (increase), so that options with higher (lower) strikes have lower (higher) associated volatilities. This justifies why we have a lower implied volatility for higher strikes when the correlation is negative.
+We can see that this parameter impacts the skewness of the implied volatility curve. Because this parameter relates the stock price and volatility, in the case of a negative $\rho$ when the prices increase (decrease), the volatilities decrease (increase), so that options with higher (lower) strikes have lower (higher) associated volatilities. This justifies why we have a lower implied volatility for higher strikes when the correlation is negative. The inverse logic can be applied for the positive $\rho$ curve observed.
 
 Finally, the impact of the parameter $\nu$, the volatility of the volatility process, is shown in Figure \autoref{SSn}. This parameter seems to control the curvature of the implied volatility curve. It should be clear that higher values of $\nu$ result in greater changes in the volatility process, enabling, at times, the volatility to become quite large. This allows the stock price process to evolve quite erratically, thus making it easier for stock prices to reach higher values, making high strike options more valuable. This effect pushes their implied volatility upwards. The inverse effect also holds and a low $\nu$ will force the stochastic volatility process to become quite limited, preventing the stock prices from changing too much, and restraining them from reaching high strikes, pulling the implied volatility curve downwards.
 
 
 We now present the results of the calibration as well as the simulations in \autoref{fig:SS}.
+
+\vspace{\fill}
+\newpage
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
@@ -430,8 +433,8 @@ We now present the results of the calibration as well as the simulations in \aut
   \label{fig:SS}
 \end{figure}
 
-As mentioned before, the Static SABR model is only expected to work for data on options with a single maturity. For this reason, the fits were done independently of one another.
-The parameters obtained in the calibration for each of the maturities are shown in \autoref{tab:SSR}.
+As mentioned before, the Static SABR model is only expected to work for data on options with a single maturity. For this reason, we fitted the model to each maturity independently.
+The parameters obtained in the calibration for each maturity are shown in \autoref{tab:SSR}.
 
 \begin{table}[H]
     \centering
@@ -450,22 +453,22 @@ The parameters obtained in the calibration for each of the maturities are shown 
 \end{table}
 
 
-We now analyze the results of this model. Observing the plots in \autoref{fig:SS} we see that the theoretical function, obtained by the closed form solution of the Static SABR model, fits the data extremely well through the whole range of strikes and for each of the maturities.
+We now analyze the results of this model. Observing the plots in \autoref{fig:SS} we see that the theoretical function (full red line), obtained by the closed form solution of the Static SABR model, fits the data extremely well through the whole range of strikes and for each of the maturities.
 
 Though the model seems to fit almost perfectly to the data, the fits may not be very robust. The reason for this is that we have an extremely small amount of data points (7 for each maturity) for the comparatively large number of parameters used (4 parameters in total). This will cause our model to overfit the data.
 
 As for the simulated function, we note that it very closely follows the theoretical curve in the regions around $S_0$, indicating that the Monte Carlo pricer implementation was done correctly. This feature doesn't hold at the high strike region in the first maturity and the low strike regions of all maturities for the same reasons described earlier.
 
-Examining now the calibrated parameters in \autoref{tab:SSR} we first note that the parameter $\alpha$ doesn't seem to vary too much between maturities, which is expected, since it controls the height of the implied volatility curve, which doesn't seem to change too much in the plots.
+Examining now the calibrated parameters in \autoref{tab:SSR} we first note that the parameter $\alpha$ doesn't seem to vary too much between maturities, which is expected, since it controls the height of the implied volatility curve and this doesn't seem to change too much in the plots.
 
-The parameter $\beta$ appears to change wildly between maturities, though this is not surprising since, as we saw, this parameter doesn't significantly affect the shape of the implied volatility function.
+The parameter $\beta$ appears to change wildly between maturities, though this is not surprising since, as we saw, this parameter doesn't significantly affect the shape of the implied volatility function, meaning that different values of $\beta$ would fit the data equally well.
 
 As for the parameter $\rho$, we first note that it is always negative, which is expected from reality. It also seems to decrease with time \hl{why?}.
 
-Finally, the parameter $\nu$ also seems to decrease with time. This is no surprise as the curvature of the implied volatility function is expected to decrease with time, with the function becoming increasingly horizontal.
+Finally, the parameter $\nu$ also seems to decrease with time. This is no surprise as the curvature of the implied volatility function is expected to decrease with time, with the function becoming increasingly horizontal, as can be seen from the provided data.
 
 
-If we now compare the cost function values of the Static SABR model in \autoref{tab:SSR} with the independently fitted results of the constant volatility assumption in \autoref{tab:ConstVolPar2} we clearly see that they improve very significantly. The cost decreases between 99.2 and 99.4\%, which is an extreme improvement. This is no surprise, since the constant volatility model was expected to perform very badly. These costs should be examined carefully, however, due to the overfitting mentioned earlier - for such a low amount of data relative to the great number of parameters we can find combinations of parameters that decrease the costs significantly, though they might not have any real interpretation.
+If we now compare the cost function values of the Static SABR model in \autoref{tab:SSR} with the independently fitted results of the constant volatility model in \autoref{tab:ConstVolPar} we clearly see that they improve very significantly. For all maturities, the costs decrease between 99.2 and 99.4\%, which is an extreme improvement. This is no surprise, since the constant volatility model was expected to perform very badly. These costs should be considered carefully, however, due to the overfitting mentioned earlier - for such a low amount of data (compared to the high number of parameters) we can find many possible combinations of parameters that fit the data as well as the parameters found by the optimizer.
 
 \begin{table}[H]
 \centering
@@ -540,18 +543,18 @@ As we did for the Static SABR model, we now study the influence of each paramete
   \label{fig:Hparam}
 \end{figure}
 
-The parameters $\kappa$, $\overline{\nu}$ and $\nu_0$ are inherently related and their influence can only be understood if all are considered at the same time. The parameter $\overline{\nu}$ is the mean value of the variance (\emph{not} the volatility! $\nu(t)=\sigma^2(t)$), $\nu_0$ denotes the initial variance, and $\kappa$ is the mean-reversion rate, which controls how fast the variance tends to its mean value.
+The parameters $\kappa$, $\overline{\nu}$ and $\nu_0$ are inherently related to one another and their influence can only be understood if all are considered at the same time. The parameter $\overline{\nu}$ is the mean value of the variance (\emph{not} the volatility! $\nu(t)=\sigma^2(t)$), $\nu_0$ denotes the initial variance, and $\kappa$ is the mean-reversion rate, which controls how fast the variance tends to its mean value.
 
-If the parameter $\kappa$ is very large, we expect the variance process to converge very fast to its mean value, $\overline{\nu}$. This means that the variance process $\nu(t)$ is not able to change significantly, as it is stuck at $\overline{\nu}$, remaining roughly constant. For this reason, options priced with such parameters would have an almost constant \emph{volatility}, and their implied volatility curve would thus be a horizontal line equal to the square root of $\overline{\nu}$.
+If the parameter $\kappa$ is very large, we expect the variance process to converge very fast to its mean value, $\overline{\nu}$. This means that the variance process $\nu(t)$ is not able to change significantly, as it is stuck at $\overline{\nu}$, remaining roughly constant. For this reason, options priced with such parameters would have an almost constant \emph{volatility}, and their implied volatility curve would tend to a horizontal line at the square root of $\overline{\nu}$ (i.e. the mean volatility).
 
-On the other hand, if $\kappa$ is small, the parameter $\overline{\nu}$ will barely have any influence at all on the implied volatility curve, and the variance process is able to change almost without restrain. This means that the parameter $\nu_0$ will have a large impact on the behavior of the variance process. A large $\nu_0$ enables the variance process to reach higher values (as does the equivalent process of volatility) so that the implied volatility of options priced with these parameters is higher. A small $\nu_0$ would have the opposite effect, decreasing the implied volatility.
+On the other hand, if $\kappa$ is small, the parameter $\overline{\nu}$ will barely have any influence at all on the implied volatility curve, and the variance process is able to change almost without restrain. This means that the parameter $\nu_0$ will have a large impact on the behavior of the variance process. A large $\nu_0$ enables the variance process to reach higher values so that the implied volatility of options priced with these parameters is higher. A small $\nu_0$ would have the opposite effect, decreasing the implied volatility.
 
 If we now have a moderate value for $\kappa$, both parameters $\overline{\nu}$ and $\nu_0$ are expected to have some impact on the implied volatility curve.
 
 By examining Figures \autoref{Hnb} and \autoref{Hn0}, with $\kappa=10$ (which is not too large nor too small), we see that the implied volatility curves increase/decrease as we increase/decrease each of the parameters, which is precisely what we expect.
 If we now look at Figure \autoref{Hk}, we can confirm that a large value for $\kappa$ (orange dot-dashed line) will produce an almost constant implied volatility curve around the square root of $\overline{\nu}$ ($\sqrt{\overline{\nu}}=\sqrt{0.1}=...$).
 \hl{change values of overline nu and nu0, change phrase below}
-For small values of $\kappa$ (blue full line), the influence of the parameter $\nu_0$ becomes apparent (notice that the curve is pulled downwards since $\nu_0$ is lower than $\overline{\nu}$), and we no longer see the horizontal implied volatility curve from before, which is also expected.
+For small values of $\kappa$ (blue full line), the influence of the parameter $\nu_0$ becomes more apparent - notice that the curve is pulled downwards since $\nu_0$ is lower than $\overline{\nu}$ -, and we no longer see the horizontal implied volatility curve from before, which is also expected.
 
 The parameters $\eta$ and $\rho$ in the Heston model control the volatility of the variance process and the correlation of this process with the stock price process, respectively. They are very much related to the parameters $\nu$ and $\rho$ of the Static SABR process, respectively, and their impact on the implied volatility curve is the same. For this reason, they will not be discussed again here.
 
@@ -586,17 +589,17 @@ $\kappa$ & $\overline{\nu}$ & $\nu_0$ & $\rho$ & $\eta$ & Cost \\ \midrule
 
 
 We now study the results obtained. Examining the plots in \autoref{fig:H} we see that the theoretical curves fit the data surprisingly well throughout all the maturities.
-This is especially surprising when we note that the adjustment is made for the entire data set, with all the different maturities.
+This is especially surprising when we note that the adjustment is made for the entire data set, with all the different maturities, unlike the Static SABR model, which was only fitted for single maturities.
 
-Observing the simulated curves and their respective confidence intervals we again see that they fit the closed-form solutions extremely well in the region around $S_0$, indicating that the simulations agree with the predictions. The large confidence intervals described before for the high strikes and early maturities and for the low strikes can also be found here. Because their cause is the same, they will not be described again.
+Observing the simulated curves and their respective confidence intervals we again see that they fit the closed-form solutions extremely well in the region around $S_0$, indicating that the simulations agree with the predictions of the closed form solutions. The large confidence intervals described before for the high strikes and early maturities and for the low strikes can also be found here. Because their cause is the same, they will not be described again.
 
 Considering now the cost function value for the fitted parameters (Cost$=0.002529$), shown in \autoref{tab:HR}, and comparing it to the sum of the costs of each of the independent fits in the Static SABR model ($\Sigma_{\mathrm{Costs}}=0.000415+0.000166+0.000102+0.000055=0.000738$), in \autoref{tab:SSR}, we note that the cost of the former is higher than that of the latter.
 This is unsurprising, as the adjustments with the Static SABR were done independently of one another, and a better fit is therefore possible.
 
-Comparing now the cost of the Heston model with that of the constant volatility assumption for dependent fits (Cost=$=0.1248$), shown in \autoref{tab:ConstVolPar2}, we see that our results improve by approximately $98\%$. The improvement is astonishing and completely justifies why the Heston model is so widely preferred over the constant volatility simplification.
+Comparing now the cost of the Heston model with that of the constant volatility assumption for dependent fits (Cost$=0.1248$), shown in \autoref{tab:ConstVolPar2}, we see that our results improve by approximately $98\%$. The improvement is astonishing and completely justifies why the Heston model is so widely preferred over the constant volatility simplification.
 
 
-Both the simulated and theoretical implied volatility curves shown in the plots of \autoref{fig:H} for different maturities can be thought of as slices of a implied volatility surfaces (one simulates, another theoretical). Similarly to what we did for the Dupire model, we again represent these surfaces and their respective contour plots in Figures \ref{fig:HS} and \ref{fig:HSSim}.
+Both the simulated and theoretical implied volatility curves shown in the plots of \autoref{fig:H} for different maturities can be thought of as slices of implied volatility surfaces (one simulated, another theoretical). Similarly to what we did for the Dupire model, we again represent these surfaces and their respective contour plots in Figures \ref{fig:HS} and \ref{fig:HSSim}.
 
 
 \begin{figure}[H]
@@ -618,7 +621,7 @@ Both the simulated and theoretical implied volatility curves shown in the plots 
 
 
 The surfaces and contour plots shown in Figures \ref{fig:HS} and \ref{fig:HSSim} should, ideally, replicate the surface and contour plot shown in \autoref{fig:DupImpV}, since these last correspond to the real (\emph{interpolated}) implied volatility surface. The simulated theoretical surface mimics the real function very well, which is expected, since the fits adjusted greatly to the data.
-As for the simulated surface, we can see the expected noisy region for the low strikes. The region around $S_0$ fits rather well, however, as we can see from the comparison of the contour plots.
+As for the simulated surface, we can see the expected noisy region for the low strikes. The region around $S_0$ is very well fitted though, as we can see from the comparison of the contour plots.
 
 
 \begin{table}[H]
@@ -675,7 +678,7 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) 
 
 \section{Dynamic SABR Model}
 
-The Dynamic SABR Model was defined as
+We now consider the Dynamic SABR Model, for which the stock price and volatility processes were assumed to follow
 \begin{equation}
 dS(t)=rS(t)dt+e^{-r(T-t)(1-\beta)}\sigma(t) (S(t))^\beta dW_1(t),
 \end{equation}
@@ -809,6 +812,7 @@ $T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) 
 
 
 
+\newpage
 
 \section{Mishaps Found in Implementation}
 During the implementation of all the models, some problems were found. They were all solved and the models were able to perform as expected, as we saw in the previous section. For future reference, and to prevent others from repeating the same problems, we now summarize not only the problems observed but also their causes and how we were able to solve them.
@@ -821,8 +825,8 @@ As an example, in \autoref{fig:DupBad} we present how different choices for thes
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{DSSSim.png}}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{DSSCSim.png}}
+    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{Placeholder.png}}
+    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{Placeholder.png}}
   \end{subfigmatrix}
     \caption[Bla bla bla bla]{Bla bla bla bla}\label{fig:DupBad}
 \end{figure} 
@@ -838,8 +842,8 @@ We thus obviously need to define some numerical limits for the integrals, since 
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{DSSSim.png}}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{DSSCSim.png}}
+    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{Placeholder.png}}
+    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{Placeholder.png}}
   \end{subfigmatrix}
     \caption[Bla bla bla bla]{Bla bla bla bla}\label{fig:Hbad}
 \end{figure} 
@@ -882,8 +886,8 @@ Despite these expected shortcomings, we priced several Barrier options with diff
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{DSSSim.png}}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{DSSCSim.png}}
+    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{Placeholder.png}}
+    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{Placeholder.png}}
   \end{subfigmatrix}
     \caption[Bla bla bla bla]{Bla bla bla bla}\label{fig:Barrier}
 \end{figure} 
@@ -900,6 +904,8 @@ Despite these expected shortcomings, we priced several Barrier options with diff
 
 \hlc[green]{ask prof Dilao why we use the forward gradient wrt time in the dupire interpolation gradient}
 
+\hlc[green]{put implied volatility applied to barrier options}
+
 \hlc[red]{why is the coupled constant implied volatility the average of the independent fits of the constant implied vols?}
 
 \hlc[red]{dynamic sabr exponential functions for rho should match the data for the individual fits}
@@ -909,6 +915,8 @@ Despite these expected shortcomings, we priced several Barrier options with diff
 \hlc[red]{how is extrapolation done in dupires model}
 
 \hlc[red]{explain why static sabr only works for one maturity}
+
+\hlc[red]{why does rho decrease with maturity in static sabr}
 
 
 \hl{check notation:}

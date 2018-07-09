@@ -5,15 +5,15 @@ HestonVol=@(K,T,kappa,nubar,nu0,rho,chi)HestonPrice(K,T,1,0,kappa,nubar,nu0,rho,
 K=(0.4:0.01:1.6);
 
 nubar=0.5^2;
-nu0=0.5^2;
-rho=0;
+nu0=0.2^2;
+rho=-0.5;
 chi=1;%eta!!!
 kappa=10;
 
 %%{
 kappa1=1;
-kappa2=25;
-kappa3=1000;
+kappa2=10;
+kappa3=100;
 for i=1:size(K,2)
     HV1(i)=HestonVol(K(i),2/12,kappa1,nubar,nu0,rho,chi);
     HV2(i)=HestonVol(K(i),2/12,kappa2,nubar,nu0,rho,chi);
@@ -24,7 +24,7 @@ lg={['$\kappa$=',num2str(kappa1)],['$\kappa$=',num2str(kappa2)],['$\kappa$=',num
 %}
 
 %{
-nubar1=0.01;
+nubar1=0.1;
 nubar2=0.25;
 nubar3=0.5;
 for i=1:size(K,2)
@@ -37,7 +37,7 @@ lg={['$\overline{\nu}$=',num2str(nubar1)],['$\overline{\nu}$=',num2str(nubar2)],
 %}
 
 %{
-nu01=0.01;
+nu01=0.1;
 nu02=0.25;
 nu03=0.5;
 for i=1:size(K,2)
@@ -103,8 +103,8 @@ function result=HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,PriceVol)
 %We need the characteristic function, depicted in function "CharFuncHeston"
 fun1=@(u)real(exp(-1i.*u.*log(K))./(1i.*u.*S0.*exp(r.*T)).*CharFuncHeston(u-1i,T,S0,r,kappa,nubar,nu0,rho,chi));
 fun2=@(u)real(exp(-1i.*u.*log(K))./(1i.*u).*CharFuncHeston(u,T,S0,r,kappa,nubar,nu0,rho,chi));
-P1=1/2+1/pi.*integral(fun1,0,500);
-P2=1/2+1/pi.*integral(fun2,0,500);
+P1=1/2+1/pi.*integral(fun1,0,400);
+P2=1/2+1/pi.*integral(fun2,0,400);
 call=S0.*P1-exp(-r.*T).*K.*P2; %call option price
 
 if PriceVol=="price"   %if desired output is a price, return this result

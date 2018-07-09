@@ -539,7 +539,7 @@ As we did for the Static SABR model, we now study the influence of each paramete
     \subfigure[Dependence on $\eta$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{Heta.eps}\label{He}}
         \subfigure[Dependence on $\rho$]{\includegraphics[width=0.49\linewidth,trim={0.25cm 0.45cm 1.1cm 1.4cm},clip]{Hrho.eps}\label{Hr}}
   \end{subfigmatrix}
-  \caption[Dependence of the implied volatility curve on each of the Heston model parameters.]{Dependence of the implied volatility curve on each of the Heston model parameters. The default parameters used were $S_0=1\EUR$, $T=42$ days and $r=0$. Furthermore, on all plots, except when the dependence on a parameter is represented, the parameters used were $\kappa=10$, $\overline{\nu}=0.1$, $\nu_0=0.1$, $\eta=1$ and $\rho=-0.5$.}
+  \caption[Dependence of the implied volatility curve on each of the Heston model parameters.]{Dependence of the implied volatility curve on each of the Heston model parameters. The default parameters used were $S_0=1\EUR$, $T=42$ days and $r=0$. Furthermore, on all plots, except when the dependence on a parameter is represented, the parameters used were $\kappa=10$, $\overline{\nu}=0.25$, $\nu_0=0.04$, $\eta=1$ and $\rho=-0.5$.}
   \label{fig:Hparam}
 \end{figure}
 
@@ -552,8 +552,7 @@ On the other hand, if $\kappa$ is small, the parameter $\overline{\nu}$ will bar
 If we now have a moderate value for $\kappa$, both parameters $\overline{\nu}$ and $\nu_0$ are expected to have some impact on the implied volatility curve.
 
 By examining Figures \autoref{Hnb} and \autoref{Hn0}, with $\kappa=10$ (which is not too large nor too small), we see that the implied volatility curves increase/decrease as we increase/decrease each of the parameters, which is precisely what we expect.
-If we now look at Figure \autoref{Hk}, we can confirm that a large value for $\kappa$ (orange dot-dashed line) will produce an almost constant implied volatility curve around the square root of $\overline{\nu}$ ($\sqrt{\overline{\nu}}=\sqrt{0.1}=...$).
-\hl{change values of overline nu and nu0, change phrase below}
+If we now look at Figure \autoref{Hk}, we can confirm that a large value for $\kappa$ (orange dot-dashed line) will produce an almost constant implied volatility curve around the square root of $\overline{\nu}$ ($\sqrt{\overline{\nu}}=\sqrt{0.25}=0.5$).
 For small values of $\kappa$ (blue full line), the influence of the parameter $\nu_0$ becomes more apparent - notice that the curve is pulled downwards since $\nu_0$ is lower than $\overline{\nu}$ -, and we no longer see the horizontal implied volatility curve from before, which is also expected.
 
 The parameters $\eta$ and $\rho$ in the Heston model control the volatility of the variance process and the correlation of this process with the stock price process, respectively. They are very much related to the parameters $\nu$ and $\rho$ of the Static SABR process, respectively, and their impact on the implied volatility curve is the same. For this reason, they will not be discussed again here.
@@ -824,10 +823,12 @@ As an example, in \autoref{fig:DupBad} we present how different choices for thes
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{Placeholder.png}}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{Placeholder.png}}
+    \subfigure[Surface Plot, $\Delta K=0.2$]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{Dup_MS_1.png}}
+    \subfigure[Contour Plot, $\Delta K=0.2$]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{Dup_MS_1C.png}}
+        \subfigure[Surface Plot, $\Delta K=0.025$]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{Dup_MS_2.png}}
+    \subfigure[Contour Plot, $\Delta K=0.025$]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{Dup_MS_2C.png}}
   \end{subfigmatrix}
-    \caption[Bla bla bla bla]{Bla bla bla bla}\label{fig:DupBad}
+    \caption[Influence of $\Delta K$ on the local volatility surface.]{Influence of $\Delta K$ on the local volatility surface.}\label{fig:DupBad}
 \end{figure} 
 
 There exist two possible alternatives to solve this problem.
@@ -837,17 +838,17 @@ The other possible path, which was the one implemented, is to test several value
 \subsection{Heston Model}
 In the Heston model, we need to evaluate some integrals to find the closed-form solutions of call prices.
 These integrals are evaluated between $0$ and $\infty$, and, because they are not analytically solvable, they have to be calculated numerically.
-We thus obviously need to define some numerical limits for the integrals, since numerical integration until $\infty$ is impossible. Cui \textit{et al.}~\citep{Cui} showed that usually these integrals only have to be evaluated until $\approx100$, because the integrands decrease fast enough that they become negligible after this point. During our implementation, this threshold proved to be insufficient when we evaluated the integrals for the earlier maturities with strikes far below and far above $S_0$. For such regions, some erratic oscillating behavior was found, which we represent in \autoref{fig:Hbad}. This behavior was not described by Cui \textit{et al.} because they didn't study the implied volatility curve for such high/low strikes.
+We thus obviously need to define some upper limits for the integrals, since numerical integration until $\infty$ is impossible. Cui \textit{et al.}~\citep{Cui} showed that usually these integrals only have to be evaluated until $\approx100$, because the integrands decrease fast enough that they become negligible after this point. During our implementation, this threshold proved to be insufficient when we evaluated the integrals for the earlier maturities with strikes far below and far above $S_0$. For such regions, some erratic oscillating behavior was found, which we represent in \autoref{fig:Hbad}. This behavior was not described by Cui \textit{et al.} because they didn't study the implied volatility curve for such high/low strikes.
+
+
 
 \begin{figure}[H]
-  \begin{subfigmatrix}{2}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{Placeholder.png}}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{Placeholder.png}}
-  \end{subfigmatrix}
-    \caption[Bla bla bla bla]{Bla bla bla bla}\label{fig:Hbad}
-\end{figure} 
+    \centering
+      \includegraphics[width=.65\columnwidth]{HBad.png}
+      \caption[Comparison between the theoretical curves obtained with different upper integration limits.]{Comparison between the theoretical curves obtained with different upper integration limits, namely using the values $100$ (green dot-dashed line) and $400$ (red full line) as limits.}\label{fig:Hbad}
+    \end{figure}
 
-This problem was solved simply by increasing the numerical integration limits until $xxxx$ \hl{put integration limit here}.
+This problem was solved simply by increasing the upper integration limits to $400$, for which the oscillating behavior wasn't found.
 
 
 
@@ -873,7 +874,7 @@ instead of the correct
 \begin{equation}
 S(t+\Delta t)=\sigma(t).\left(\ldots\right)+\ldots,
 \end{equation}
-\noindent the results obtained become wrong.
+\noindent the simulations deviate significantly from the theoretical predictions.
 This is expected because the whole correlation mechanism, relating the two stochastic processes through the variable $\rho$, falls apart when we use the first formula.
 
 Though this might seem trivial, some care must be taken when implementing the Monte Carlo pricer to use the updating equations in the correct order.
@@ -907,6 +908,8 @@ Despite these expected shortcomings, we priced several Barrier options with diff
 
 \hlc[green]{put implied volatility applied to barrier options}
 
+\hl{keep dupire's results table or not. they are the results for simulations not theoretical predictions}
+
 \hlc[red]{why is the coupled constant implied volatility the average of the independent fits of the constant implied vols?}
 
 \hlc[red]{dynamic sabr exponential functions for rho should match the data for the individual fits}
@@ -927,6 +930,7 @@ $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 
 \hl{put units in fitted parameters}
 
+\hl{put proof of lower bounds for the option prices}
 
 \hl{in the plots of the chapters background and implementation, use dashed and dot-dashed lines}
 
@@ -936,9 +940,7 @@ $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 
 \hl{check number of decimal places in the parameters tables (in particular for the cost function value)}
 
-\hl{in multiple volatilities plot, check the label}
-
-\hl{explain how the  lower bound volatility sensitivity plot was obtained}
+\hl{explain how the lower bound volatility sensitivity plot was obtained}
 
 \hl{explain what C means in the lower bound volatility sensitivity plot}
 
@@ -950,16 +952,9 @@ $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 
 \hl{change the 3d surface captions of the blue circles to something else}
 
-\hl{in dupire's results table, the implied volatilities should have subscript "sim" instead of "mdl"}
-
-\hl{replot the parameter influence in Heston}
-
 \hl{put 95 percent confidence intervals}
 
 \hl{put proof of option price lower bound}
 
 \hl{in plot of implied vol vs. option price, put C mkt in axis label}
 
-\hl{put year in all bibliographic references}
-
-\hl{modify the Delaunay triangulation figure to have thicker lines}

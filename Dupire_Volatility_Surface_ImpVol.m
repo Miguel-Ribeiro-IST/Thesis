@@ -76,6 +76,7 @@ set(get(gca,'YLabel'),'rotation',360/(2*pi)*atan(y(2)/y(1)))
 figure
 contourf(X,Y,SXY,25)
 pbaspect([1.5 1 1])
+caxis([0 1])
 xlim([0.4,1.6])
 ylim([1/12,0.5])
 xlabel('K/S_0');
@@ -117,6 +118,7 @@ set(get(gca,'YLabel'),'rotation',360/(2*pi)*atan(y(2)/y(1)))
 figure
 contourf(X,Y,interp2,25)
 pbaspect([1.5 1 1])
+caxis([0 1])
 xlabel('K/S_0');
 ylabel('T (days)');
 xlim([0.4,1.6])

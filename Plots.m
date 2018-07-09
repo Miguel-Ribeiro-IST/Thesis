@@ -73,7 +73,8 @@ hold on;
 
 plot(0:dt:1,S1(:,:)','LineWidth',1.25);
 
-legend({'\sigma=0.05 yr^{-0.5}','\sigma=0.1 yr^{-0.5}','\sigma=0.2 yr^{-0.5}'},'Location','northeast','FontSize',11)
+h = get(gca,'Children');
+legend([h(1) h(3) h(2)],{'\sigma=0.05 yr^{-0.5}','\sigma=0.1 yr^{-0.5}','\sigma=0.2 yr^{-0.5}'},'Location','northeast','FontSize',11)
   
 
 set(gca,'fontsize',12)
@@ -302,7 +303,7 @@ xlim([0,0.6])
 ylim([10^-2,10])
 set(gca, 'YScale', 'log')
 
-xlabel('C(€)');
+xlabel('C_{mkt}(€)');
 ylabel('\sigma_{imp}(yr^{-1/2})')
 %xticks(S0-K*exp(-r*T));
 %xticklabels({'S_0-Ke^{(-rT)}'})

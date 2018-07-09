@@ -150,47 +150,50 @@ The second derivative results in
 \end{equation}
 \noindent assuming $p(S,t,\infty,T)=0$.
 
-We now make a brief detour to derive the Fokker-Planck equation (following the procedure shown in ~\citep{Wilmott}), which we require for the next steps. This equation is widely used in stochastic calculus, and is applicable to stochastic processes in general.
-To make its proof simpler, we make a simplification assuming that the stochastic process is a stock price following a trinomial model: at each time step, the stock price can only increase or decrease by an amount $dS$, with probabilities $\phi^+$ and $\phi^-$, respectively, or remain the same, with probability $(1-\phi^+-\phi^-)$. The resulting equation still works, however, for any general stochastic process.
+We now make a brief digression to derive the Fokker-Planck equation (following the procedure shown in Wilmott~\citep{Wilmott3}), which we require for the next steps. This equation is widely used in stochastic calculus, and is applicable to stochastic processes in general.
+To make its proof simpler, we make a simplification assuming that the stochastic process is a stock price following a trinomial model: at each time step $\delta t$, the stock price can only increase or decrease by an amount $\delta S$, with probabilities $\phi^+$ and $\phi^-$, respectively, or remain the same, with probability $(1-\phi^+-\phi^-)$. The resulting equation still works, however, for any general stochastic process.
 
 
 Assuming the trinomial model, the expected value of the change is given by
 \begin{equation}
-\phi^+dS+(1-\phi^+-\phi^-).0+\phi^-(-dS)=(\phi^+-\phi^-)dS,
+\phi^+\delta S+(1-\phi^+-\phi^-).0+\phi^-(-\delta S)=(\phi^+-\phi^-)\delta S,
 \end{equation}
 \noindent and its variance is approximately given by
 \begin{equation}
-(dS)^2(\phi^++\phi^--(\phi^+-\phi^-)^2)\approx (\phi^++\phi^-)(dS)^2
+(\delta S)^2(\phi^++\phi^--(\phi^+-\phi^-)^2)\approx (\phi^++\phi^-)(\delta S)^2
 \end{equation}
-\noindent where we take only the first order terms. The expected value of the change of a GBM can be thought of as its drift term (i.e. $rSdt$), and the variance is its stochastic term squared (i.e. $(\sigma SdW)^2=\sigma^2S^2dt$), so that we have
+\noindent where we take only the first order terms. The expected value of the change of a GBM can be thought of as its drift term (i.e. $rS\delta t$), and the variance is its stochastic term squared (i.e. $(\sigma SdW)^2=\sigma^2S^2\delta t$), so that we have
 \begin{equation}
 \begin{split}
-rSdt&=(\phi^+-\phi^-)dS;\\
-\sigma^2S^2dt&=(\phi^++\phi^-)(dS)^2,
+rS\delta t&=(\phi^+-\phi^-)\delta S;\\
+\sigma^2S^2\delta t&=(\phi^++\phi^-)(\delta S)^2,
 \end{split}
 \end{equation}
 \noindent from which we can derive the probabilities $\phi^+$ and $\phi^-$ as
 \begin{equation}
 \begin{split}
-\phi^+&=\frac{1}{2}\frac{dt}{dS^2}(rSdS+\sigma^2S^2);\\
-\phi^-&=\frac{1}{2}\frac{dt}{dS^2}(-rSdS+\sigma^2S^2).
+\phi^+(S,t)&=\frac{1}{2}\frac{\delta t}{\delta S^2}(rS\delta S+\sigma^2S^2);\\
+\phi^-(S,t)&=\frac{1}{2}\frac{\delta t}{\delta S^2}(-rS\delta S+\sigma^2S^2).
 \end{split}
 \end{equation}
 
-We can now move backwards and derive the probability of reaching the price $S'$ at time $t'$ having started at the previous time $t'-dt$ with some (unknown) price $S$, which could be either $S'+dS$, $S'-dS$ or $S'$ (assuming a trinomial movement). This probability is indeed the probability density, $ p(S,t,S',T) $ and can be derived as
+We can now move backwards and derive the probability of reaching the price $S'$ at time $t'$ having started at the previous time $t'-\delta t$ with some (unknown) price $S$, which could be either $S'+\delta S$, $S'-\delta S$ or $S'$ (assuming a trinomial movement). Applying the same logic as before, the probability of reaching $S'$ at time $t'$, having started at $S$ at time $t$, is the same as the probability of being at $S'-\delta S$ at time $t'-\delta t$ and moving up, plus the probability of being at $S'+\delta S$ at time $t'-\delta t$ and moving down plus the probability of being at $S'$ at time $t'-\delta t$ and remaining at the same value. We can thus derive the transition probability density, $ p(S,t,S',t')$ as
 \begin{equation}
-p(S,t,S',T)=\phi^-p(S'+dS,t-dt,S',T)+(1-\phi^+-\phi^-)(S',t-dt,S',T)+\phi^+p(S'-dS,t-dt,S',T).
+\begin{split}
+p(S,t,S',t')=&\phi^-(S'+\delta S,t'-\delta t)p(S,t,S'+\delta S,t'-\delta t)\\
+&+(1-\phi^+(S',t'-\delta t)-\phi^-(S',t'-\delta t))p(S,t,S',t'-\delta t)\\
+&+\phi^+(S'-\delta S,t'-\delta t)p(S,t,S'-\delta S,t'-\delta t)
+\end{split}
 \end{equation}
 \noindent If we expand each term on its Taylor series around point $(S',t')$, we get
 \begin{equation}
 \begin{split}
-p(S,t,S',T)=&\ \phi^-\left(p(S',t,S',T)+dS\frac{dp}{dS'}+\frac{1}{2}(dS)^2\frac{d^2p}{dS^2}-dt\frac{dp}{dt'}\right)\\
-&+(1-\phi^+-\phi^-)\left(p(S',t,S',T)-dt\frac{dp}{dt'}\right)\\
-&+\phi^+\left(p(S',t,S',T)-dS\frac{dp}{dS'}+\frac{1}{2}(dS)^2\frac{d^2p}{dS^2}-dt\frac{dp}{dt'}\right)\\
-=&\frac{1}{2}\frac{dt}{dS'^2}\sigma^2S'^2(dS)^2\frac{d^2p}{dS'^2}-\frac{dt}{dS'^2}rS'(dS)^2\frac{dp}{dS'},
+p(S,t,S',t')=&\ \phi^-(S'+\delta S,t'-\delta t)\left(p(S,t,S',t')+\delta S\pdv{p}{S'}+\frac{1}{2}(\delta S)^2\pdv{^2p}{S^2}-\delta t\pdv{p}{t'}\right)\\
+&+(1-\phi^+(S',t'-\delta t)-\phi^-(S',t'-\delta t))\left(p(S,t,S',t')-\delta t\pdv{p}{t'}\right)\\
+&+\phi^+(S'-\delta S,t'-\delta t)\left(p(S,t,S',t')-\delta S\pdv{p}{S'}+\frac{1}{2}(\delta S)^2\pdv{^2p}{S^2}-\delta t\pdv{p}{t'}\right),
 \end{split}
 \end{equation}
-\noindent from which we can derive the famous Fokker-Planck equation (with rather sloppy notation) as
+\noindent from which, collecting all the terms, we can derive the famous Fokker-Planck equation~\citep{Wilmott3} (with rather sloppy notation) as
 \begin{equation}\label{FokkerPlanck}
 \pdv{p}{T}=\frac{1}{2}\pdv{^2(\sigma^2S'^2p)}{S'^2}-\pdv{(rS'p)}{S'}.
 \end{equation}
@@ -354,7 +357,20 @@ g=\frac{\xi-\alpha}{\xi+\alpha}.
 \begin{proof}
 We will follow the derivation presented in Gatheral~\citep{gatheral} with slight changes of variables, for consistency.
 
-We begin by defining the (call) option's value equation (from Itô's Lemma) as
+We begin by defining Itô's Lemma for a function $V$ (such as the price of an option) dependent on the behavior of two diffusion processes $X$ and $Y$ (such as the stock price and variance processes, but also applicable to two different stock price processes), which is given by
+\begin{equation}
+dV=\pdv{V}{t}dt+\pdv{V}{X}dX+\pdv{V}{Y}dY+\frac{1}{2}\sigma_X^2\pdv[2]{V}{X}dt+\rho\sigma_X\sigma_Y\pdv{V}{X}{Y}dt+\frac{1}{2}\sigma_Y^2\pdv[2]{V}{Y}dt,
+\end{equation}
+\noindent where we have assumed that the two diffusion processes are defined as
+\begin{equation}
+\begin{split}
+&dX=\mu_X(X,Y,t)dt+\sigma_X(X,Y,t)dW_X;\\
+&dY=\mu_Y(X,Y,t)dt+\sigma_Y(X,Y,t)dW_Y,
+\end{split}
+\end{equation}
+\noindent where $W_X$ and $W_Y$ have a correlation of $\rho$.
+
+If we apply this lemma (as well as the usual non-arbitrage arguments) to the price of a call option's value, assuming the diffusion processes to be the stock price and variance defined in eqs.\eqref{hestons} and \eqref{hestonv}, we arrive at
 \begin{equation}\label{hestonproof1}
 \pdv{C}{t}+\frac{1}{2}\nu S^2\pdv[2]{C}{S}+\rho\eta\nu S\pdv{C}{\nu}{S}+\frac{1}{2}\eta^2\nu\pdv[2]{C}{\nu}+rS\pdv{C}{S}-rC+\kappa(\overline{\nu}-\nu)\pdv{C}{\nu}=0.
 \end{equation}

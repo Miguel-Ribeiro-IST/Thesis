@@ -36,8 +36,8 @@ B=B(B(:,1)<=times(matur),:);
 %[alpha, rho0, nu0, a, b, beta]
 x0 = [0.2, -0.42, 2.45, 1.14,   2.62,   0.75];
 lb = [0,   -1,   0,   0,   0,   0];
-ub = [5,   1,    5,   25, 25, 1];
-%{
+ub = [5,   1,    5,   100, 100, 1];
+%%{
 optimvars=Optimizer(S0,B,r,x0,OptAlg,lb,ub);
 alpha=optimvars(1);
 rho0=optimvars(2);
@@ -178,8 +178,8 @@ for i=1:size(K,1)
     mn=mean(DV_tmp,1)';
     if i==2 || i==4 || i==6 || i==12
         DV2(f,:)=mn;
-        DV2max(f,:)=quantile(DV_tmp,0.9,1);
-        DV2min(f,:)=quantile(DV_tmp,0.1,1);
+        DV2max(f,:)=quantile(DV_tmp,0.95,1);
+        DV2min(f,:)=quantile(DV_tmp,0.05,1);
         plot3(K2,ones(1,size(K2,2))*T(i,1),DV2(f,:),'-.','LineWidth',2,'Color',[0.9500    0.200    0.1])
         hold on;
         f=f+1;
@@ -219,6 +219,7 @@ set(get(gca,'YLabel'),'rotation',360/(2*pi)*atan(y(2)/y(1)))
 figure
 contourf(K,T,DV,25)
 pbaspect([1.5 1 1])
+caxis([0 1])
 xlim([0.4,1.6])
 ylim([0.5/12,0.5+0.5/12])
 xlabel('K/S_0');
@@ -269,7 +270,7 @@ for iter=1:matur
     pbaspect([1.5 1 1])
     
     h = get(gca,'Children');
-    lgd=legend([h(4) h(3) h(2) h(1)],{'Market Data','Theoretical Function','Simulated Function (mean)','90% Confidence Interval'},'Location','northeast','FontSize',11);
+    lgd=legend([h(4) h(3) h(2) h(1)],{'Market Data','Theoretical Function','Simulated Function (mean)','95% Confidence Interval'},'Location','northeast','FontSize',11);
     title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
     set(gca,'Children',[h(4) h(2) h(3) h(1)])
     
@@ -389,6 +390,7 @@ set(get(gca,'YLabel'),'rotation',360/(2*pi)*atan(y(2)/y(1)))
 figure
 contourf(K,T,SV,25)
 pbaspect([1.5 1 1])
+caxis([0 1])
 xlabel('K/S_0');
 ylabel('T (days)');
 yticks([1/12,2/12,3/12,4/12,5/12,6/12])

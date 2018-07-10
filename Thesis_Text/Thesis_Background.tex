@@ -220,3 +220,50 @@ C&\geq \max\left[S_0-Ke^{-rT},0\right];\\
 P&\geq \max\left[Ke^{-rT}-S_0,0\right].
 \end{split}
 \end{equation}
+
+\begin{proof}
+Consider two portfolios, A and B, with the following composition:
+\begin{itemize}
+  \item[] Portfolio A: one European call option plus an amount $Ke^{-rT}$ in cash
+  \item[] Portfolio B: one stock
+\end{itemize}
+With portfolio A, we invest the cash at the risk-free rate so that, at maturity, it reaches $K$. At the maturity, if $S_T>K$, we use the cash to exercise the option, buying the stock, and sell it immediately after for $S_T$. If $S_T<K$, the option expires worthless, and we are left with the cash $K$. Thus, the payoff of this portfolio is $\max[S_T,K]$. On the other hand, the payoff of portfolio B at the maturity is $S_T$, which is always equal to or smaller than that of portfolio A (i.e. portfolio A is always worth more than B). We can thus conclude that
+\begin{equation}
+C+Ke^{-rT}\geq S_0.
+\end{equation}
+
+We also note that the payoff of an option is always positive, so that its value is always greater than 0.
+
+Joining these two conclusions, we obtain the result presented in eq.\eqref{bound}.
+\end{proof}
+
+As we did for European call and put options, we can equally derive the theoretical prices of Barrier options, changing the boundary condition to incorporate the barrier level~\citep{taleb}. The resulting \emph{up-and-in call} Barrier option price is given by
+\begin{equation}
+C_{Barr}=S_0\left(N(d_3)+b\left(N(d_4)-N(d_5)\right)\right)-Ke^{-r(T-t)}\left(N(d_6)+a\left(N(d_7)-N(d_8)\right)\right),
+\end{equation}
+\noindent where we define the variables $a$, $b$ and $d_3$ through $d_8$ as
+\begin{equation}
+a=\left(\frac{B}{S_0}\right)^{-1+\frac{2r}{\sigma^2}},
+\end{equation}
+\begin{equation}
+b=\left(\frac{B}{S_0}\right)^{1+\frac{2r}{\sigma^2}},
+\end{equation}
+\begin{equation}
+d_3=\frac{\log(S_0/B)+(r+\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+\end{equation}
+\begin{equation}
+d_4=\frac{\log(S_0/B)-(r+\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+\end{equation}
+\begin{equation}
+d_5=\frac{\log(S_0K/B^2)-(r+\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+\end{equation}
+\begin{equation}
+d_6=\frac{\log(S_0/B)+(r-\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+\end{equation}
+\begin{equation}
+d_7=\frac{\log(S_0/B)-(r-\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+\end{equation}
+\begin{equation}
+d_8=\frac{\log(S_0K/B^2)-(r-\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+\end{equation}
+\noindent where $B$ defines the barrier level, at which the option becomes activated.

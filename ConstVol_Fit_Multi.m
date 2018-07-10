@@ -88,8 +88,8 @@ for j=1:repetitions
     Mdl_tmp(j,:)=SimVol(K');
 end
 Mdl=mean(Mdl_tmp);
-Mdlmax90=quantile(Mdl_tmp,0.95,1);
-Mdlmin10=quantile(Mdl_tmp,0.05,1);
+Mdlmax90=quantile(Mdl_tmp,0.975,1);
+Mdlmin10=quantile(Mdl_tmp,0.025,1);
 
 
 
@@ -118,7 +118,7 @@ ylabel('\sigma_{imp} (yr^{-1/2})')
 pbaspect([1.5 1 1])
 
 h = get(gca,'Children');
-lgd=legend([h(4) h(3) h(2) h(1)],{'Market Data','Theoretical Function','Simulated Function (mean)','95% Confidence Interval'},'Location','northeast','FontSize',11);
+lgd=legend([h(4) h(3) h(2) h(1)],{'Market Data','Theoretical Function','Simulated Function (mean)','95% Confidence Band'},'Location','northeast','FontSize',11);
 title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
 set(gca,'Children',[h(4) h(2) h(3) h(1)])
 end

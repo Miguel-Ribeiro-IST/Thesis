@@ -48,13 +48,15 @@ interp2=interp(X,Y);
 
 %%{
 figure
-scatter3(SB(:,2),SB(:,1),SB(:,3),30,'LineWidth',0.5,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
+scatter3(SB(:,2),SB(:,1),SB(:,3),30,'LineWidth',1.5,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
 hold on;
 surf(X,Y,SXY);
+
 s.EdgeAlpha=0.6;
 s.FaceAlpha=0.85;
 shading interp
 axis([MinK MaxK MinT MaxT 0 1])
+caxis([0 1])
 box on;
 grid on;
 xlabel('K/S_0');
@@ -93,6 +95,7 @@ set(gca,'fontsize',12)
 figure
 surf(X,Y,interp2);
 axis([MinK MaxK MinT MaxT 0 1])
+caxis([0 1])
 s.EdgeAlpha=0.6;
 s.FaceAlpha=0.85;
 shading interp

@@ -20,8 +20,8 @@ OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
 SimPoints=false;
-M=100000;
-repetitions=100;
+M=1000;
+repetitions=10;
 %L=T*252*2
 
 
@@ -37,7 +37,7 @@ B=B(B(:,1)<=times(matur),:);
 x0 = [0.2, -0.42, 2.45, 1.14,   2.62,   0.75];
 lb = [0,   -1,   0,   0,   0,   0];
 ub = [5,   1,    5,   100, 100, 1];
-%%{
+%{
 optimvars=Optimizer(S0,B,r,x0,OptAlg,lb,ub);
 alpha=optimvars(1);
 rho0=optimvars(2);
@@ -165,7 +165,7 @@ times=unique(B(:,1));   %array with all maturity dates
 K2=0.4:0.01:1.6;
 Mdl=zeros(matur,size(K2,2));
 
-scatter3(B(:,2),B(:,1),B(:,3),30,'LineWidth',0.5,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
+scatter3(B(:,2),B(:,1),B(:,3),30,'LineWidth',1.5,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
 hold on;
 SimVol=@(K,T)Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,K',"vol");
 [K,T] = meshgrid(K2,0.5/12:0.5/12:0.5+0.5/12); %create the grid to be evaluated
@@ -178,8 +178,8 @@ for i=1:size(K,1)
     mn=mean(DV_tmp,1)';
     if i==2 || i==4 || i==6 || i==12
         DV2(f,:)=mn;
-        DV2max(f,:)=quantile(DV_tmp,0.95,1);
-        DV2min(f,:)=quantile(DV_tmp,0.05,1);
+        DV2max(f,:)=quantile(DV_tmp,0.975,1);
+        DV2min(f,:)=quantile(DV_tmp,0.025,1);
         plot3(K2,ones(1,size(K2,2))*T(i,1),DV2(f,:),'-.','LineWidth',2,'Color',[0.9500    0.200    0.1])
         hold on;
         f=f+1;
@@ -196,6 +196,7 @@ hold on;
 xlim([0.4,1.6])
 ylim([0.5/12,0.5+0.5/12])
 zlim([0,1])
+caxis([0 1])
 box on;
 grid on;
 xlabel('K/S_0');
@@ -270,7 +271,7 @@ for iter=1:matur
     pbaspect([1.5 1 1])
     
     h = get(gca,'Children');
-    lgd=legend([h(4) h(3) h(2) h(1)],{'Market Data','Theoretical Function','Simulated Function (mean)','95% Confidence Interval'},'Location','northeast','FontSize',11);
+    lgd=legend([h(4) h(3) h(2) h(1)],{'Market Data','Theoretical Function','Simulated Function (mean)','95% Confidence Band'},'Location','northeast','FontSize',11);
     title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
     set(gca,'Children',[h(4) h(2) h(3) h(1)])
     
@@ -333,7 +334,7 @@ function Plotter3D(alpha,rho0,nu0,a,b,beta,S0,r,B)
     figure
     
     %Plot original data points
-    scatter3(B(:,2),B(:,1),B(:,3),30,'LineWidth',0.5,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
+    scatter3(B(:,2),B(:,1),B(:,3),30,'LineWidth',1.5,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
     hold on;
     
     %Plot implied volatility function under the Heston model
@@ -363,6 +364,7 @@ function Plotter3D(alpha,rho0,nu0,a,b,beta,S0,r,B)
    xlim([0.4,1.6])
     ylim([0.5/12,0.5+0.5/12])
     zlim([0,1])
+    caxis([0 1])
     box on;
     grid on;
     xlabel('K/S_0');

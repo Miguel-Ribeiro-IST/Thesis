@@ -4,7 +4,7 @@ Having described the implementation of all the models introduced in \autoref{cha
 
 We will calibrate the SABR and Heston models' parameters to a dataset of implied volatilities for European options with different maturities and strike prices. This data was kindly provided by \emph{BNP Paribas} and is shown in \autoref{chapter:mktdata}. As stated, the closed form solutions will be used in this calibration procedure. After the calibration, we are able to produce a function from these closed-form solutions using the models' calibrated parameters. These functions - henceforth named \emph{theoretical functions} - should, in principle, closely fit the implied volatility data.
 
-To validate the SABR and Heston models' closed-form solutions, after finding the optimal parameters with the calibration procedure, we will input them into a Monte Carlo pricer, adapted to each model, and calculate the simulated option prices of each calibrated model. This price will then be converted into an implied volatility (using eq.\eqref{impvolform}) in order for the simulation to be comparable to the data and the closed form solutions. To better grasp the behavior of the simulations we will repeat them a large number of times, $N_{\mathrm{reps}}$, averaging the results to produce a function - henceforth named \emph{simulated function} -  and extracting from them the 95\% confidence bands of the simulations - these confidence bands are obtained by sorting the simulated implied volatilities for each strike and extracting both the 95\% highest and the 5\% lowest.
+To validate the SABR and Heston models' closed-form solutions, after finding the optimal parameters with the calibration procedure, we will input them into a Monte Carlo pricer, adapted to each model, and calculate the simulated option prices of each calibrated model. This price will then be converted into an implied volatility (using eq.\eqref{impvolform}) in order for the simulation to be comparable to the data and the closed form solutions. To better grasp the behavior of the simulations we will repeat them a large number of times, $N_{\mathrm{reps}}$, averaging the results to produce a function - henceforth named \emph{simulated function} -  and extracting from them the 95\% confidence bands of the simulations - these confidence bands are obtained by sorting the simulated implied volatilities for each strike, extracting both the 97.5\% highest and the 2.5\% lowest and setting these values to the upper and lower bounds of the confidence bands, so that 95\% of all observations are inside them.
 
 
 
@@ -73,7 +73,7 @@ $T$ (days) & $\sigma_{imp,\mathrm{mdl}}$ ($\SI{}{\year\tothe{-1/2}}$) & Cost \\ 
 126& 0.2518 & 0.0069 \\
 \bottomrule
 \end{tabular}
-  \caption[Fitted parameters for each maturity (fitted independently) under constant volatility model.]{Fitted parameters for each maturity (fitted independently) under constant volatility model.}
+  \caption[Fitted implied volatilities for each maturity (fitted independently) under constant volatility model.]{Fitted implied volatilities for each maturity (fitted independently) under constant volatility model.}
   \label{tab:ConstVolPar}
 \end{table}
 
@@ -81,38 +81,37 @@ $T$ (days) & $\sigma_{imp,\mathrm{mdl}}$ ($\SI{}{\year\tothe{-1/2}}$) & Cost \\ 
 \begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}ccccSccS@{}}
+\begin{tabular}{@{}cccrcr@{}}
 \toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
-\multirow{7}{*}{21} & 0.50 & 0.7082 & \multirow{7}{*}{0.3174} & 55.2 & 0.50001 & 0.50000 & 0.003 \\
-&0.75 & 0.4632 &  & 31.5 & 0.25065 & 0.25002 & 0.3 \\
-&0.90 & 0.2989 &  & 6.2 & 0.10439 & 0.10540 & 1.0 \\
-&1.00 & 0.2425 &  & 30.9 & 0.02792 & 0.03654 & 30.9 \\
-&1.10 & 0.2314 &  & 37.1 & 2.42$\times10^{-3}$ & 7.41$\times10^{-3}$ & 205.9 \\
-&1.25 & 0.2699 &  & 17.6 & 5.34$\times10^{-5}$ & 25.01$\times10^{-5}$ & 367.9 \\
-&1.50 & 0.3433 &  & 7.5 & 5.75$\times10^{-7}$ & 1.12$\times10^{-7}$ & 80.5 \\\midrule
-\multirow{7}{*}{42}&0.50 & 0.5556 & \multirow{7}{*}{0.2918} & 47.5 & 0.50005 & 0.50000 & 0.01 \\
-&0.75 & 0.3876 &  & 24.7 & 0.25186 & 0.25027 & 0.6 \\
-&0.90 & 0.2824 &  & 3.3 & 0.11069 & 0.11166 & 0.9 \\
-&1.00 & 0.2461 &  & 18.6 & 0.04006 & 0.04749 & 18.5 \\
-&1.10 & 0.2354 &  & 23.9 & 8.52$\times10^{-3}$ & 15.00$\times10^{-3}$ & 75.9 \\
-&1.25 & 0.2525 &  & 15.6 & 6.21$\times10^{-4}$ & 15.75$\times10^{-4}$ & 153.8 \\
-&1.50 & 0.2968 &  & 1.7 & 1.58$\times10^{-5}$ & 1.24$\times10^{-5}$ & 21.4 \\\midrule
-\multirow{7}{*}{63}&0.50 & 0.4789 &\multirow{7}{*}{0.2742}  & 42.7 & 0.50009 & 0.50000 & 0.02 \\
-&0.75 & 0.3452 &  & 20.6 & 0.25296 & 0.25077 & 0.9 \\
-&0.90 & 0.2658 &  & 3.2 & 0.11533 & 0.11650 & 1.0 \\
-&1.00 & 0.2401 &  & 14.2 & 0.04787 & 0.05465 & 14.2 \\
-&1.10 & 0.2330 &  & 17.7 & 0.01421 & 0.02069 & 45.5 \\
-&1.25 & 0.2438 &  & 12.5 & 1.80$\times10^{-3}$ & 3.33$\times10^{-3}$ & 85.1 \\
-&1.50 & 0.2749 &  & 0.3 & 7.66$\times10^{-5}$ & 7.44$\times10^{-5}$ & 2.9 \\\midrule
-\multirow{7}{*}{126}&0.50 & 0.3878 &  \multirow{7}{*}{0.2518}& 35.1 & 0.50035 & 0.50000 & 0.07 \\
-&0.75 & 0.2954 &  & 14.7 & 0.25694 & 0.25344 & 1.4 \\
-&0.90 & 0.2444 &  & 3.1 & 0.12716 & 0.12882 & 1.3 \\
-&1.00 & 0.2295 &  & 9.7 & 0.06467 & 0.07094 & 9.7 \\
-&1.10 & 0.2269 &  & 11.0 & 0.02862 & 0.03488 & 21.9 \\
-&1.25 & 0.2340 &  & 7.6 & 7.57$\times10^{-3}$ & 9.98$\times10^{-3}$ & 31.8 \\
-&1.50 & 0.2521 &  & 0.1 & 8.58$\times10^{-4}$ & 8.51$\times10^{-4}$ & 0.8 \\
-\bottomrule
+$T$(days) & $K$($\EUR$) & $\sigma_{imp,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) & $\mathrm{Error}_{\sigma}(\%)$ & $C_{\mathrm{mdl}}$($\EUR$) & $\mathrm{Error}_{C}(\%)$ \\ \midrule
+\multirow{7}{*}{21} & 0.50 & \multirow{7}{*}{0.3174}& 55 & \num{5.000E-01} & 0 \\
+ & 0.75 &  & 31 & \num{2.500E-01} & 0 \\
+ & 0.90 &  & 6 & \num{1.054E-01} & 1 \\
+ & 1.00 &  & 31 & \num{3.654E-02} & 31 \\
+ & 1.10 &  & 37 & \num{7.406E-03} & 206 \\
+ & 1.25 &  & 18 & \num{2.501E-04} & 368 \\
+ & 1.50 &  & 8 & \num{1.119E-07} & 81 \\ \midrule
+\multirow{7}{*}{42} & 0.50 & \multirow{7}{*}{0.2918} & 47 & \num{5.000E-01} & 0 \\
+ & 0.75 &  & 25 & \num{2.503E-01} & 1 \\
+ & 0.90 &  & 3 & \num{1.117E-01} & 1 \\
+ & 1.00 &  & 19 & \num{4.749E-02} & 19 \\
+ & 1.10 &  & 24 & \num{1.500E-02} & 76 \\
+ & 1.25 &  & 16 & \num{1.575E-03} & 154 \\
+ & 1.50 &  & 2 & \num{1.244E-05} & 21 \\ \midrule
+\multirow{7}{*}{63} & 0.50 & \multirow{7}{*}{0.2742} & 43 & \num{5.000E-01} & 0 \\
+ & 0.75 &  & 21 & \num{2.508E-01} & 1 \\
+ & 0.90 &  & 3 & \num{1.165E-01} & 1 \\
+ & 1.00 &  & 14 & \num{5.465E-02} & 14 \\
+ & 1.10 &  & 18 & \num{2.069E-02} & 46 \\
+ & 1.25 &  & 12 & \num{3.331E-03} & 85 \\
+ & 1.50 &  & 0 & \num{7.437E-05} & 3 \\ \midrule
+\multirow{7}{*}{126} & 0.50 & \multirow{7}{*}{0.2518} & 35 & \num{5.000E-01} & 0 \\
+ & 0.75 &  & 15 & \num{2.534E-01} & 1 \\
+ & 0.90 &  & 3 & \num{1.288E-01} & 1 \\
+ & 1.00 &  & 10 & \num{7.094E-02} & 10 \\
+ & 1.10 &  & 11 & \num{3.488E-02} & 22 \\
+ & 1.25 &  & 8 & \num{9.977E-03} & 32 \\
+ & 1.50 &  & 0 & \num{8.510E-04} & 1 \\ \bottomrule
 \end{tabular}
   \caption[Comparison between fitted results (fitted independently) and original data under constant volatility model with the respective relative errors.]{Comparison between fitted functions (fitted independently) and original data under constant volatility model with the respective relative errors.}
   \label{tab:CV}
@@ -129,11 +128,11 @@ First, we can see that the theoretical functions (full red lines) clearly don't 
 
 Secondly, by comparing the theoretical and simulated functions, we must note that the simulation performs extremely well for strikes near $S_0$. Notice that the simulated function (dot-dashed blue line) perfectly follows the constant volatility theoretical result (full red line) in this region, and that the confidence bands converge to the simulated function indicating that all simulations produced the same result. This suggests that the simulation is working as expected for this particular region.
 
-Thirdly, we notice that on the earliest maturity (i.e. 21 days), for strikes much larger than $S_0$ (e.g. $K=1.5S_0$), the simulated implied volatilities go to zero, even though they should remain constant. The reason behind this has already been discussed in \autoref{subsection:Pricing options from simulations} and relates to the very, very small number of paths that reach such high strikes and end up contributing to the option price (which is then converted to an implied volatility). For the case of strike $K=1.5S_0$, and maturity $T=21$ days, the number of paths that reach the strike is indeed approximately $0.25$ out of $100\,000$ (i.e. one out of four Monte Carlo simulations of 100000 paths contains a single path that is able to reach such a high strike). This problem is not observed for the remaining maturities for the simple reason that, because they are given more time to evolve, more paths are able to reach these high strikes.
+Thirdly, we notice that on the earliest maturity (i.e. 21 days), for strikes much larger than $S_0$ (e.g. $K=1.5S_0$), the simulated implied volatilities go to zero, even though they should remain constant. The reason behind this has already been discussed in \autoref{subsection:Pricing options from simulations} and relates to the very, very small number of paths that reach such high strikes and end up contributing to the option price (which is then converted to an implied volatility). For the case of strike $K=1.5S_0$, and maturity $T=21$ days, the number of paths that reach the strike is indeed approximately $0.25$ out of $100\,000$ (i.e. one out of four Monte Carlo simulations of $100\,000$ paths contains a single path that is able to reach such a high strike). This problem is not observed for the remaining maturities for the simple reason that, because they are given more time to evolve, more paths are able to reach these high strikes.
 To solve this problem we could significantly increase the number of simulations, so that the number of paths that are able to reach these high strikes is enough to produce a good estimate of the option price. The problem with this solution is the very significant increase in the computation time required, which makes it impractical.
 If we lowered the number of simulated paths from $100\,000$ to any other smaller amount, the problem described before would become even more severe, and the later maturities would eventually also display the problem observed in the earliest maturity.
 
-Finally we must discuss the large confidence bands for strikes much lower than $S_0$, occurring over all maturities. To explain this we require the information presented in \autoref{fig:ImpVolPrice}, relating the implied volatility with the option's market price. We saw that the implied volatility was extremely sensitive to option prices very close to their lower bounds, $S_0-Ke^{-rT}$. If we now look, for example, at the market price of the option with strike $K=\SI{0.5}{\EUR}$ and maturity $T=21$ days, which is $C=0.500013\SI{}{\EUR}$, and we compare it with its lower bound, $S_0-Ke^{-rT}=\SI{0.5}{\EUR}$ (assuming the parameters shown in \autoref{tab:defaultparam}), we can clearly see that they are extremely close, with a difference of only $0.0026\%$. We can then conclude that, in this case, we are in the extremely high sensitivity region of the implied volatility functions shown in \autoref{fig:ImpVolPrice}.
+Finally we must discuss the large confidence bands for strikes much lower than $S_0$, occurring over all maturities. To explain this we require the information presented in \autoref{fig:ImpVolPrice}, relating the implied volatility with the option's market price. We saw that the implied volatility was extremely sensitive to option prices very close to their lower bounds, $S_0-Ke^{-rT}$. If we now look, for example, at the market price of the option with strike $K=\SI{0.5}{\EUR}$ and maturity $T=21$ days, which is $C=0.5000\SI{}{\EUR}$, and we compare it with its lower bound, $S_0-Ke^{-rT}=0.5000\SI{}{\EUR}$ (assuming the parameters shown in \autoref{tab:defaultparam}), we can clearly see that they are the same (with a difference only on the fourth decimal place, which is not shown here). We can then conclude that, in this case, we are in the extremely high sensitivity region of the implied volatility functions shown in \autoref{fig:ImpVolPrice}.
 Even though the Monte Carlo pricer is expected to produce a good estimation of option prices with lower strikes (a very large number of paths contribute to the option price, so a low amount of noise is produced - the opposite of what we described before for high strikes), because there will always be \emph{some} error associated with the simulations, the pricer is expected to produce some very slighty different results when executed multiple times, which is enough to cause some of the simulated implied volatilities to go to approximately zero or to increase significantly, which explains the large confidence bands. For options with strikes near $S_0$ and above, the market option price is much farther from its lower bound, so that we are far from the high sensitivity region. Indeed, the lower bound of options with strikes equal to or above $S_0$ is 0 (assuming interest rate $r=0$).
 
 These two last problems are not only applicable to the constant volatility model and will also be observed in all the other models.
@@ -176,38 +175,37 @@ The fitted implied volatility is represented in \autoref{tab:ConstVolPar2} as we
 \begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}ccccSccS@{}}
+\begin{tabular}{@{}cccrcr@{}}
 \toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
-\multirow{7}{*}{21} & 0.50 & 0.7082 & \multirow{7}{*}{0.2838} & 59.9 & 0.50001 & 0.50000 & 0.003 \\
- & 0.75 & 0.4632 &  & 38.7 & 0.25065 & 0.25000 & 0.3 \\
- & 0.90 & 0.2989 &  & 5.0 & 0.10439 & 0.10364 & 0.7 \\
- & 1.00 & 0.2425 &  & 17.0 & 0.02792 & 0.03267 & 17.0 \\
- & 1.10 & 0.2314 &  & 22.6 & 2.42$\times10^{-3}$ & 5.19$\times10^{-3}$ & 114.4 \\
- & 1.25 & 0.2699 &  & 5.1 & 5.34$\times10^{-5}$ & 8.98$\times10^{-5}$ & 67.9 \\
- & 1.50 & 0.3433 &  & 17.3 & 5.75$\times10^{-7}$ & 0.07$\times10^{-7}$ & 98.8 \\\midrule
-\multirow{7}{*}{42} & 0.50 & 0.5556 & \multirow{7}{*}{0.2838} & 48.9 & 0.50005 & 0.50000 & 0.01 \\
- & 0.75 & 0.3876 &  & 26.8 & 0.25186 & 0.25021 & 0.7 \\
- & 0.90 & 0.2824 &  & 0.5 & 0.11069 & 0.11084 & 0.1 \\
- & 1.00 & 0.2461 &  & 15.3 & 0.04006 & 0.04620 & 15.3 \\
- & 1.10 & 0.2354 &  & 20.6 & 8.52$\times10^{-3}$ & 14.02$\times10^{-3}$ & 64.5 \\
- & 1.25 & 0.2525 &  & 12.4 & 6.21$\times10^{-4}$ & 13.36$\times10^{-4}$ & 115.3 \\
- & 1.50 & 0.2968 &  & 4.4 & 1.58$\times10^{-5}$ & 0.83$\times10^{-5}$ & 47.6 \\\midrule
-\multirow{7}{*}{63} & 0.50 & 0.4789 & \multirow{7}{*}{0.2838} & 40.7 & 0.50009 & 0.50000 & 0.02 \\
- & 0.75 & 0.3452 && 17.8 & 0.25296 & 0.25097 & 0.8 \\
- & 0.90 & 0.2658 && 6.8 & 0.11533 & 0.11786 & 2.2 \\
- & 1.00 & 0.2401 && 18.2 & 0.04787 & 0.05656 & 18.2 \\
- & 1.10 & 0.2330 && 21.8 & 0.01421 & 0.02227 & 56.7 \\
- & 1.25 & 0.2438 && 16.4 & 1.80$\times10^{-3}$ & 3.93$\times10^{-3}$ & 118.2 \\
- & 1.50 & 0.2749 && 3.2 & 7.66$\times10^{-5}$ & 10.87$\times10^{-5}$ & 42.0 \\\midrule
-\multirow{7}{*}{126} & 0.50 & 0.3878 & \multirow{7}{*}{0.2838} & 26.8 & 0.50035 & 0.50001 & 0.1 \\
- & 0.75 & 0.2954 && 3.9 & 0.25694 & 0.25589 & 0.4 \\
- & 0.90 & 0.2444 && 16.1 & 0.12716 & 0.13611 & 7.0 \\
- & 1.00 & 0.2295 && 23.7 & 0.06467 & 0.07992 & 23.6 \\
- & 1.10 & 0.2269 && 25.1 & 0.02862 & 0.04317 & 50.8 \\
- & 1.25 & 0.2340 && 21.3 & 7.57$\times10^{-3}$ & 14.99$\times10^{-3}$ & 98.0 \\
- & 1.50 & 0.2521 && 12.6 & 8.58$\times10^{-4}$ & 19.67$\times10^{-4}$ & 129.3 \\
-\bottomrule
+$T$(days) & $K$($\EUR$) & $\sigma_{imp,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) & $\mathrm{Error}_{\sigma}(\%)$ & $C_{\mathrm{mdl}}$($\EUR$) & $\mathrm{Error}_{C}(\%)$ \\ \midrule
+\multirow{7}{*}{21} & 0.50 & \multirow{7}{*}{0.2838} & 60 & \num{5.000E-01} & 0 \\
+ & 0.75 &  & 39 & \num{2.500E-01} & 0 \\
+ & 0.90 &  & 5 & \num{1.036E-01} & 1 \\
+ & 1.00 &  & 17 & \num{3.267E-02} & 17 \\
+ & 1.10 &  & 23 & \num{5.191E-03} & 114 \\
+ & 1.25 &  & 5 & \num{8.977E-05} & 68 \\
+ & 1.50 &  & 17 & \num{7.031E-09} & 99 \\ \midrule
+\multirow{7}{*}{42} & 0.50 & \multirow{7}{*}{0.2838} & 49 & \num{5.000E-01} & 0 \\
+ & 0.75 &  & 27 & \num{2.502E-01} & 1 \\
+ & 0.90 &  & 1 & \num{1.108E-01} & 0 \\
+ & 1.00 &  & 15 & \num{4.620E-02} & 15 \\
+ & 1.10 &  & 21 & \num{1.402E-02} & 64 \\
+ & 1.25 &  & 12 & \num{1.336E-03} & 115 \\
+ & 1.50 &  & 4 & \num{8.299E-06} & 48 \\ \midrule
+\multirow{7}{*}{63} & 0.50 & \multirow{7}{*}{0.2838} & 41 & \num{5.000E-01} & 0 \\
+ & 0.75 &  & 18 & \num{2.510E-01} & 1 \\
+ & 0.90 &  & 7 & \num{1.179E-01} & 2 \\
+ & 1.00 &  & 18 & \num{5.656E-02} & 18 \\
+ & 1.10 &  & 22 & \num{2.227E-02} & 57 \\
+ & 1.25 &  & 16 & \num{3.925E-03} & 118 \\
+ & 1.50 &  & 3 & \num{1.087E-04} & 42 \\ \midrule
+\multirow{7}{*}{126} & 0.50 & \multirow{7}{*}{0.2838} & 27 & \num{5.000E-01} & 0 \\
+ & 0.75 &  & 4 & \num{2.559E-01} & 0 \\
+ & 0.90 &  & 16 & \num{1.361E-01} & 7 \\
+ & 1.00 &  & 24 & \num{7.992E-02} & 24 \\
+ & 1.10 &  & 25 & \num{4.317E-02} & 51 \\
+ & 1.25 &  & 21 & \num{1.499E-02} & 98 \\
+ & 1.50 &  & 13 & \num{1.967E-03} & 129 \\ \bottomrule
 \end{tabular}
   \caption[Comparison between fitted results (fitted simultaneously) and original data under constant volatility model.]{Comparison between fitted functions (fitted simultaneously) and original data under constant volatility model.}
   \label{tab:CV2}
@@ -320,52 +318,6 @@ The simulations shown in the plots of \autoref{fig:Dup} can be thought of as sli
 
 As expected, the amount of noise is quite overwhelming in the regions where the Monte Carlo pricer performs badly. For the regions where the strike approaches $S_0$, the picture is quite different and the simulations closely follow the data, as expected.
 
-\vspace{\fill}
-\newpage
-
-\begin{table}[H]
-\centering
-\renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}ccccSccS@{}}
-\toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
-\multirow{7}{*}{21} & 0.50 & 0.7082 & 0.2319 & 67.3 & 0.50001 & 0.50000 & 0.003 \\
- & 0.75 & 0.4632 & 0.3740 & 19.3 & 0.25065 & 0.25011 & 0.2 \\
- & 0.90 & 0.2989 & 0.2845 & 4.8 & 0.10439 & 0.10368 & 0.7 \\
- & 1.00 & 0.2425 & 0.2374 & 2.1 & 0.02792 & 0.02734 & 2.1 \\
- & 1.10 & 0.2314 & 0.2276 & 1.7 & 2.42$\times10^{-3}$ & 2.26$\times10^{-3}$ & 6.8 \\
- & 1.25 & 0.2699 & 0.2633 & 2.5 & 5.34$\times10^{-5}$ & 4.06$\times10^{-5}$ & 24.0 \\
- & 1.50 & 0.3433 & 0.1421 & 58.6 & 5.75$\times10^{-7}$ & 0 & 100.0 \\\midrule
-\multirow{7}{*}{42} & 0.50 & 0.5556 & 0.3846 & 30.8 & 0.50005 & 0.50000 & 0.01 \\
- & 0.75 & 0.3876 & 0.3683 & 5.0 & 0.25186 & 0.25139 & 0.2 \\
- & 0.90 & 0.2824 & 0.2700 & 4.4 & 0.11069 & 0.10946 & 1.1 \\
- & 1.00 & 0.2461 & 0.2358 & 4.2 & 0.04006 & 0.03838 & 4.2 \\
- & 1.10 & 0.2354 & 0.2286 & 2.9 & 8.52$\times10^{-3}$ & 7.83$\times10^{-3}$ & 8.2 \\
- & 1.25 & 0.2525 & 0.2539 & 0.6 & 6.21$\times10^{-4}$ & 6.46$\times10^{-4}$ & 4.1 \\
- & 1.50 & 0.2968 & 0.3089 & 4.1 & 1.58$\times10^{-5}$ & 2.70$\times10^{-5}$ & 70.3 \\\midrule
-\multirow{7}{*}{63} & 0.50 & 0.4789 & 0.3176 & 33.7 & 0.50009 & 0.50000 & 0.02 \\
- & 0.75 & 0.3452 & 0.3355 & 2.8 & 0.25296 & 0.25256 & 0.2 \\
- & 0.90 & 0.2658 & 0.2578 & 3.0 & 0.11533 & 0.11424 & 0.9 \\
- & 1.00 & 0.2401 & 0.2310 & 3.8 & 0.04787 & 0.04606 & 3.8 \\
- & 1.10 & 0.2330 & 0.2253 & 3.3 & 0.01421 & 0.01307 & 8.0 \\
- & 1.25 & 0.2438 & 0.2440 & 0.1 & 1.80$\times10^{-3}$ & 1.81$\times10^{-3}$ & 0.5 \\
- & 1.50 & 0.2749 & 0.2845 & 3.5 & 7.66$\times10^{-5}$ & 11.15$\times10^{-5}$ & 45.7 \\\midrule
-\multirow{7}{*}{126} & 0.50 & 0.3878 & 0.3870 & 0.2 & 0.50035 & 0.50035 & 0.001 \\
- & 0.75 & 0.2954 & 0.2876 & 2.6 & 0.25694 & 0.25623 & 0.3 \\
- & 0.90 & 0.2444 & 0.2358 & 3.5 & 0.12716 & 0.12528 & 1.5 \\
- & 1.00 & 0.2295 & 0.2203 & 4.0 & 0.06467 & 0.06207 & 4.0 \\
- & 1.10 & 0.2269 & 0.2190 & 3.5 & 0.02862 & 0.02667 & 6.8 \\
- & 1.25 & 0.2340 & 0.2319 & 0.9 & 7.57$\times10^{-3}$ & 7.31$\times10^{-3}$ & 3.4 \\
- & 1.50 & 0.2521 & 0.2528 & 0.3 & 8.58$\times10^{-4}$ & 8.77$\times10^{-4}$ & 2.2 \\
- \bottomrule
-\end{tabular}
-  \caption[Comparison between the data obtained by generating $N_{paths}$ paths under Dupire's local volatility model using the Monte Carlo pricing method and the original data.]{Comparison between the data obtained by generating $N_{paths}$ paths under Dupire's local volatility model using the Monte Carlo pricing method and the original data.}
-  \label{tab:Dup}
-\end{table}
-
-
-
-
 
 
 
@@ -442,10 +394,10 @@ The parameters obtained in the calibration for each maturity are shown in \autor
 \begin{tabular}{@{}lccccr@{}}
 \toprule
  $T$(days) & $\alpha$ ($\SI{}{\year\tothe{-1/2}}$) & $\beta$ & $\rho$ & $\nu$ & Cost \\ \midrule
-21 & 0.2381 & 0.3766 & -0.3760 & 2.1022 & 0.000415 \\
-42 & 0.2434 & 0.7362 & -0.3664 & 1.4451 & 0.000166\\
-63 & 0.2375 & 0.7750 & -0.3119 & 1.1420 & 0.000102\\
-126& 0.2267 & 0.8771 & -0.2383 & 0.8215 & 0.000055\\
+21 & 0.2381 & 0.3766 & -0.3760 & 2.1022 & 0.0004 \\
+42 & 0.2434 & 0.7362 & -0.3664 & 1.4451 & 0.0002\\
+63 & 0.2375 & 0.7750 & -0.3119 & 1.1420 & 0.0001\\
+126& 0.2267 & 0.8771 & -0.2383 & 0.8215 & 0.0001\\
 \bottomrule
 \end{tabular}
   \caption[Fitted parameters for each maturity (fitted independently) under static SABR model.]{Fitted parameters for each maturity (fitted independently) under static SABR model.}
@@ -468,43 +420,42 @@ As for the parameter $\rho$, we first note that it is always negative, which is 
 Finally, the parameter $\nu$ also seems to decrease with time. This is no surprise as the curvature of the implied volatility function is expected to decrease with time, with the function becoming increasingly horizontal, as can be seen from the provided data.
 
 
-If we now compare the cost function values of the Static SABR model in \autoref{tab:SSR} with the independently fitted results of the constant volatility model in \autoref{tab:ConstVolPar} we clearly see that they improve very significantly. For all maturities, the costs decrease between 99.2 and 99.4\%, which is an extreme improvement. This is no surprise, since the constant volatility model was expected to perform very badly. These costs should be considered carefully, however, due to the overfitting mentioned earlier - for such a low amount of data (compared to the high number of parameters) we can find many possible combinations of parameters that fit the data as well as the parameters found by the optimizer.
+If we now compare the cost function values of the Static SABR model in \autoref{tab:SSR} with the independently fitted results of the constant volatility model in \autoref{tab:ConstVolPar} we clearly see that they improve very significantly. For all maturities, the costs decrease between 99.2 and 99.4\% \hl{here}, which is an extreme improvement. This is no surprise, since the constant volatility model was expected to perform very badly. These costs should be considered carefully, however, due to the overfitting mentioned earlier - for such a low amount of data (compared to the high number of parameters) we can find many possible combinations of parameters that fit the data as well as the parameters found by the optimizer.
 
 \begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}ccccSccS@{}}
+\begin{tabular}{@{}cccrcr@{}}
 \toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
-\multirow{7}{*}{21} & 0.50 & 0.7082 & 0.7209 & 1.8 & 0.50001 & 0.50002 & 0.001 \\
-&0.75 & 0.4632 & 0.4428 & 4.4 & 0.25065 & 0.25047 & 0.1 \\
-&0.90 & 0.2989 & 0.3105 & 3.9 & 0.10439 & 0.10501 & 0.6 \\
-&1.00 & 0.2425 & 0.2435 & 0.4 & 0.02792 & 0.02804 & 0.4 \\
-&1.10 & 0.2314 & 0.2269 & 2.0 & 2.42$\times10^{-3}$ & 2.23$\times10^{-3}$ & 8.0 \\
-&1.25 & 0.2699 & 0.2692 & 0.3 & 5.34$\times10^{-5}$ & 5.18$\times10^{-5}$ & 3.0 \\
-&1.50 & 0.3433 & 0.3500 & 1.9 & 5.75$\times10^{-7}$ & 8.32$\times10^{-7}$ & 44.7 \\\midrule
-\multirow{7}{*}{42} &0.50 & 0.5556 & 0.5631 & 1.4 & 0.50005 & 0.50006 & 0.002 \\
-&0.75 & 0.3876 & 0.3751 & 3.2 & 0.25186 & 0.25155 & 0.1 \\
-&0.90 & 0.2824 & 0.2891 & 2.4 & 0.11069 & 0.11139 & 0.6 \\
-&1.00 & 0.2461 & 0.2481 & 0.8 & 0.04006 & 0.04039 & 0.8 \\
-&1.10 & 0.2354 & 0.2322 & 1.4 & 8.52$\times10^{-3}$ & 8.19$\times10^{-3}$ & 3.9 \\
-&1.25 & 0.2525 & 0.2497 & 1.1 & 6.21$\times10^{-4}$ & 5.75$\times10^{-4}$ & 7.4 \\
-&1.50 & 0.2968 & 0.3033 & 2.2 & 1.58$\times10^{-5}$ & 2.12$\times10^{-5}$ & 33.9 \\\midrule
-\multirow{7}{*}{63} &0.50 & 0.4789 & 0.4845 & 1.2 & 0.50009 & 0.50011 & 0.002 \\
-&0.75 & 0.3452 & 0.3357 & 2.8 & 0.25296 & 0.25256 & 0.2 \\
-&0.90 & 0.2658 & 0.2710 & 2.0 & 0.11533 & 0.11605 & 0.6 \\
-&1.00 & 0.2401 & 0.2421 & 0.8 & 0.04787 & 0.04826 & 0.8 \\
-&1.10 & 0.2330 & 0.2305 & 1.1 & 0.01421 & 0.01384 & 2.6 \\
-&1.25 & 0.2438 & 0.2409 & 1.2 & 1.80$\times10^{-3}$ & 1.68$\times10^{-3}$ & 6.7 \\
-&1.50 & 0.2749 & 0.2804 & 2.0 & 7.66$\times10^{-5}$ & 9.56$\times10^{-5}$ & 24.8 \\\midrule
-\multirow{7}{*}{126} &0.50 & 0.3878 & 0.3914 & 0.9 & 0.50035 & 0.50038 & 0.006 \\
-&0.75 & 0.2954 & 0.2887 & 2.2 & 0.25694 & 0.25633 & 0.2 \\
-&0.90 & 0.2444 & 0.2479 & 1.5 & 0.12716 & 0.12794 & 0.6 \\
-&1.00 & 0.2295 & 0.2314 & 0.8 & 0.06467 & 0.06522 & 0.8 \\
-&1.10 & 0.2269 & 0.2251 & 0.8 & 0.02862 & 0.02817 & 1.6 \\
-&1.25 & 0.2340 & 0.2309 & 1.3 & 7.57$\times10^{-3}$ & 7.18$\times10^{-3}$ & 5.2 \\
-&1.50 & 0.2521 & 0.2567 & 1.8 & 8.58$\times10^{-4}$ & 9.82$\times10^{-4}$ & 14.5 \\
- \bottomrule
+$T$(days) & $K$($\EUR$) & $\sigma_{imp,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) & $\mathrm{Error}_{\sigma}(\%)$ & $C_{\mathrm{mdl}}$($\EUR$) & $\mathrm{Error}_{C}(\%)$ \\ \midrule
+\multirow{7}{*}{21} & 0.50 & 0.7209 & 2 & \num{5.000E-01} & 0 \\
+ & 0.75 & 0.4428 & 4 & \num{2.505E-01} & 0 \\
+ & 0.90 & 0.3105 & 4 & \num{1.050E-01} & 1 \\
+ & 1.00 & 0.2435 & 0 & \num{2.804E-02} & 0 \\
+ & 1.10 & 0.2269 & 2 & \num{2.227E-03} & 8 \\
+ & 1.25 & 0.2692 & 0 & \num{5.183E-05} & 3 \\
+ & 1.50 & 0.3500 & 2 & \num{8.317E-07} & 45 \\ \midrule
+\multirow{7}{*}{42} & 0.50 & 0.5631 & 1 & \num{5.001E-01} & 0 \\
+ & 0.75 & 0.3751 & 3 & \num{2.515E-01} & 0 \\
+ & 0.90 & 0.2891 & 2 & \num{1.114E-01} & 1 \\
+ & 1.00 & 0.2481 & 1 & \num{4.039E-02} & 1 \\
+ & 1.10 & 0.2322 & 1 & \num{8.194E-03} & 4 \\
+ & 1.25 & 0.2497 & 1 & \num{5.746E-04} & 7 \\
+ & 1.50 & 0.3033 & 2 & \num{2.120E-05} & 34 \\ \midrule
+\multirow{7}{*}{63} & 0.50 & 0.4845 & 1 & \num{5.001E-01} & 0 \\
+ & 0.75 & 0.3357 & 3 & \num{2.526E-01} & 0 \\
+ & 0.90 & 0.2710 & 2 & \num{1.160E-01} & 1 \\
+ & 1.00 & 0.2421 & 1 & \num{4.826E-02} & 1 \\
+ & 1.10 & 0.2305 & 1 & \num{1.384E-02} & 3 \\
+ & 1.25 & 0.2409 & 1 & \num{1.678E-03} & 7 \\
+ & 1.50 & 0.2804 & 2 & \num{9.557E-05} & 25 \\ \midrule
+\multirow{7}{*}{126} & 0.50 & 0.3914 & 1 & \num{5.004E-01} & 0 \\
+ & 0.75 & 0.2887 & 2 & \num{2.563E-01} & 0 \\
+ & 0.90 & 0.2479 & 1 & \num{1.279E-01} & 1 \\
+ & 1.00 & 0.2314 & 1 & \num{6.522E-02} & 1 \\
+ & 1.10 & 0.2251 & 1 & \num{2.817E-02} & 2 \\
+ & 1.25 & 0.2309 & 1 & \num{7.177E-03} & 5 \\
+ & 1.50 & 0.2567 & 2 & \num{9.822E-04} & 14 \\ \bottomrule
 \end{tabular}
   \caption[Comparison between fitted results and original data under static SABR model.]{Comparison between fitted results and original data under static SABR model.}
   \label{tab:SS}
@@ -579,7 +530,7 @@ The values of the calibrated parameters are shown in \autoref{tab:HR}.
 \begin{tabular}{@{}lccccr@{}}
 \toprule
 $\kappa$ & $\overline{\nu}$ & $\nu_0$ & $\rho$ & $\eta$ & Cost \\ \midrule
-53.4355 & 0.0653 & 0.1046 & -0.4086 & 6.2554 & 0.002529 \\
+53.4355 & 0.0653 & 0.1046 & -0.4086 & 6.2554 & 0.0025 \\
 \bottomrule
 \end{tabular}
   \caption[Fitted parameters for all maturities (fitted simultaneously) under the Heston model.]{Fitted parameters for all maturities (fitted simultaneously) under the Heston model.}
@@ -592,10 +543,10 @@ This is especially surprising when we note that the adjustment is made for the e
 
 Observing the simulated curves and their respective confidence bands we again see that they fit the closed-form solutions extremely well in the region around $S_0$, indicating that the simulations agree with the predictions of the closed form solutions. The large confidence bands described before for the high strikes and early maturities and for the low strikes can also be found here. Because their cause is the same, they will not be described again.
 
-Considering now the cost function value for the fitted parameters (Cost$=0.002529$), shown in \autoref{tab:HR}, and comparing it to the sum of the costs of each of the independent fits in the Static SABR model ($\Sigma_{\mathrm{Costs}}=0.000415+0.000166+0.000102+0.000055=0.000738$), in \autoref{tab:SSR}, we note that the cost of the former is higher than that of the latter.
+Considering now the cost function value for the fitted parameters (Cost$=0.0025$), shown in \autoref{tab:HR}, and comparing it to the sum of the costs of each of the independent fits in the Static SABR model ($\Sigma_{\mathrm{Costs}}=0.0004+0.0002+0.0001+0.0001=0.0008$), in \autoref{tab:SSR}, we note that the cost of the former is higher than that of the latter.
 This is unsurprising, as the adjustments with the Static SABR were done independently of one another, and a better fit is therefore possible.
 
-Comparing now the cost of the Heston model with that of the constant volatility assumption for dependent fits (Cost$=0.1248$), shown in \autoref{tab:ConstVolPar2}, we see that our results improve by approximately $98\%$. The improvement is astonishing and completely justifies why the Heston model is so widely preferred over the constant volatility simplification.
+Comparing now the cost of the Heston model with that of the constant volatility assumption for dependent fits (Cost$=0.1248$), shown in \autoref{tab:ConstVolPar2}, we see that our results improve by approximately $98\%$ \hl{here}. The improvement is astonishing and completely justifies why the Heston model is so widely preferred over the constant volatility simplification.
 
 
 Both the simulated and theoretical implied volatility curves shown in the plots of \autoref{fig:H} for different maturities can be thought of as slices of implied volatility surfaces (one simulated, another theoretical). Similarly to what we did for the Dupire model, we again represent these surfaces and their respective contour plots in Figures \ref{fig:HS} and \ref{fig:HSSim}.
@@ -626,38 +577,37 @@ As for the simulated surface, we can see the expected noisy region for the low s
 \begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}ccccSccS@{}}
+\begin{tabular}{@{}cccrcr@{}}
 \toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
-\multirow{7}{*}{21} & 0.50 & 0.7082 & 0.6886 & 2.8 & 0.50001 & 0.50001 & 0.001 \\
- & 0.75 & 0.4632 & 0.4604 & 0.6 & 0.25065 & 0.25062 & 0.01 \\
- & 0.90 & 0.2989 & 0.3216 & 7.6 & 0.10439 & 0.10563 & 1.2 \\
- & 1.00 & 0.2425 & 0.2346 & 3.2 & 0.02792 & 0.02702 & 3.2 \\
- & 1.10 & 0.2314 & 0.2316 & 0.1 & 2.42$\times10^{-3}$ & 2.43$\times10^{-3}$ & 0.3 \\
- & 1.25 & 0.2699 & 0.2935 & 8.7 & 5.34$\times10^{-5}$ & 12.43$\times10^{-5}$ & 132.5 \\
- & 1.50 & 0.3433 & 0.3759 & 9.5 & 5.75$\times10^{-7}$ & 29.58$\times10^{-7}$ & 414.7 \\\midrule
-\multirow{7}{*}{42} & 0.50 & 0.5556 & 0.5422 & 2.4 & 0.50005 & 0.50004 & 0.003 \\
- & 0.75 & 0.3876 & 0.3781 & 2.5 & 0.25186 & 0.25162 & 0.1 \\
- & 0.90 & 0.2824 & 0.2873 & 1.7 & 0.11069 & 0.11120 & 0.5 \\
- & 1.00 & 0.2461 & 0.2366 & 3.9 & 0.04006 & 0.03852 & 3.9 \\
- & 1.10 & 0.2354 & 0.2205 & 6.3 & 8.52$\times10^{-3}$ & 7.02$\times10^{-3}$ & 17.6 \\
- & 1.25 & 0.2525 & 0.2463 & 2.4 & 6.21$\times10^{-4}$ & 5.20$\times10^{-4}$ & 16.2 \\
- & 1.50 & 0.2968 & 0.2979 & 0.4 & 1.58$\times10^{-5}$ & 1.66$\times10^{-5}$ & 4.9 \\\midrule
-\multirow{7}{*}{63} & 0.50 & 0.4789 & 0.4709 & 1.7 & 0.50009 & 0.50008 & 0.003 \\
- & 0.75 & 0.3452 & 0.3420 & 0.9 & 0.25296 & 0.25282 & 0.1 \\
- & 0.90 & 0.2658 & 0.2748 & 3.4 & 0.11533 & 0.11659 & 1.1 \\
- & 1.00 & 0.2401 & 0.2392 & 0.4 & 0.04787 & 0.04768 & 0.4 \\
- & 1.10 & 0.2330 & 0.2224 & 4.6 & 0.01421 & 0.01265 & 11.0 \\
- & 1.25 & 0.2438 & 0.2310 & 5.2 & 1.80$\times10^{-3}$ & 1.31$\times10^{-3}$ & 27.1 \\
- & 1.50 & 0.2749 & 0.2649 & 3.7 & 7.66$\times10^{-5}$ & 4.97$\times10^{-5}$ & 35.1 \\\midrule
-\multirow{7}{*}{126} & 0.50 & 0.3878 & 0.3784 & 2.4 & 0.50035 & 0.50028 & 0.01 \\
- & 0.75 & 0.2954 & 0.2993 & 1.3 & 0.25694 & 0.25732 & 0.1 \\
- & 0.90 & 0.2444 & 0.2626 & 7.5 & 0.12716 & 0.13124 & 3.2 \\
- & 1.00 & 0.2295 & 0.2439 & 6.3 & 0.06467 & 0.06870 & 6.2 \\
- & 1.10 & 0.2269 & 0.2314 & 2.0 & 0.02862 & 0.02973 & 3.9 \\
- & 1.25 & 0.2340 & 0.2248 & 3.9 & 7.57$\times10^{-3}$ & 6.45$\times10^{-3}$ & 14.8 \\
- & 1.50 & 0.2521 & 0.2324 & 7.8 & 8.58$\times10^{-4}$ & 4.45$\times10^{-4}$ & 48.2 \\ 
- \bottomrule
+$T$(days) & $K$($\EUR$) & $\sigma_{imp,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) & $\mathrm{Error}_{\sigma}(\%)$ & $C_{\mathrm{mdl}}$($\EUR$) & $\mathrm{Error}_{C}(\%)$ \\ \midrule
+\multirow{7}{*}{21} & 0.50 & 0.6886 & 3 & \num{5.000E-01} & 0 \\
+ & 0.75 & 0.4604 & 1 & \num{2.506E-01} & 0 \\
+ & 0.90 & 0.3216 & 8 & \num{1.056E-01} & 1 \\
+ & 1.00 & 0.2346 & 3 & \num{2.702E-02} & 3 \\
+ & 1.10 & 0.2316 & 0 & \num{2.429E-03} & 0 \\
+ & 1.25 & 0.2935 & 9 & \num{1.243E-04} & 133 \\
+ & 1.50 & 0.3759 & 10 & \num{2.958E-06} & 415 \\ \midrule
+\multirow{7}{*}{42} & 0.50 & 0.5422 & 2 & \num{5.000E-01} & 0 \\
+ & 0.75 & 0.3781 & 2 & \num{2.516E-01} & 0 \\
+ & 0.90 & 0.2873 & 2 & \num{1.112E-01} & 0 \\
+ & 1.00 & 0.2366 & 4 & \num{3.852E-02} & 4 \\
+ & 1.10 & 0.2205 & 6 & \num{7.021E-03} & 18 \\
+ & 1.25 & 0.2463 & 2 & \num{5.203E-04} & 16 \\
+ & 1.50 & 0.2979 & 0 & \num{1.661E-05} & 5 \\ \midrule
+\multirow{7}{*}{63} & 0.50 & 0.4709 & 2 & \num{5.001E-01} & 0 \\
+ & 0.75 & 0.3420 & 1 & \num{2.528E-01} & 0 \\
+ & 0.90 & 0.2748 & 3 & \num{1.166E-01} & 1 \\
+ & 1.00 & 0.2392 & 0 & \num{4.768E-02} & 0 \\
+ & 1.10 & 0.2224 & 5 & \num{1.265E-02} & 11 \\
+ & 1.25 & 0.2310 & 5 & \num{1.312E-03} & 27 \\
+ & 1.50 & 0.2649 & 4 & \num{4.968E-05} & 35 \\ \midrule
+\multirow{7}{*}{126} & 0.50 & 0.3784 & 2 & \num{5.003E-01} & 0 \\
+ & 0.75 & 0.2993 & 1 & \num{2.573E-01} & 0 \\
+ & 0.90 & 0.2626 & 7 & \num{1.312E-01} & 3 \\
+ & 1.00 & 0.2439 & 6 & \num{6.870E-02} & 6 \\
+ & 1.10 & 0.2314 & 2 & \num{2.973E-02} & 4 \\
+ & 1.25 & 0.2248 & 4 & \num{6.453E-03} & 15 \\
+ & 1.50 & 0.2324 & 8 & \num{4.446E-04} & 48 \\ \bottomrule
 \end{tabular}
   \caption[Comparison between fitted results and original data under the Heston model.]{Comparison between fitted results and original data under the Heston model.}
   \label{tab:H}
@@ -734,12 +684,12 @@ We now consider the adjustments above. Observing the theoretical curves in \auto
 
 Considering now the simulated curves, we again see that they accurately follow the theoretical curve for the regions around $S_0$, behaving very badly for the low strike regions and for high strikes with low maturities. This has been observed before in all models and is therefore expected.
 
-If we now compare the cost function of the Dynamic SABR model (Cost$=0.0108$), shown in \autoref{tab:DSR}, with the sum of the costs of the independent fits for the Static SABR ($\Sigma_{\mathrm{Costs}}=0.000415+0.000166+0.000102+0.000055=0.000738$), in \autoref{tab:SSR}, the former is much greater than that of the latter.
+If we now compare the cost function of the Dynamic SABR model (Cost$=0.0108$), shown in \autoref{tab:DSR}, with the sum of the costs of the independent fits for the Static SABR ($\Sigma_{\mathrm{Costs}}=0.0004+0.0002+0.0001+0.0001=0.0008$), in \autoref{tab:SSR}, the former is much greater than that of the latter.
 This is unsurprising, since the Static SABR fits only a small amount of data for a single maturity and Dynamic SABR attempts to model a whole surface.
 
-Comparing the cost resulting from the Heston model (Cost$=0.002529$) with that from Dynamic SABR, we see that even though both models fit the same data on a range of different maturities, Heston outperforms the Dynamic SABR quite significantly. This is further corroborated by the comparison of the theoretical functions in Figures \ref{fig:H} and \ref{fig:DS}, from which it is clear that the Heston model's curves seemed to better fit the data.
+Comparing the cost resulting from the Heston model (Cost$=0.0025$) with that from Dynamic SABR, we see that even though both models fit the same data on a range of different maturities, Heston outperforms the Dynamic SABR quite significantly. This is further corroborated by the comparison of the theoretical functions in Figures \ref{fig:H} and \ref{fig:DS}, from which it is clear that the Heston model's curves seemed to better fit the data.
 
-Finally comparing cost of the Dynamic SABR model with the constant volatility assumption for dependent fits (Cost$=0.1248$), shown in \autoref{tab:ConstVolPar2}, the results improve by approximately $91\%$, compared to the $98\%$ improvement seen with the Heston model. Despite performing worse than Heston, the improvement against the constant volatility model is still striking, though unsurprising.
+Finally comparing cost of the Dynamic SABR model with the constant volatility assumption for dependent fits (Cost$=0.1248$), shown in \autoref{tab:ConstVolPar2}, the results improve by approximately $91\%$, compared to the $98\%$ \hl{here} improvement seen with the Heston model. Despite performing worse than Heston, the improvement against the constant volatility model is still striking, though unsurprising.
 
 As we did for the Heston model, we now present the theoretical and simulated implied volatility surfaces of which the plots in \autoref{fig:DS} are slices. 
 These surfaces and their respective contour plots are shown in Figures \ref{fig:DSS} and \ref{fig:DSSSim}.
@@ -770,38 +720,37 @@ As for the simulated surface in \autoref{fig:DSSSim}, the surface is heavily mod
 \begin{table}[H]
 \centering
 \renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}ccccSccS@{}}
+\begin{tabular}{@{}cccrcr@{}}
 \toprule
-$T$(days) & $K$($\EUR$) & $\sigma_{i,\mathrm{mkt}}$($\SI{}{\year\tothe{-0.5}}$) &  $\sigma_{i,\mathrm{mdl}}$($\SI{}{\year\tothe{-0.5}}$) & \multicolumn{1}{c}{$\mathrm{Error}_{\sigma}(\%)$} & $C_{\mathrm{mkt}}$($\EUR$)&$C_{\mathrm{mdl}}$($\EUR$)& \multicolumn{1}{c}{$\mathrm{Error}_{C}(\%)$}\\ \midrule
-\multirow{7}{*}{21} & 0.50 & 0.7082 & 0.7625 & 7.7 & 0.50001 & 0.50003 & 0.004 \\
- & 0.75 & 0.4632 & 0.3765 & 18.7 & 0.25065 & 0.25012 & 0.2 \\
- & 0.90 & 0.2989 & 0.2843 & 4.9 & 0.10439 & 0.10367 & 0.7 \\
- & 1.00 & 0.2425 & 0.2540 & 4.7 & 0.02792 & 0.02924 & 4.7 \\
- & 1.10 & 0.2314 & 0.2410 & 4.2 & 2.42$\times10^{-3}$ & 2.86$\times10^{-3}$ & 18.0 \\
- & 1.25 & 0.2699 & 0.2454 & 9.1 & 5.34$\times10^{-5}$ & 1.76$\times10^{-5}$ & 67.1 \\
- & 1.50 & 0.3433 & 0.2944 & 14.2 & 57.48$\times10^{-8}$ & 1.86$\times10^{-8}$ & 96.8 \\\midrule
-\multirow{7}{*}{42} & 0.50 & 0.5556 & 0.5788 & 4.2 & 0.50005 & 0.50008 & 0.01 \\
- & 0.75 & 0.3876 & 0.3337 & 13.9 & 0.25186 & 0.25074 & 0.4 \\
- & 0.90 & 0.2824 & 0.2740 & 3.0 & 0.11069 & 0.10985 & 0.8 \\
- & 1.00 & 0.2461 & 0.2538 & 3.1 & 0.04006 & 0.04131 & 3.1 \\
- & 1.10 & 0.2354 & 0.2445 & 3.9 & 8.52$\times10^{-3}$ & 9.49$\times10^{-3}$ & 11.3 \\
- & 1.25 & 0.2525 & 0.2455 & 2.8 & 6.21$\times10^{-4}$ & 5.07$\times10^{-4}$ & 18.3 \\
- & 1.50 & 0.2968 & 0.2736 & 7.8 & 15.83$\times10^{-6}$ & 4.72$\times10^{-6}$ & 70.2 \\\midrule
-\multirow{7}{*}{63} & 0.50 & 0.4789 & 0.4980 & 4.0 & 0.50009 & 0.50014 & 0.01 \\
- & 0.75 & 0.3452 & 0.3150 & 8.8 & 0.25296 & 0.25182 & 0.5 \\
- & 0.90 & 0.2658 & 0.2695 & 1.4 & 0.11533 & 0.11585 & 0.4 \\
- & 1.00 & 0.2401 & 0.2537 & 5.7 & 0.04787 & 0.05057 & 5.6 \\
- & 1.10 & 0.2330 & 0.2460 & 5.6 & 0.01421 & 0.01619 & 13.9 \\
- & 1.25 & 0.2438 & 0.2455 & 0.7 & 1.80$\times10^{-3}$ & 1.87$\times10^{-3}$ & 3.8 \\
- & 1.50 & 0.2749 & 0.2642 & 3.9 & 7.66$\times10^{-5}$ & 4.81$\times10^{-5}$ & 37.2 \\\midrule
-\multirow{7}{*}{126} & 0.50 & 0.3878 & 0.4050 & 4.4 & 0.50035 & 0.50051 & 0.03 \\
- & 0.75 & 0.2954 & 0.2935 & 0.6 & 0.25694 & 0.25677 & 0.1 \\
- & 0.90 & 0.2444 & 0.2645 & 8.2 & 0.12716 & 0.13168 & 3.6 \\
- & 1.00 & 0.2295 & 0.2537 & 10.5 & 0.06467 & 0.07147 & 10.5 \\
- & 1.10 & 0.2269 & 0.2477 & 9.1 & 0.02862 & 0.03382 & 18.2 \\
- & 1.25 & 0.2340 & 0.2452 & 4.8 & 7.57$\times10^{-3}$ & 9.05$\times10^{-3}$ & 19.6 \\
- & 1.50 & 0.2521 & 0.2528 & 0.3 & 8.58$\times10^{-4}$ & 8.77$\times10^{-4}$ & 2.3 \\
- \bottomrule
+$T$(days) & $K$($\EUR$) & $\sigma_{imp,\mathrm{mdl}}$($\SI{}{\year\tothe{-1/2}}$) & $\mathrm{Error}_{\sigma}(\%)$ & $C_{\mathrm{mdl}}$($\EUR$) & $\mathrm{Error}_{C}(\%)$ \\ \midrule
+\multirow{7}{*}{21} & 0.50 & 0.7625 & 8 & \num{5.000E-01} & 0 \\
+ & 0.75 & 0.3765 & 19 & \num{2.501E-01} & 0 \\
+ & 0.90 & 0.2843 & 5 & \num{1.037E-01} & 1 \\
+ & 1.00 & 0.2540 & 5 & \num{2.924E-02} & 5 \\
+ & 1.10 & 0.2410 & 4 & \num{2.858E-03} & 18 \\
+ & 1.25 & 0.2454 & 9 & \num{1.760E-05} & 67 \\
+ & 1.50 & 0.2944 & 14 & \num{1.857E-08} & 97 \\ \midrule
+\multirow{7}{*}{42} & 0.50 & 0.5788 & 4 & \num{5.001E-01} & 0 \\
+ & 0.75 & 0.3337 & 14 & \num{2.507E-01} & 0 \\
+ & 0.90 & 0.2740 & 3 & \num{1.099E-01} & 1 \\
+ & 1.00 & 0.2538 & 3 & \num{4.131E-02} & 3 \\
+ & 1.10 & 0.2445 & 4 & \num{9.490E-03} & 11 \\
+ & 1.25 & 0.2455 & 3 & \num{5.072E-04} & 18 \\
+ & 1.50 & 0.2736 & 8 & \num{4.721E-06} & 70 \\ \midrule
+\multirow{7}{*}{63} & 0.50 & 0.4980 & 4 & \num{5.001E-01} & 0 \\
+ & 0.75 & 0.3150 & 9 & \num{2.518E-01} & 0 \\
+ & 0.90 & 0.2695 & 1 & \num{1.158E-01} & 0 \\
+ & 1.00 & 0.2537 & 6 & \num{5.057E-02} & 6 \\
+ & 1.10 & 0.2460 & 6 & \num{1.619E-02} & 14 \\
+ & 1.25 & 0.2455 & 1 & \num{1.868E-03} & 4 \\
+ & 1.50 & 0.2642 & 4 & \num{4.810E-05} & 37 \\ \midrule
+\multirow{7}{*}{126} & 0.50 & 0.4050 & 4 & \num{5.005E-01} & 0 \\
+ & 0.75 & 0.2935 & 1 & \num{2.568E-01} & 0 \\
+ & 0.90 & 0.2645 & 8 & \num{1.317E-01} & 4 \\
+ & 1.00 & 0.2537 & 11 & \num{7.147E-02} & 11 \\
+ & 1.10 & 0.2477 & 9 & \num{3.382E-02} & 18 \\
+ & 1.25 & 0.2452 & 5 & \num{9.051E-03} & 20 \\
+ & 1.50 & 0.2528 & 0 & \num{8.775E-04} & 2 \\ \bottomrule
 \end{tabular}
   \caption[Comparison between fitted results and original data under the dynamic SABR model.]{Comparison between fitted results and original data under the dynamic SABR model.}
   \label{tab:DS}
@@ -853,7 +802,7 @@ This problem was solved simply by increasing the upper integration limits to $40
 
 
 \subsection{SABR Model}
-One problem related to the SABR models is the fact that stock prices might become negative, which is clearly absurd. This event is very rare and was usually only found in one of the simulated paths out of 100000.
+One problem related to the SABR models is the fact that stock prices might become negative, which is clearly absurd. This event is very rare and was usually only found in one of the simulated paths out of $100\,000$.
 The reason why this problem only occurred for the SABR models and wasn't observed in Heston is due to the fact that the volatility process in the former is not mean reverting.
 This detail enables the volatility process to evolve without restrain. If the volatility process becomes extremely large, the jumps in the stock price process become equally extremely large. In the limit, it is perfectly possible that one of these jumps decreases the stock price process past zero. For the Heston model this problem is not observed because the volatility process (we used the variance process, but they are equivalent) is mean-reverting, so that the volatility doesn't evolve unrestrained.
 
@@ -960,3 +909,11 @@ $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 \hl{explain better the difference between independent and dependent constant volatility plots}
 
 \hl{replace the word -noise- in monte carlo with -bad estimatio- }
+
+\hl{mention that for prices far above the lower bound, the implied volatility is very insensitive to the price, so that even a very small error on the implied volatility will produce an extremely large error in the price}
+
+\hl{mention why we don't have a big table for dupire}
+
+\hl{mention the relative errors in the captions}
+
+\hl{reduce decimal places of values in appendix}

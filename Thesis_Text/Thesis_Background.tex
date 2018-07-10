@@ -199,7 +199,7 @@ The results published originally by Black \textit{et al.} state that, at time $t
 \noindent where $N(\cdot)$ is the cumulative distribution function of the standard normal distribution and where $d_1$, $d_2$ are given by
 \begin{equation}\label{d1d2}
 \begin{split}
-&d_1=\frac{1}{\sigma\sqrt{T}}\left[\ln\left(\frac{S_0}{K}\right)+\left(r+\frac{\sigma^2}{2}\right)T\right];\\
+&d_1=\frac{1}{\sigma\sqrt{T}}\left[\log\left(\frac{S_0}{K}\right)+\left(r+\frac{\sigma^2}{2}\right)T\right];\\
 &d_2=d_1-\sigma\sqrt{T}.\\
 \end{split}
 \end{equation}
@@ -239,7 +239,7 @@ Joining these two conclusions, we obtain the result presented in eq.\eqref{bound
 
 As we did for European call and put options, we can equally derive the theoretical prices of Barrier options, changing the boundary condition to incorporate the barrier level~\citep{taleb}. The resulting \emph{up-and-in call} Barrier option price is given by
 \begin{equation}
-C_{Barr}=S_0\left(N(d_3)+b\left(N(d_4)-N(d_5)\right)\right)-Ke^{-r(T-t)}\left(N(d_6)+a\left(N(d_7)-N(d_8)\right)\right),
+C_{Barr}=S_0\left(N(d_3)+b\left(N(d_4)-N(d_5)\right)\right)-Ke^{-rT}\left(N(d_6)+a\left(N(d_7)-N(d_8)\right)\right),
 \end{equation}
 \noindent where we define the variables $a$, $b$ and $d_3$ through $d_8$ as
 \begin{equation}
@@ -249,21 +249,21 @@ a=\left(\frac{B}{S_0}\right)^{-1+\frac{2r}{\sigma^2}},
 b=\left(\frac{B}{S_0}\right)^{1+\frac{2r}{\sigma^2}},
 \end{equation}
 \begin{equation}
-d_3=\frac{\log(S_0/B)+(r+\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+d_3=\frac{1}{\sigma\sqrt{T}}\left[\log\left(\frac{S_0}{B}\right)+\left(r+\frac{\sigma^2}{2}\right)T\right],
 \end{equation}
 \begin{equation}
-d_4=\frac{\log(S_0/B)-(r+\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+d_4=\frac{1}{\sigma\sqrt{T}}\left[\log\left(\frac{S_0}{B}\right)-\left(r+\frac{\sigma^2}{2}\right)T\right],
 \end{equation}
 \begin{equation}
-d_5=\frac{\log(S_0K/B^2)-(r+\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+d_5=\frac{1}{\sigma\sqrt{T}}\left[\log\left(\frac{S_0K}{B^2}\right)-\left(r+\frac{\sigma^2}{2}\right)T\right],
 \end{equation}
 \begin{equation}
-d_6=\frac{\log(S_0/B)+(r-\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+d_6=\frac{1}{\sigma\sqrt{T}}\left[\log\left(\frac{S_0}{B}\right)+\left(r-\frac{\sigma^2}{2}\right)T\right],
 \end{equation}
 \begin{equation}
-d_7=\frac{\log(S_0/B)-(r-\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+d_7=\frac{1}{\sigma\sqrt{T}}\left[\log\left(\frac{S_0}{B}\right)-\left(r-\frac{\sigma^2}{2}\right)T\right],
 \end{equation}
 \begin{equation}
-d_8=\frac{\log(S_0K/B^2)-(r-\frac{1}{2}\sigma^2)(T-t)}{\sigma\sqrt{T-t}},
+d_8=\frac{1}{\sigma\sqrt{T}}\left[\log\left(\frac{S_0K}{B^2}\right)-\left(r-\frac{\sigma^2}{2}\right)T\right],
 \end{equation}
 \noindent where $B$ defines the barrier level, at which the option becomes activated.

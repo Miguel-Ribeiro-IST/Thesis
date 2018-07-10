@@ -1,6 +1,7 @@
 clearvars -except kappa nubar nu0 rho chi; %clear all variables. This prevents multiple simulations from interfering with one another
 %Import data from file "Data_BNPP_2.txt" and assign it to matrix B. The file must be in the same folder
 %1st column - maturities, 2nd column - strikes, 3rd column - implied volatilities
+kappa=53.4355;nubar=0.0653;nu0=0.1046;rho=-0.4086;chi=6.2554;
 A = importdata('Data_BNPP.txt','\t',1);
 B=A.data(:,:);
 
@@ -15,8 +16,8 @@ OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 %After calibrating all the model's parameters, we may want to simulate the implied volatilities using Monte Carlo
 SimPoints=true;   %true or false - define if Monte Carlo simulation should be executed
 M=100000;           %number of paths to be simulated
-repetitions=100;
-barr=[1.05,1.15,1.25];
+repetitions=10;
+barr=[1.05,0.9,1.25];
 %L=T*252*2
 
 
@@ -352,7 +353,7 @@ if PriceVol=="price"
 else
     Result=zeros(1,N);
     for j=1:N
-        volatility=@(sigma)european_bs(S0,C(j,1),r,sigma,T,"call")-exp(-r*T)*mean(Y(:,j));
+        volatility=@(sigma)barrier_bs(S0,C(j,1),r,sigma,T,"call",b)-exp(-r*T)*mean(Y(:,j));
         res=fzero(volatility,0.0001);   %Calculate the expected implied volatility
         
         if ~isnan(res)     %if no implied volatility is comaptible with the price, fzero outputs NaN
@@ -399,6 +400,26 @@ if putcall=="call"
     price = S0.*N1 - K.*exp(-r.*T).*N2;
 elseif putcall=="put"
     price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
+end
+end
+
+function price=barrier_bs(S0,K,r,sigma,T,putcall,B)
+x1=(B/S0)^(-1+2*r/sigma^2);
+x2=(B/S0)^(1+2*r/sigma^2);
+d3= (log(S0./B) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d4= (log(S0./B) - (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d5= (log(S0.*K./(B.^2)) - (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d6= (log(S0./B) + (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d7= (log(S0./B) - (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d8= (log(S0.*K./(B.^2)) - (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+N3 = normcdf(d3);
+N4 = normcdf(d4);
+N5 = normcdf(d5);
+N6 = normcdf(d6);
+N7 = normcdf(d7);
+N8 = normcdf(d8);
+if putcall=="call"
+    price = S0.*(N3+x2.*(N4-N5)) - K.*exp(-r.*T).*(N6+x1.*(N7-N8));
 end
 end
 

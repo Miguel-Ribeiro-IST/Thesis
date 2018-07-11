@@ -181,11 +181,11 @@ dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \end{equation}
 \noindent with $\{W(t),\ t>0\}$ defining a one-dimensional Brownian motion and where we define $S_0=S(0)$ as the stock price at time $t=0$. An example of such processes is represented in \autoref{fig:GBM}.
 
-Many other diffusion processes exist, and this choice made by Black \textit{et al.} might seem a bit arbitrary, but there is actually a reason behind it. Changes in the stock price are geometric and not arithmetic. If an asset of price $\SI{1000}{\EUR}$ changed by $\SI{9}{\EUR}$, we would barely take notice. If another asset of price $\SI{10}{\EUR}$ changed by $\SI{9}{\EUR}$, the drop would be quite surprising, even though the change was the same in both assets. This seems to indicate that changes in the stock price depend on the stock price itself and justifies the choice made by Black \textit{et al.} to model stock prices using a Geometric Brownian Motion process.
+Many other diffusion processes exist, and this choice made by Black \textit{et al.} might seem a bit arbitrary, but there is actually a reason behind it. Changes in the stock price are geometric and not arithmetic. If an asset of price $1000\SI{}{\EUR}$ changed by $9\SI{}{\EUR}$, we would barely take notice. If another asset of price $10\SI{}{\EUR}$ changed by $9\SI{}{\EUR}$, the drop would be quite surprising, even though the change was the same in both assets. This seems to indicate that changes in the stock price depend on the stock price itself and justifies the choice made by Black \textit{et al.} to model stock prices using a Geometric Brownian Motion process.
 \begin{figure}[!htb]
     \centering
       \includegraphics[width=.65\columnwidth]{GBM.eps}
-      \caption[Example of Geometric Brownian Motion processes]{Example of three Geometric Brownian Motion processes with maturity $T=\SI{1}{\year}$, interest rate $r=\SI{0.01}{\per\year}$, volatility $\sigma=\SI{0.1}{\year\tothe{-1/2}}$ and initial stock price $S_0=\SI{1}{\EUR}$.}\label{fig:GBM}
+      \caption[Example of Geometric Brownian Motion processes]{Example of three Geometric Brownian Motion processes with maturity $T=1\SI{}{\year}$, interest rate $r=0.01\SI{}{\per\year}$, volatility $\sigma=0.1\SI{}{\year\tothe{-1/2}}$ and initial stock price $S_0=1\SI{}{\EUR}$.}\label{fig:GBM}
     \end{figure}
 
 With this result, pricing options is fairly straightforward - we simply need to solve the PDE in eq.\eqref{BS2} as we would for the diffusion equation's initial value problem~\citep{Dilao}.

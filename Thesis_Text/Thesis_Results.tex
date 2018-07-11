@@ -132,8 +132,8 @@ Thirdly, we notice that on the earliest maturity (i.e. 21 days), for strikes muc
 To solve this problem we could significantly increase the number of simulations, so that the number of paths that are able to reach these high strikes is enough to produce a good estimate of the option price. The problem with this solution is the very significant increase in the computation time required, which makes it impractical.
 If we lowered the number of simulated paths from $100\,000$ to any other smaller amount, the problem described before would become even more severe, and the later maturities would eventually also display the problem observed in the earliest maturity.
 
-Finally we must discuss the large confidence bands for strikes much lower than $S_0$, occurring over all maturities. To explain this we require the information presented in \autoref{fig:ImpVolPrice}, relating the implied volatility with the option's market price. We saw that the implied volatility was extremely sensitive to option prices very close to their lower bounds, $S_0-Ke^{-rT}$. If we now look, for example, at the market price of the option with strike $K=\SI{0.5}{\EUR}$ and maturity $T=21$ days, which is $C=0.5000\SI{}{\EUR}$, and we compare it with its lower bound, $S_0-Ke^{-rT}=0.5000\SI{}{\EUR}$ (assuming the parameters shown in \autoref{tab:defaultparam}), we can clearly see that they are the same (with a difference only on the fourth decimal place, which is not shown here). We can then conclude that, in this case, we are in the extremely high sensitivity region of the implied volatility functions shown in \autoref{fig:ImpVolPrice}.
-Even though the Monte Carlo pricer is expected to produce a good estimation of option prices with lower strikes (a very large number of paths contribute to the option price, so a low amount of noise is produced - the opposite of what we described before for high strikes), because there will always be \emph{some} error associated with the simulations, the pricer is expected to produce some very slighty different results when executed multiple times, which is enough to cause some of the simulated implied volatilities to go to approximately zero or to increase significantly, which explains the large confidence bands. For options with strikes near $S_0$ and above, the market option price is much farther from its lower bound, so that we are far from the high sensitivity region. Indeed, the lower bound of options with strikes equal to or above $S_0$ is 0 (assuming interest rate $r=0$).
+Finally we must discuss the large confidence bands for strikes much lower than $S_0$, occurring over all maturities. To explain this we require the information presented in \autoref{fig:ImpVolPrice}, relating the implied volatility with the option's market price. We saw that the implied volatility was extremely sensitive to option prices very close to their lower bounds, $S_0-Ke^{-rT}$. If we now look, for example, at the market price of the option with strike $K=0.5\SI{}{\EUR}$ and maturity $T=21$ days, which is $C=0.5000\SI{}{\EUR}$, and we compare it with its lower bound, $S_0-Ke^{-rT}=0.5000\SI{}{\EUR}$ (assuming the parameters shown in \autoref{tab:defaultparam}), we can clearly see that they are the same (with a difference only on the fourth decimal place, which is not shown here). We can then conclude that, in this case, we are in the extremely high sensitivity region of the implied volatility functions shown in \autoref{fig:ImpVolPrice}.
+Even though the Monte Carlo pricer is expected to produce a good estimation of option prices with lower strikes (a very large number of paths contribute to the option price, so the estimation will be very accurate, with very little variation - the opposite of what we described before for high strikes), because there will always be \emph{some} error associated with the simulations, the pricer is expected to produce some very slighty different results when executed multiple times, which is enough to cause some of the simulated implied volatilities to go to approximately zero or to increase significantly, which explains the large confidence bands. For options with strikes near $S_0$ and above, the market option price is much farther from its lower bound, so that we are far from the high sensitivity region. Indeed, the lower bound of options with strikes equal to or above $S_0$ is 0 (assuming interest rate $r=0$).
 
 These two last problems are not only applicable to the constant volatility model and will also be observed in all the other models.
 
@@ -281,7 +281,7 @@ $T_{min}$(days) & $T_{max}$(days) & $\Delta T$(days) & $K_{min}$($\EUR$) & $K_{m
 
 To simulate a stock price path we need to sample the surface at the point $(S_i,t_j)$ when we are at the time step $t_j$ of the simulation with a stock price $S_i$ and assume that value as the local volatility, to be used on the generation of the next stock price value, $S_{i+1}$. We iterate this procedure for all paths until we reach the maturity. Having obtained all the simulated stock prices at maturity, pricing the option is done as usual.
 
-The results of these simulations are shown in \autoref{fig:Dup}, along with the confidence bands and the original market data. To prevent volatilities from becoming too high, we implemented a maximum cutoff value of $\sigma_{max}$=$\SI{1.5}{\year\tothe{-1/2}}$, limiting the volatilities sampled from the surface.
+The results of these simulations are shown in \autoref{fig:Dup}, along with the confidence bands and the original market data. To prevent volatilities from becoming too high, we implemented a maximum cutoff value of $\sigma_{max}$=$1.5\SI{}{\year\tothe{-1/2}}$, limiting the volatilities sampled from the surface.
 
 \vspace{\fill}
 \newpage
@@ -303,7 +303,7 @@ As before, we now see the very large confidence bands for very low strikes. The 
 The great improvement of Dupire's model over the constant volatility model is the presence of the implied volatility smiles in the simulated implied volatilities. Furthermore, these smiles follow the market data almost perfectly for strikes near $S_0$.
 We can therefore conclude that the model greatly outperforms the constant volatility model presented earlier, which is unsurprising.
 
-The simulations shown in the plots of \autoref{fig:Dup} can be thought of as slices of a simulated implied volatility surface. Ideally, this surface would look exactly like the one shown in \autoref{fig:DupImpV}. However, in the regions where the simulations behave badly (large strikes for early maturities and low strikes), we expect there to be a very high amount of noise. This simulated surface is shown in \autoref{fig:DupS}, along with the simulated functions of the earlier plots (red dashed lines) and the market data (red circles). The respective contour plot is also represented.
+The simulations shown in the plots of \autoref{fig:Dup} can be thought of as slices of a simulated implied volatility surface. Ideally, this surface would look exactly like the one shown in \autoref{fig:DupImpV}. However, in the regions where the simulations behave badly (large strikes for early maturities and low strikes), we expect there to be a very high amount of error in the estimations. This simulated surface is shown in \autoref{fig:DupS}, along with the simulated functions of the earlier plots (red dashed lines) and the market data (blue circles). The respective contour plot is also represented.
 
 
 
@@ -316,7 +316,7 @@ The simulations shown in the plots of \autoref{fig:Dup} can be thought of as sli
 \end{figure}   
 
 
-As expected, the amount of noise is quite overwhelming in the regions where the Monte Carlo pricer performs badly. For the regions where the strike approaches $S_0$, the picture is quite different and the simulations closely follow the data, as expected.
+As expected, the amount of error is quite overwhelming in the regions where the Monte Carlo pricer performs badly. For the regions where the strike approaches $S_0$, the picture is quite different and the simulations closely follow the data, as expected.
 
 
 
@@ -420,7 +420,7 @@ As for the parameter $\rho$, we first note that it is always negative, which is 
 Finally, the parameter $\nu$ also seems to decrease with time. This is no surprise as the curvature of the implied volatility function is expected to decrease with time, with the function becoming increasingly horizontal, as can be seen from the provided data.
 
 
-If we now compare the cost function values of the Static SABR model in \autoref{tab:SSR} with the independently fitted results of the constant volatility model in \autoref{tab:ConstVolPar} we clearly see that they improve very significantly. For all maturities, the costs decrease between 99.2 and 99.4\% \hl{here}, which is an extreme improvement. This is no surprise, since the constant volatility model was expected to perform very badly. These costs should be considered carefully, however, due to the overfitting mentioned earlier - for such a low amount of data (compared to the high number of parameters) we can find many possible combinations of parameters that fit the data as well as the parameters found by the optimizer.
+If we now compare the cost function values of the Static SABR model in \autoref{tab:SSR} with the independently fitted results of the constant volatility model in \autoref{tab:ConstVolPar} we clearly see that they improve very significantly. For all maturities, the costs decrease between 98.6 and 99.4\%, which is an extreme improvement. This is no surprise, since the constant volatility model was expected to perform very badly. These costs should be considered carefully, however, due to the overfitting mentioned earlier - for such a low amount of data (compared to the high number of parameters) we can find many possible combinations of parameters that fit the data as well as the parameters found by the optimizer.
 
 \begin{table}[H]
 \centering
@@ -546,7 +546,7 @@ Observing the simulated curves and their respective confidence bands we again se
 Considering now the cost function value for the fitted parameters (Cost$=0.0025$), shown in \autoref{tab:HR}, and comparing it to the sum of the costs of each of the independent fits in the Static SABR model ($\Sigma_{\mathrm{Costs}}=0.0004+0.0002+0.0001+0.0001=0.0008$), in \autoref{tab:SSR}, we note that the cost of the former is higher than that of the latter.
 This is unsurprising, as the adjustments with the Static SABR were done independently of one another, and a better fit is therefore possible.
 
-Comparing now the cost of the Heston model with that of the constant volatility assumption for dependent fits (Cost$=0.1248$), shown in \autoref{tab:ConstVolPar2}, we see that our results improve by approximately $98\%$ \hl{here}. The improvement is astonishing and completely justifies why the Heston model is so widely preferred over the constant volatility simplification.
+Comparing now the cost of the Heston model with that of the constant volatility assumption for dependent fits (Cost$=0.1248$), shown in \autoref{tab:ConstVolPar2}, we see that our results improve by approximately $98\%$. The improvement is astonishing and completely justifies why the Heston model is so widely preferred over the constant volatility simplification.
 
 
 Both the simulated and theoretical implied volatility curves shown in the plots of \autoref{fig:H} for different maturities can be thought of as slices of implied volatility surfaces (one simulated, another theoretical). Similarly to what we did for the Dupire model, we again represent these surfaces and their respective contour plots in Figures \ref{fig:HS} and \ref{fig:HSSim}.
@@ -689,7 +689,7 @@ This is unsurprising, since the Static SABR fits only a small amount of data for
 
 Comparing the cost resulting from the Heston model (Cost$=0.0025$) with that from Dynamic SABR, we see that even though both models fit the same data on a range of different maturities, Heston outperforms the Dynamic SABR quite significantly. This is further corroborated by the comparison of the theoretical functions in Figures \ref{fig:H} and \ref{fig:DS}, from which it is clear that the Heston model's curves seemed to better fit the data.
 
-Finally comparing cost of the Dynamic SABR model with the constant volatility assumption for dependent fits (Cost$=0.1248$), shown in \autoref{tab:ConstVolPar2}, the results improve by approximately $91\%$, compared to the $98\%$ \hl{here} improvement seen with the Heston model. Despite performing worse than Heston, the improvement against the constant volatility model is still striking, though unsurprising.
+Finally comparing cost of the Dynamic SABR model with the constant volatility assumption for dependent fits (Cost$=0.1248$), shown in \autoref{tab:ConstVolPar2}, the results improve by approximately $91\%$, compared to the $98\%$ improvement seen with the Heston model. Despite performing worse than Heston, the improvement against the constant volatility model is still striking, though unsurprising.
 
 As we did for the Heston model, we now present the theoretical and simulated implied volatility surfaces of which the plots in \autoref{fig:DS} are slices. 
 These surfaces and their respective contour plots are shown in Figures \ref{fig:DSS} and \ref{fig:DSSSim}.
@@ -715,7 +715,7 @@ These surfaces and their respective contour plots are shown in Figures \ref{fig:
 
 
 As stated before, ideally the plots in these two Figures would perfectly mimic the surface shown in \autoref{fig:DupImpV}. This obviously doesn't occur. The theoretical surface plot in \autoref{fig:DSS} seems to be flatter than the actual surface in the regions around $S_0$ (notice the wider contours in this region) whereas it increases quite abruptly for low strikes.
-As for the simulated surface in \autoref{fig:DSSSim}, the surface is heavily modified by noise, which is expected from the adjustments shown before.
+As for the simulated surface in \autoref{fig:DSSSim}, in the regions where the simulations are expected to behave badly, a large amount of error can be observed, as is expected.
 
 \begin{table}[H]
 \centering
@@ -845,19 +845,8 @@ Despite these expected shortcomings, we priced several Barrier options with diff
 
 \newpage
 
-\hlc[green]{in the tables show only one maturity and show the simulation implied vols, deleting the option prices (or showing in a different table)}
 
-\hlc[green]{create a cost function for the simulated volatility functions besides the already existing cost for the theoretical values, in order to compare dupire's model}
-
-\hlc[green]{plot the decaying functions of rho and nu on the dynamic sabr model}
-
-\hlc[green]{check with Claude if BNPP data assumes a 0 interest rate or not}
-
-\hlc[green]{ask prof Dilao why we use the forward gradient wrt time in the dupire interpolation gradient}
-
-\hlc[green]{put implied volatility applied to barrier options}
-
-\hlc[green]{keep dupire's results table or not. they are the results for simulations not theoretical predictions}
+\hlc[red]{check with Claude if BNPP data assumes a 0 interest rate or not}
 
 \hlc[red]{why is the coupled constant implied volatility the average of the independent fits of the constant implied vols?}
 
@@ -865,50 +854,17 @@ Despite these expected shortcomings, we priced several Barrier options with diff
 
 \hlc[red]{mention the implied vol sensitivity to option price but changing maturity.}
 
-\hlc[red]{how is extrapolation done in dupires model}
-
 \hlc[red]{explain why static sabr only works for one maturity}
 
 \hlc[red]{why does rho/nu decrease with maturity in static sabr}
 
 \hlc[red]{why does implied volatility surface become flatter with maturity}
 
-\hl{check notation:}
-
-$\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
-
 \hl{put units in fitted parameters}
-
-\hl{put proof of lower bounds for the option prices}
-
-\hl{in the plots of the chapters background and implementation, use dashed and dot-dashed lines}
-
-\hl{save files as .png}
-
-\hl{change labels from "simulated function" to something else}
-
-\hl{check number of decimal places in the parameters tables (in particular for the cost function value)}
-
-\hl{explain how the lower bound volatility sensitivity plot was obtained}
-
-\hl{explain what C means in the lower bound volatility sensitivity plot}
-
-\hl{redo fokker-planck proof}
 
 \hl{redo heston proof}
 
-\hl{in heston proof, show ito's lemma for two dimensions}
-
-\hl{change the 3d surface captions of the blue circles to something else}
-
-\hl{put 95 percent confidence bands}
-
-
-\hl{in plot of implied vol vs. option price, put C mkt in axis label}
-
 \hl{explain better the difference between independent and dependent constant volatility plots}
-
-\hl{replace the word -noise- in monte carlo with -bad estimatio- }
 
 \hl{mention that for prices far above the lower bound, the implied volatility is very insensitive to the price, so that even a very small error on the implied volatility will produce an extremely large error in the price}
 
@@ -916,4 +872,6 @@ $\sigma_{i,\mathrm{mkt}}$ vs $\sigma_{imp,\mathrm{mkt}}$;
 
 \hl{mention the relative errors in the captions}
 
-\hl{reduce decimal places of values in appendix}
+\hl{comment the big tables}
+
+\hl{redo the implied volatility sensitivity section}

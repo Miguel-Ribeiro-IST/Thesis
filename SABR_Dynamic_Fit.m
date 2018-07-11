@@ -20,8 +20,8 @@ OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
 SimPoints=false;
-M=1000;
-repetitions=10;
+M=100000;
+repetitions=100;
 %L=T*252*2
 
 

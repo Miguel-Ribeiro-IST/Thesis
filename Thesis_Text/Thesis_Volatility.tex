@@ -4,7 +4,7 @@ As mentioned, volatility is a measure of the uncertainty of future stock price m
 \begin{figure}[!htb]
     \centering
       \includegraphics[width=.65\columnwidth]{VarVol.eps}
-      \caption[Example of three identical GBM processes with different volatilities]{Example of three identical GBM processes with maturity $T=\SI{1}{\year}$, interest rate $r=\SI{0.01}{\per\year}$ and initial stock price $S_0=\SI{1}{\EUR}$. The volatilities are $\sigma=\SI{0.05}{\year\tothe{-1/2}}$, $\sigma=\SI{0.1}{\year\tothe{-1/2}}$ and $\sigma=\SI{0.2}{\year\tothe{-1/2}}$ for the orange, blue and red plot lines represented, respectively. To emphasize this effect, the underlying Brownian Motion $\{W(t),\ t>0\}$ used to generate all three paths was the same.}\label{fig:VarVol}
+      \caption[Example of three identical GBM processes with different volatilities]{Example of three identical GBM processes with maturity $T=1\SI{}{\year}$, interest rate $r=0.01\SI{}{\per\year}$ and initial stock price $S_0=1\SI{}{\EUR}$. The volatilities are $\sigma=0.05\SI{}{\year\tothe{-1/2}}$, $\sigma=0.1\SI{}{\year\tothe{-1/2}}$ and $\sigma=0.2\SI{}{\year\tothe{-1/2}}$ for the orange, blue and red plot lines represented, respectively. To emphasize this effect, the underlying Brownian Motion $\{W(t),\ t>0\}$ used to generate all three paths was the same.}\label{fig:VarVol}
     \end{figure}
 
 Of all the parameters in the BS formula (eq.\eqref{BS2}), volatility is the only one we can't easily measure from market data.
@@ -45,7 +45,7 @@ Because eq.\eqref{callputBS} is not invertible w.r.t. $\sigma$, we need to use s
 \begin{equation}\label{impvolform}
 C(\sigma_{imp})=C_{\mathrm{mkt}},
 \end{equation}
-\noindent where $C(\sigma_{imp})$ corresponds to the result of eq.\eqref{callputBS} using $\sigma_{imp}$ as (implied) volatility and $C_{\mathrm{mkt}}$ to the price of the option observed in the market.
+\noindent where $C(\sigma_{imp})$ corresponds to the result of eq.\eqref{callputBS} using $\sigma_{imp}$ as (implied) volatility and $C_{\mathrm{mkt}}$ to the price of the call option observed in the market (it could also be the call option price resulting from a model or simulation).
 
 
 
@@ -55,10 +55,12 @@ Solving eq.\eqref{impvolform} to find the implied volatility of different option
 \begin{figure}[H]
     \centering
       \includegraphics[width=.65\columnwidth]{ImpVolC.eps}
-      \caption[Relationship between the implied volatility and the market price of a call option.]{Relationship between the implied volatility and the market price of a call option. The parameters used were $T=21$ days, interest rate $r=\SI{0.01}{\per\year}$ and initial stock price $S_0=\SI{1}{\EUR}$. The strike prices are $K=\SI{0.9}{\EUR}$, $K=\SI{0.75}{\EUR}$ and $K=\SI{0.5}{\EUR}$ for the red full line, the blue dot-dashed line and the green dot-dashed line, respectively.}\label{fig:ImpVolPrice}
+      \caption[Relationship between the implied volatility and the market price of a call option.]{Relationship between the implied volatility and the market price of a call option. The parameters used were $T=21$ days, interest rate $r=0.01\SI{}{\per\year}$ and initial stock price $S_0=1\SI{}{\EUR}$. The strike prices are $K=0.9\SI{}{\EUR}$, $K=0.75\SI{}{\EUR}$ and $K=0.5\SI{}{\EUR}$ for the red full line, the blue dot-dashed line and the green dot-dashed line, respectively.}\label{fig:ImpVolPrice}
     \end{figure}
 
-We can see that the implied volatility goes to zero extremely fast when we approach the lower bound of the call option's price, $S_0-Ke^{-rT}$ (from eq.\eqref{bound}) - the lower bounds for the option prices with strikes $K=\SI{0.9}{\EUR}$, $K=\SI{0.75}{\EUR}$ and $K=\SI{0.5}{\EUR}$ are, respectively, $C=\SI{0.1007}{\EUR}$, $C=\SI{0.2506}{\EUR}$ and $C=\SI{0.5004}{\EUR}$). We can thus conclude that the implied volatility is extremely sensitive to the option's market price when this price approaches its lower bound. We can also observe that this property is more pronounced for lower strikes. This observation will become very important in later sections.
+We can see that the implied volatility goes to zero extremely fast when we approach the lower bound of the call option's price, $S_0-Ke^{-rT}$ - from eq.\eqref{bound}, the lower bounds for the option prices shown in \autoref{fig:ImpVolPrice}, with strikes $K=0.9\SI{}{\EUR}$, $K=0.75\SI{}{\EUR}$ and $K=0.5\SI{}{\EUR}$ are, respectively, $C=0.1007\SI{}{\EUR}$, $C=0.2506\SI{}{\EUR}$ and $C=0.5004\SI{}{\EUR}$). We can thus conclude that the implied volatility is extremely sensitive to the option's market price when this price approaches its lower bound. We can also observe that this property is more pronounced for lower strikes. This observation will become very important in later sections. We can also see that the curves only leave this high sensitivity region for implied volatilities above $1\SI{}{\year\tothe{-1/2}}$, which is a very high value usually not seen in the market, so it expected for the implied volatility of such options to always be extremely sensitive to the their price.
+
+One other property that can be deduced from \autoref{fig:ImpVolPrice} is that when the market prices are far larger than their lower bounds
 
 From \autoref{fig:ImpVolPrice} we can also observe that the relation between implied volatility and market option price is a monotonous increasing function.
 This means that we can obtain the implied volatility of an option from its price and vice versa (i.e. the relationship is bijective). This duality is so fundamental that investors often disclose options by providing their implied volatility instead of their price~\citep{Wilmott}, as is indeed the case for the data we will use later to calibrate the models.

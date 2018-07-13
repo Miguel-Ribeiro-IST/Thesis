@@ -66,12 +66,12 @@ sigma3=0.2;
 
 
 
-plot(0:dt:1,S2(:,:)','LineWidth',1.25);
+plot(0:dt:1,S2(:,:)','-.','LineWidth',1.25);
 hold on;
  plot(0:dt:1,S3(:,:)','LineWidth',1.25);
 hold on;
 
-plot(0:dt:1,S1(:,:)','LineWidth',1.25);
+plot(0:dt:1,S1(:,:)',':','LineWidth',1.25);
 
 h = get(gca,'Children');
 legend([h(1) h(3) h(2)],{'\sigma=0.05 yr^{-0.5}','\sigma=0.1 yr^{-0.5}','\sigma=0.2 yr^{-0.5}'},'Location','northeast','FontSize',11)
@@ -264,14 +264,17 @@ grid on;
 pbaspect([1.5 1 1])
 %}
 
-%%{
+%{
+figure
 format long
 T=1/12;
 r=0.01;
 S0=1;
+m=0.9;
+d=1000;
 
 K1=0.9;
-P=logspace(log10(S0-K1*exp(-r*T)),log10(0.6),100);
+P=linspace(S0-K1*exp(-r*T),0.3,d);
 vol=zeros(1,size(P,2));
 for i=1:size(P,2)
 volatility=@(sigma)european_bs(S0,K1,r,sigma,T,"call")-P(i);
@@ -281,7 +284,7 @@ plot(P,vol,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
 hold on;
 
 K2=0.75;
-P=logspace(log10(S0-K2*exp(-r*T)),log10(0.6),100);
+P=linspace(S0-K2*exp(-r*T),0.4,d);
 vol=zeros(1,size(P,2));
 for i=1:size(P,2)
 volatility=@(sigma)european_bs(S0,K2,r,sigma,T,"call")-P(i);
@@ -291,7 +294,7 @@ plot(P,vol,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
 hold on;
 
 K3=0.5;
-P=logspace(log10(S0-K3*exp(-r*T)),log10(0.6),100);
+P=linspace(S0-K3*exp(-r*T),0.55,d);
 vol=zeros(1,size(P,2));
 for i=1:size(P,2)
 volatility=@(sigma)european_bs(S0,K3,r,sigma,T,"call")-P(i);
@@ -300,8 +303,8 @@ end
 plot(P,vol,':','LineWidth',2.25,'Color',[0.4660    0.6740    0.1880]);
 
 xlim([0,0.6])
-ylim([10^-2,10])
-set(gca, 'YScale', 'log')
+ylim([0,2])
+%set(gca, 'YScale', 'log')
 
 xlabel('C_{mkt}(€)');
 ylabel('\sigma_{imp}(yr^{-1/2})')
@@ -323,5 +326,206 @@ if putcall=="call"
 elseif putcall=="put"
     price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
 end
+end
+%}
+
+%{
+figure
+format long
+T=1/12;
+r=0.01;
+S0=1;
+m=0.1;
+d=1000;
+
+K1=1.1;
+P=linspace(0,m,d);
+vol=zeros(1,size(P,2));
+for i=1:size(P,2)
+volatility=@(sigma)european_bs(S0,K1,r,sigma,T,"call")-P(i);
+vol(i)=fzero(volatility,0.000001);
+end
+plot(vol,P,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
+hold on;
+
+K2=1.25;
+vol=zeros(1,size(P,2));
+for i=1:size(P,2)
+volatility=@(sigma)european_bs(S0,K2,r,sigma,T,"call")-P(i);
+vol(i)=fzero(volatility,0.000001);
+end
+plot(vol,P,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
+hold on;
+
+K3=1.5;
+vol=zeros(1,size(P,2));
+for i=1:size(P,2)
+volatility=@(sigma)european_bs(S0,K3,r,sigma,T,"call")-P(i);
+vol(i)=fzero(volatility,0.000001);
+end
+plot(vol,P,':','LineWidth',2.25,'Color',[0.4660    0.6740    0.1880]);
+
+xlim([0,1])
+ylim([0,m])
+%set(gca, 'YScale', 'log')
+
+ylabel('C_{mkt}(€)');
+xlabel('\sigma_{imp}(yr^{-1/2})')
+%xticks(S0-K*exp(-r*T));
+%xticklabels({'S_0-Ke^{(-rT)}'})
+pbaspect([1.5 1 1])
+set(gca,'fontsize',12)
+grid on;
+legend({['K=',num2str(K1),'0 €'],['K=',num2str(K2),' €'],['K=',num2str(K3),'0 €']},'Location','northwest','FontSize',11)
+
+
+function price=european_bs(S0,K,r,sigma,T,putcall)
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d2 = d1 - sigma.*sqrt(T);
+N1 = normcdf(d1);
+N2 = normcdf(d2);
+if putcall=="call"
+    price = S0.*N1 - K.*exp(-r.*T).*N2;
+elseif putcall=="put"
+    price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
+end
+end
+%}
+
+%%{
+figure
+format long
+r=0.01;
+S0=1;
+d=1000;
+sigma=0.3;
+
+K=linspace(0.4,1.6,10000);
+veg=zeros(1,size(K,2));
+pric=zeros(1,size(K,2));
+
+T=3/12;
+for i=1:size(K,2)
+pric(i)=european_bs(S0,K(i),r,sigma,T,"call");
+veg(i)=vega(S0,K(i),r,sigma,T)/pric(i)*sigma;
+end
+plot(K,veg,'LineWidth',2);
+hold on;
+
+T=2/12;
+for i=1:size(K,2)
+pric(i)=european_bs(S0,K(i),r,sigma,T,"call");
+veg(i)=vega(S0,K(i),r,sigma,T)/pric(i)*sigma;
+end
+plot(K,veg,'-.','LineWidth',2);
+hold on;
+
+T=1/12;
+for i=1:size(K,2)
+pric(i)=european_bs(S0,K(i),r,sigma,T,"call");
+veg(i)=vega(S0,K(i),r,sigma,T)/pric(i)*sigma;
+end
+plot(K,veg,':','LineWidth',2);
+hold on;
+
+xlim([0.4,1.6])
+%ylim([0,0.15])
+%set(gca, 'YScale', 'log')
+
+xlabel('K/S_0');
+ylabel('Relative Change')
+%xticks(S0-K*exp(-r*T));
+%xticklabels({'S_0-Ke^{(-rT)}'})
+pbaspect([1.5 1 1])
+set(gca,'fontsize',12)
+grid on;
+legend({'T=63 days','T=42 days','T=21 days'},'Location','northwest','FontSize',11)
+
+
+function price=european_bs(S0,K,r,sigma,T,putcall)
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d2 = d1 - sigma.*sqrt(T);
+N1 = normcdf(d1);
+N2 = normcdf(d2);
+if putcall=="call"
+    price = S0.*N1 - K.*exp(-r.*T).*N2;
+elseif putcall=="put"
+    price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
+end
+end
+
+function res=vega(S0,K,r,sigma,T)
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+N=@(x)1/(sqrt(2*pi))*exp(-x.^2/2);
+res=S0*sqrt(T)*N(d1);
+end
+%}
+
+%{
+figure
+format long
+r=0.01;
+S0=1;
+d=1000;
+sigma=0.3;
+
+K=linspace(0.4,1.6,100000);
+veg=zeros(1,size(K,2));
+pric=zeros(1,size(K,2));
+
+T=3/12;
+for i=1:size(K,2)
+pric(i)=european_bs(S0,K(i),r,sigma,T,"call");
+veg(i)=vega(S0,K(i),r,sigma,T);
+end
+plot(K,veg,'LineWidth',2);
+hold on;
+
+T=2/12;
+for i=1:size(K,2)
+pric(i)=european_bs(S0,K(i),r,sigma,T,"call");
+veg(i)=vega(S0,K(i),r,sigma,T);
+end
+plot(K,veg,'-.','LineWidth',2);
+hold on;
+
+T=1/12;
+for i=1:size(K,2)
+pric(i)=european_bs(S0,K(i),r,sigma,T,"call");
+veg(i)=vega(S0,K(i),r,sigma,T);
+end
+plot(K,veg,':','LineWidth',2);
+hold on;
+
+xlim([0.4,1.6])
+%ylim([0,0.15])
+%set(gca, 'YScale', 'log')
+
+xlabel('K/S_0');
+ylabel('Vega (€.yr^{1/2})')
+%xticks(S0-K*exp(-r*T));
+%xticklabels({'S_0-Ke^{(-rT)}'})
+pbaspect([1.5 1 1])
+set(gca,'fontsize',12)
+grid on;
+legend({'T=63 days','T=42 days','T=21 days'},'Location','northeast','FontSize',11)
+
+
+function price=european_bs(S0,K,r,sigma,T,putcall)
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d2 = d1 - sigma.*sqrt(T);
+N1 = normcdf(d1);
+N2 = normcdf(d2);
+if putcall=="call"
+    price = S0.*N1 - K.*exp(-r.*T).*N2;
+elseif putcall=="put"
+    price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
+end
+end
+
+function res=vega(S0,K,r,sigma,T)
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+N=@(x)1/(sqrt(2*pi))*exp(-x.^2/2);
+res=S0*sqrt(T)*N(d1);
 end
 %}

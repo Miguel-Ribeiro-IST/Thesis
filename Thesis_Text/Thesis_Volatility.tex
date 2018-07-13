@@ -48,21 +48,7 @@ C(\sigma_{imp})=C_{\mathrm{mkt}},
 \noindent where $C(\sigma_{imp})$ corresponds to the result of eq.\eqref{callputBS} using $\sigma_{imp}$ as (implied) volatility and $C_{\mathrm{mkt}}$ to the price of the call option observed in the market (it could also be the call option price resulting from a model or simulation).
 
 
-
-Solving eq.\eqref{impvolform} to find the implied volatility of different option market prices, we find the relationship depicted in \autoref{fig:ImpVolPrice}, for three different strike prices.
-
-
-\begin{figure}[H]
-    \centering
-      \includegraphics[width=.65\columnwidth]{ImpVolC.eps}
-      \caption[Relationship between the implied volatility and the market price of a call option.]{Relationship between the implied volatility and the market price of a call option. The parameters used were $T=21$ days, interest rate $r=0.01\SI{}{\per\year}$ and initial stock price $S_0=1\SI{}{\EUR}$. The strike prices are $K=0.9\SI{}{\EUR}$, $K=0.75\SI{}{\EUR}$ and $K=0.5\SI{}{\EUR}$ for the red full line, the blue dot-dashed line and the green dot-dashed line, respectively.}\label{fig:ImpVolPrice}
-    \end{figure}
-
-We can see that the implied volatility goes to zero extremely fast when we approach the lower bound of the call option's price, $S_0-Ke^{-rT}$ - from eq.\eqref{bound}, the lower bounds for the option prices shown in \autoref{fig:ImpVolPrice}, with strikes $K=0.9\SI{}{\EUR}$, $K=0.75\SI{}{\EUR}$ and $K=0.5\SI{}{\EUR}$ are, respectively, $C=0.1007\SI{}{\EUR}$, $C=0.2506\SI{}{\EUR}$ and $C=0.5004\SI{}{\EUR}$). We can thus conclude that the implied volatility is extremely sensitive to the option's market price when this price approaches its lower bound. We can also observe that this property is more pronounced for lower strikes. This observation will become very important in later sections. We can also see that the curves only leave this high sensitivity region for implied volatilities above $1\SI{}{\year\tothe{-1/2}}$, which is a very high value usually not seen in the market, so it expected for the implied volatility of such options to always be extremely sensitive to the their price.
-
-One other property that can be deduced from \autoref{fig:ImpVolPrice} is that when the market prices are far larger than their lower bounds
-
-From \autoref{fig:ImpVolPrice} we can also observe that the relation between implied volatility and market option price is a monotonous increasing function.
+It can be shown that the relation between implied volatility and market option price is a monotonous increasing function.
 This means that we can obtain the implied volatility of an option from its price and vice versa (i.e. the relationship is bijective). This duality is so fundamental that investors often disclose options by providing their implied volatility instead of their price~\citep{Wilmott}, as is indeed the case for the data we will use later to calibrate the models.
 To understand why option price is an increasing monotonous function w.r.t. the volatility we note that volatility is very desirable to investors when dealing with options. A high volatility means that there is an increased probability that the stock price will increase or decrease very significantly. In the case of a call option, if the stock price increases considerably, the investor earns a large amount of money. If the price decreases considerably, the investor may let the option expire. Thus we see that a higher volatility provides a greater change of potentially very high profits with a limited potential downfall. We thus conclude that a higher volatility increases the value of an option.
 
@@ -97,6 +83,51 @@ It can also be shown that the implied volatility is the same for calls and puts~
 Though the implied volatility is usually defined for European options, we can just as easily adapt this term for Barrier options. We again have to solve eq.\eqref{impvolform}, but now using the (Barrier) implied volatility, $\sigma_{imp,Barr}$, to generate the theoretical Barrier option price, $C(\sigma_{imp,Barr})$. This result will be used later when we study barrier options.
 
 
+\section{Option Price Sensitivity and Vega}
+\label{section:vega}
+When studying volatilities, as is our case, one of the most important aspects to consider is the sensitivity of the option price to the volatility. In other words, we should try to understand how a small variation in the volatility of a given option affects its price. This sensitivity can be considered for other parameters, such as the interest rate or the maturity, but it is particularly important for the volatility because we don't actually know the exact value of this parameter. Therefore, if the option price is very sensitive to the volatility and we have a bad estimation for this parameter, we will have severe mispricing problems and possibly lose high amounts of money.
+
+This sensitivity has been deeply studied in the literature and is usually called \emph{Vega}, or $\mathcal{V}$, and it is given by
+\begin{equation}
+\mathcal{V}=\pdv{V}{\sigma},
+\end{equation}
+\noindent where $V$ denotes the option price.
+In particular for European calls, this value can be shown to be~\citep{Hull}
+\begin{equation}
+\mathcal{V}=S_0\sqrt{T}N'(d_1),
+\end{equation}
+\noindent where $d_1$ is given in eq.\eqref{d1d2} and $N'(\cdot)$ is the probability density function for a standard normal distribution.
+If we plot this quantity against option strikes, we obtain the curve shown in \autoref{fig:Vega}.
+
+\begin{figure}[H]
+    \centering
+      \includegraphics[width=.65\columnwidth]{Vega.eps}
+      \caption[Relationship between the Vega and the respective options' strike prices, for different maturities.]{Relationship between the Vega and the respective options' strike prices, for different maturities. The parameters used were interest rate $r=0.01\SI{}{\per\year}$, initial stock price $S_0=1\SI{}{\EUR}$ and a constant volatility of $\sigma=0.3\SI{}{\year\tothe{-1/2}}$.}\label{fig:Vega}
+    \end{figure}
+    
+As we can see, the Vega peaks when the strike equals the option price. This means that, at this point, a variation in the volatility will produce the largest variation on the corresponding strike price. Furthermore, we can see that this peak is more pronounced for later maturities.
+
+Despite its usefulness, the Vega doesn't quite grasp the whole picture. As we said before, prices behave geometrically and not arithmetically - a change of $0.01\EUR$ in an option with price $0.5\EUR$ is quite different from the same change in an option with price $0.02\EUR$. A derivative (such as Vega) assumes arithmetic variations i.e. $\partial A/\partial B=0.1$ means that a change of 0.1 in $B$ produces a change of 1 in $A$. This doesn't contain any information on the \emph{relative change} of $A$ (i.e. if $A$ was an option price, we wouldn't know if it changed by $10\%$ or $0.1\%$).
+To solve this shortcoming, we can simply define the \emph{relative change} as
+\begin{equation}
+\mathrm{Relative\ Change}=\pdv{V}{\sigma}\frac{\sigma}{V},
+\end{equation}
+\noindent which we plot in \autoref{fig:Vega2}, for call options, against their strike price.
+As an example, if we have a relative change of $5$, this means that a variation of $1\%$ in the volatility will produce a variation of $5\%$ in the option price. 
+
+\begin{figure}[H]
+    \centering
+      \includegraphics[width=.65\columnwidth]{Vega2.eps}
+      \caption[Relationship between the (call) option price's relative change (w.r.t. volatility) and the respective strike prices, for different maturities.]{Relationship between the (call) option price's relative change (w.r.t. volatility) and the respective strike prices, for different maturities. The parameters used were interest rate $r=0.01\SI{}{\per\year}$, initial stock price $S_0=1\SI{}{\EUR}$ and a constant volatility of $\sigma=0.3\SI{}{\year\tothe{-1/2}}$.}\label{fig:Vega2}
+    \end{figure}
+    
+As we can see in \autoref{fig:Vega2}, the relative change of the option price w.r.t. volatility is very large for call options with high strikes. We can therefore conclude that the prices of options with high strikes are very sensitive to the value of volatility. This implies that a very slight (relative) change in the volatility will produce a very large (relative) change in the option price. It also means that the volatility is very robust w.r.t. the option price ,i.e. a very large (relative) variation in the option price will barely affect the volatility. We will observe this effect in later sections.
+
+The opposite effect is found for call options with lower strikes - we can see that the relative variation of the option price w.r.t. the volatility is extremely small in these cases, meaning that the option price is extremely robust to the volatility, i.e. a change in the volatility will affect the option price only very slightly. It also implies that the volatility is extremely sensitive to the option price, meaning that a very slight (relative) change in the price of a call option with low strikes will dramatically change its volatility. This observation will become very important in later sections.
+
+Furthermore, we can also observe that the relative change of the option price w.r.t. the volatility is greater for options with smaller maturities, which will also be observed later.
+
+For later comparison, we note that the value of relative change of the option price w.r.t. the volatility is approximately $1$ when $K=S_0$ for all maturities.
 
 \section{Local Volatility}
 \label{section:localvolatility}

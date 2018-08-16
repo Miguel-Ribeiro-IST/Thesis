@@ -10,8 +10,10 @@ OptAlg="CMA";
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
 SimPoints=false;
-M=100000;
-repetitions=100;
+M=10000;
+repetitions=3;
+barr=[1.05,1.15,1.25];
+sigma=0.2518;
 %L=T*252*2
 
 
@@ -25,11 +27,7 @@ B=B(B(:,1)==T,:);
 
 
 %%%%%%%%%%%%%%%%%%%%%    CALIBRATION      %%%%%%%%%%%%%%%%%%%%%%
-x0=0.2;
-
-sigma=0.2518;
-b=1.1;
-Plotter_Sim(sigma,S0,r,M,T,repetitions,b)
+Plotter_Sim(sigma,S0,r,M,T,repetitions,barr)
 
 
 beep
@@ -49,39 +47,77 @@ beep
 %iterations=number of repetitions of the simulations (to reduce error)
 %B=input data file
 %x0=optimization starting parameters
-function Plotter_Sim(sigma,S0,r,M,T,repetitions,b)
-figure
+function Plotter_Sim(sigma,S0,r,M,T,repetitions,barr)
+K=0.4:0.01:1.6;
 
-K=(0.4:0.01:1.6);
-SimVol=@(K)Pricer(sigma,K,S0,r,T,T*252*2,M,"vol",b);
-for j=1:repetitions
-    Mdl_tmp(j,:)=SimVol(K');
-end
-Mdl=mean(Mdl_tmp);
-Mdlmax90=quantile(Mdl_tmp,0.9,1);
-Mdlmin10=quantile(Mdl_tmp,0.1,1);
-
-plot(K,Mdl,'-.','LineWidth',1.5,'Color',[0.0510    0.70    0.9330]);
-
-hold on;
-K2 = [K, fliplr(K)]; % Use ; instead of ,
-inBetween = [Mdlmax90, fliplr(Mdlmin10)]; % Use ; instead of ,
-fill(K2, inBetween,[0    0.150    0.830],'FaceAlpha',0.2,'EdgeAlpha',0);
+SimVol1=@(K,PriceVol)Pricer(sigma,K',S0,r,T,T*252*2,M,PriceVol,barr(1));
+SimVol2=@(K,PriceVol)Pricer(sigma,K',S0,r,T,T*252*2,M,PriceVol,barr(2));
+SimVol3=@(K,PriceVol)Pricer(sigma,K',S0,r,T,T*252*2,M,PriceVol,barr(3));
+SimVolEuro=@(K,PriceVol)PricerEuro(sigma,K',S0,r,T,T*252*2,M,PriceVol);
 
 
-xlim([0.4,1.6])
-ylim([0,1])
-box on;
-grid on;
-set(gca,'fontsize',12)
-xlabel('K/S_0');
-ylabel('\sigma_{imp} (yr^{-1/2})')
-pbaspect([1.5 1 1])
 
-h = get(gca,'Children');
-lgd=legend([h(2) h(1)],{'Simulated Function (mean)','90% Confidence Interval'},'Location','northeast','FontSize',11);
-title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
-set(gca,'Children',[h(2) h(1)])
+    parfor j=1:repetitions
+        DV_tmp1(j,:)=SimVol1(K,"vol");
+        DV_tmp2(j,:)=SimVol2(K,"vol");
+        DV_tmp3(j,:)=SimVol3(K,"vol");
+        DVP_tmp1(j,:)=SimVol1(K,"price");
+        DVP_tmp2(j,:)=SimVol2(K,"price");
+        DVP_tmp3(j,:)=SimVol3(K,"price");
+        DV_tmpEuro(j,:)=SimVolEuro(K,"vol");
+        DVP_tmpEuro(j,:)=SimVolEuro(K,"price");
+    end
+    DV1=mean(DV_tmp1,1);
+    DV2=mean(DV_tmp2,1);
+    DV3=mean(DV_tmp3,1);
+    DVP1=mean(DVP_tmp1,1);
+    DVP2=mean(DVP_tmp2,1);
+    DVP3=mean(DVP_tmp3,1);
+    DVEuro=mean(DV_tmpEuro,1);
+    DVPEuro=mean(DVP_tmpEuro,1);
+    
+      %Plot implied volatility function under the Heston model
+    figure
+    plot(K,DVEuro,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
+    hold on;
+    plot(K,DV1,'LineWidth',2);
+    plot(K,DV2,'--','LineWidth',2);
+    plot(K,DV3,':','LineWidth',2);
+    
+    %Plot options
+    xlim([0.4,1.6])
+    ylim([0,1])
+    box on;
+    grid on;
+    set(gca,'fontsize',12)
+    xlabel('K/S_0');
+    ylabel('\sigma_{imp} (yr^{-1/2})')
+    pbaspect([1.5 1 1])
+
+
+    lg={'European Call',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    legend(lg,'Location','northeast','FontSize',11);
+
+   
+    figure
+    plot(K,DVPEuro,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
+    hold on;
+    plot(K,DVP1,'LineWidth',2);
+    plot(K,DVP2,'--','LineWidth',2);
+    plot(K,DVP3,':','LineWidth',2);
+    
+    %Plot options
+    xlim([0.4,1.6])
+    ylim([0,0.6])
+    box on;
+    grid on;
+    set(gca,'fontsize',12)
+    xlabel('K/S_0');
+    ylabel('Option Price(€)')
+    pbaspect([1.5 1 1])
+
+    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    legend(lg,'Location','northeast','FontSize',11);
 end
 
 
@@ -111,7 +147,7 @@ if PriceVol=="price"
 else
     Result=zeros(1,N);
     for j=1:N
-        volatility=@(sigma)european_bs(S0,C(j,1),r,sigma,T,"call")-exp(-r*T)*mean(Y(:,j));
+        volatility=@(sigma)barrier_bs(S0,C(j,1),r,sigma,T,"call",b)-exp(-r*T)*mean(Y(:,j));
         res=fzero(volatility,0.0001);
         
         if ~isnan(res)
@@ -123,6 +159,41 @@ else
 end
 end
 
+
+function Result=PricerEuro(sigma,C,S0,r,T,L,M,PriceVol)
+dt = T/L;
+N=size(C,1);
+
+S = S0*ones(M,1);
+for k = 1:L
+    %Euler-Maruyama discretization
+    S(:)=S(:).*(1+r*dt+sigma*sqrt(dt)*randn(M,1));
+end
+
+Y=zeros(M,N);
+
+for j=1:N
+    for i=1:M
+        Y(i,j) = max(S(i)-C(j,1),0);
+    end
+end
+
+if PriceVol=="price"
+    Result=exp(-r*T)*mean(Y);
+else
+    Result=zeros(1,N);
+    for j=1:N
+        volatility=@(sigma)european_bs(S0,C(j,1),r,sigma,T,"call")-exp(-r*T)*mean(Y(:,j));
+        res=fzero(volatility,0.0001);
+        
+        if ~isnan(res)
+            Result(j)=res;
+        else
+            Result(j)=0;
+        end
+    end
+end
+end
 
 
 %%%%%%%%%%%%%%  CALCULATE BLACK-SCHOLES PRICE  %%%%%%%%%%%%%%%%%%%%
@@ -137,6 +208,31 @@ if putcall=="call"
     price = S0.*N1 - K.*exp(-r.*T).*N2;
 elseif putcall=="put"
     price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
+end
+end
+
+
+function price=barrier_bs(S0,K,r,sigma,T,putcall,B)
+if B<K
+    price=european_bs(S0,K,r,sigma,T,putcall);
+else
+x1=(B/S0)^(-1+2*r/sigma^2);
+x2=(B/S0)^(1+2*r/sigma^2);
+d3= (log(S0./B) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d4= (log(S0./B) - (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d5= (log(S0.*K./(B.^2)) - (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d6= (log(S0./B) + (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d7= (log(S0./B) - (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d8= (log(S0.*K./(B.^2)) - (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+N3 = normcdf(d3);
+N4 = normcdf(d4);
+N5 = normcdf(d5);
+N6 = normcdf(d6);
+N7 = normcdf(d7);
+N8 = normcdf(d8);
+if putcall=="call"
+    price = S0.*(N3+x2.*(N4-N5)) - K.*exp(-r.*T).*(N6+x1.*(N7-N8));
+end
 end
 end
 

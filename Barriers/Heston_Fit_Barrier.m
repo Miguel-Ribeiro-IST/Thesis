@@ -8,7 +8,7 @@ B=A.data(:,:);
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;               %initial stock price
 r = 0;                    %risk-free rate. Forward prices in data file assumed r=0.0
-matur=4;                  %maturity until which we want to fit the data. If matur=5, all maturities until the fifth are chosen.
+matur=2;                  %maturity until which we want to fit the data. If matur=5, all maturities until the fifth are chosen.
 OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 
 
@@ -17,7 +17,7 @@ OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 SimPoints=true;   %true or false - define if Monte Carlo simulation should be executed
 M=100000;           %number of paths to be simulated
 repetitions=10;
-barr=[1.05,0.9,1.25];
+barr=[1.05,1.2,1.4];
 %L=T*252*2
 
 
@@ -170,6 +170,7 @@ K=0.4:0.01:1.6;
 SimVol1=@(K,PriceVol)Pricer(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,PriceVol,barr(1));
 SimVol2=@(K,PriceVol)Pricer(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,PriceVol,barr(2));
 SimVol3=@(K,PriceVol)Pricer(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,PriceVol,barr(3));
+SimVolEuro=@(K,PriceVol)PricerEuro(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,PriceVol);
 
 
     parfor j=1:repetitions
@@ -179,6 +180,8 @@ SimVol3=@(K,PriceVol)Pricer(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,PriceVol
         DVP_tmp1(j,:)=SimVol1(K,"price");
         DVP_tmp2(j,:)=SimVol2(K,"price");
         DVP_tmp3(j,:)=SimVol3(K,"price");
+        DV_tmpEuro(j,:)=SimVolEuro(K,"vol");
+        DVP_tmpEuro(j,:)=SimVolEuro(K,"price");
     end
     DV1=mean(DV_tmp1,1);
     DV2=mean(DV_tmp2,1);
@@ -186,16 +189,14 @@ SimVol3=@(K,PriceVol)Pricer(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,PriceVol
     DVP1=mean(DVP_tmp1,1);
     DVP2=mean(DVP_tmp2,1);
     DVP3=mean(DVP_tmp3,1);
+    DVEuro=mean(DV_tmpEuro,1);
+    DVPEuro=mean(DVP_tmpEuro,1);
 
     %Plot implied volatility function under the Heston model
     figure
-    HestonVol=@(K)HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,"vol");
-    for i=1:size(K,2)
-        HV(i)=HestonVol(K(i));
-    end
-    plot(K,HV,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
+    plot(K,DVEuro,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
     hold on;
-    plot(K,DV1,'-.','LineWidth',2);
+    plot(K,DV1,'LineWidth',2);
     plot(K,DV2,'--','LineWidth',2);
     plot(K,DV3,':','LineWidth',2);
     
@@ -210,19 +211,14 @@ SimVol3=@(K,PriceVol)Pricer(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,PriceVol
     pbaspect([1.5 1 1])
 
 
-    lg={'European Call',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
     legend(lg,'Location','northeast','FontSize',11);
 
    
     figure
-       %Plot implied volatility function under the Heston model
-    HestonVol=@(K)HestonPrice(K,T,S0,r,kappa,nubar,nu0,rho,chi,"price");
-    for i=1:size(K,2)
-        HV2(i)=HestonVol(K(i));
-    end
-    plot(K,HV2,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
+    plot(K,DVPEuro,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
     hold on;
-    plot(K,DVP1,'-.','LineWidth',2);
+    plot(K,DVP1,'LineWidth',2);
     plot(K,DVP2,'--','LineWidth',2);
     plot(K,DVP3,':','LineWidth',2);
     
@@ -341,6 +337,7 @@ for k = 1:L
 end
 S=S.*barrier;
 
+
 Y=zeros(M,N);    %matrix with paths' payoff  (for all inserted strikes)
 for j=1:N
     for i=1:M
@@ -354,7 +351,7 @@ else
     Result=zeros(1,N);
     for j=1:N
         volatility=@(sigma)barrier_bs(S0,C(j,1),r,sigma,T,"call",b)-exp(-r*T)*mean(Y(:,j));
-        res=fzero(volatility,0.0001);   %Calculate the expected implied volatility
+        res=fzero(volatility,0.01);   %Calculate the expected implied volatility
         
         if ~isnan(res)     %if no implied volatility is comaptible with the price, fzero outputs NaN
             Result(j)=res;
@@ -366,6 +363,49 @@ end
 
 end
 
+
+
+function Result=PricerEuro(kappa,nubar,nu0,rho,chi,C,S0,r,T,L,M,PriceVol)
+dt = T/L;      %time steps
+N=size(C,1);   %size of vector of volatilities to be output
+
+S=S0*ones(M,1);      %define initial vector of stock prices
+nu=nu0*ones(M,1);    %define the initial vector of volatilities
+
+for k = 1:L
+    Z1=randn(M,1);                                 %vector of random variables
+    Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);            %vector of random variables with correlation "rho" with vector Z1
+    
+    %Milstein discretization
+    S(:)=S(:).*(1+r.*dt+sqrt(dt.*max(nu(:),0)).*Z1+0.5.*dt.*max(nu(:),0).*(Z1.^2-1));
+    nu(:)=nu(:)+kappa.*(nubar-max(nu(:),0)).*dt+chi.*sqrt(dt.*max(nu(:),0)).*Z2+chi.^2./4.*dt.*(Z2.^2-1);  %Ensure variance never becomes negative
+end
+
+
+Y=zeros(M,N);    %matrix with paths' payoff  (for all inserted strikes)
+for j=1:N
+    for i=1:M
+        Y(i,j) = max(S(i)-C(j,1),0);      %Calculate the payoff of all paths (assuming calls)
+    end
+end
+
+if PriceVol=="price"
+    Result=exp(-r*T)*mean(Y); %Output the discounted expected payoff
+else
+    Result=zeros(1,N);
+    for j=1:N
+        volatility=@(sigma)european_bs(S0,C(j,1),r,sigma,T,"call")-exp(-r*T)*mean(Y(:,j));
+        res=fzero(volatility,0.01);   %Calculate the expected implied volatility
+        
+        if ~isnan(res)     %if no implied volatility is comaptible with the price, fzero outputs NaN
+            Result(j)=res;
+        else               %if no price is found, output zero implied vol
+            Result(j)=0;
+        end
+    end
+end
+
+end
 
 
 %%% PRINT A TABLE WITH MODEL/MARKET IMPLIED VOL/PRICES AND REL. ERRORS %%%
@@ -404,6 +444,9 @@ end
 end
 
 function price=barrier_bs(S0,K,r,sigma,T,putcall,B)
+if B<K
+    price=european_bs(S0,K,r,sigma,T,putcall);
+else
 x1=(B/S0)^(-1+2*r/sigma^2);
 x2=(B/S0)^(1+2*r/sigma^2);
 d3= (log(S0./B) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
@@ -420,6 +463,7 @@ N7 = normcdf(d7);
 N8 = normcdf(d8);
 if putcall=="call"
     price = S0.*(N3+x2.*(N4-N5)) - K.*exp(-r.*T).*(N6+x1.*(N7-N8));
+end
 end
 end
 

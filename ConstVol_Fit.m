@@ -5,7 +5,7 @@ B=A.data(:,:);
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;
 r = 0;
-matur=2;
+matur=4;
 OptAlg="CMA";
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%

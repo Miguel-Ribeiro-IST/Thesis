@@ -80,8 +80,9 @@ $T$ (days) & $\sigma_{imp,\mathrm{mdl}}$ ($\SI{}{\year\tothe{-1/2}}$) & Cost \\ 
 
 By observing the fit results in \autoref{tab:ConstVolPar} we see that the cost function decreases with the maturity. This is indeed what is expected, since the implied volatility surface becomes flatter as maturity increases, as can be seen from the market data (and also as we can see in \autoref{fig:DupImpV}). This makes the constant volatility function a better approximation in such cases, which decreases the cost function's value.
 
+We should note that the fitted constant implied volatilities' values are typical for what is usually observed in the market, i.e. values between $0.2$ and $0.3\SI{}{\year\tothe{-1/2}}$.
 
-One other property that we can observe is that the constant implied volatility also decreases with maturity. The reason behind this is the simple fact that earlier maturities contain higher implied volatilities (for the strikes far from $S_0$), which pull the constant volatility function upwards.
+One other property that we can observe is that the constant implied volatility also decreases with maturity. The reason behind this is the simple fact that earlier maturities contain higher implied volatilities (for the strikes far from $S_0$), which pull the fitted constant volatility function upwards.
 
 
 We now focus on the simulated results in \autoref{fig:ConstVol}.
@@ -425,15 +426,17 @@ We now analyze the results of this model. Observing the plots in \autoref{fig:SS
 
 Though the model seems to fit almost perfectly to the data, the fits may not be very robust. The reason for this is that we have an extremely small amount of data points (7 for each maturity) for the comparatively large number of parameters used (4 parameters in total). This will cause our model to overfit the data.
 
+
 As for the simulated function, we note that it very closely follows the theoretical curve in the regions around $S_0$, indicating that the Monte Carlo pricer implementation was done correctly. This feature doesn't hold at the high strike region in the first maturity and the low strike regions of all maturities for the same reasons described earlier.
 
-Examining now the calibrated parameters in \autoref{tab:SSR} we first note that the parameter $\alpha$ doesn't seem to vary too much between maturities, which is expected, since it controls the height of the implied volatility curve and this doesn't seem to change too much in the plots.
+Examining now the calibrated parameters in \autoref{tab:SSR} we first note that the parameter $\alpha$ doesn't seem to vary too much between maturities, which is expected, since it controls the height of the implied volatility curve and this doesn't seem to change too much in the plots. Furthermore, we see that these values are close to what is usually observed in the market.
+
 
 The parameter $\beta$ appears to change wildly between maturities, though this is not surprising since, as we saw, this parameter doesn't significantly affect the shape of the implied volatility function, meaning that different values of $\beta$ would fit the data equally well.
 
-As for the parameter $\rho$, we first note that it is always negative, which is expected from reality. It also seems to decrease with time \hl{why?}.
+As for the parameter $\rho$, we first note that it is always negative, which is expected from reality. It also seems to decrease with time which is expected for options with stock indices as underlying assets, as we mentioned in \autoref{subsection:Dynamic SABR Model}.
 
-Finally, the parameter $\nu$ also seems to decrease with time. This is no surprise as the curvature of the implied volatility function is expected to decrease with time, with the function becoming increasingly horizontal, as can be seen from the provided data.
+Finally, the parameter $\nu$ also seems to decrease with time. This should come as no surprise, since the curvature of the implied volatility function is expected to decrease with time, with the function becoming increasingly horizontal, as can be seen from the provided data and as we mentioned in \autoref{subsection:Dynamic SABR Model}. We should also note that the calibrated $\nu$ is quite large, which means that the volatility process evolves quite erratically.
 
 
 If we now compare the cost function values of the Static SABR model in \autoref{tab:SSR} with the independently fitted results of the constant volatility model in \autoref{tab:ConstVolPar} we clearly see that they improve very significantly. For all maturities, the costs decrease between 98.6 and 99.4\%, which is an extreme improvement. This is no surprise, since the constant volatility model was expected to perform very badly. These costs should be considered carefully, however, due to the overfitting mentioned earlier - for such a low amount of data (compared to the high number of parameters) we can find many possible combinations of parameters that fit the data as perfectly as the parameters found by the optimizer.
@@ -569,7 +572,10 @@ $\kappa$ & $\overline{\nu}$ & $\nu_0$ & $\rho$ & $\eta$ & Cost \\ \midrule
 We now study the results obtained. Examining the plots in \autoref{fig:H} we see that the theoretical curves fit the data surprisingly well throughout all the maturities.
 This is especially surprising when we note that the adjustment is made for the entire data set, with all the different maturities, unlike the Static SABR model, which was only fitted for single maturities.
 
-Observing the simulated curves and their respective confidence bands we again see that they fit the closed-form solutions extremely well in the region around $S_0$, indicating that the simulations agree with the predictions of the closed form solutions. The large confidence bands described before for the high strikes and early maturities and for the low strikes can also be found here. Because their cause is the same, they will not be described again.
+Analyzing the fitted parameters' values, we begin by noting that $\kappa$ is quite large, which means that the variance process tends to its mean value $\overline{\nu}$ quite fast. It also means that the initial variance, $\nu_0$, has almost no influence on the shape of the fitted curves. We note furthermore that the mean variance, $\overline{\nu}$, corresponds to a mean volatility of $0.2555\SI{}{\year\tothe{-1/2}}$ ($\sqrt{\overline{\nu}}=\overline{\sigma}$), which is a typical value for volatilities observed in the market. The same applies to the initial variance. As for the correlation parameter, $\rho$, we note that it is negative, which is indeed expected from market behavior. Finally, the volatility of the variance process, $\eta$, is very large, which suggests that this process is very erratic.
+
+Observing now the simulated curves and their respective confidence bands we again see that they fit the closed-form solutions extremely well in the region around $S_0$, indicating that the simulations agree with the predictions of the closed form solutions. The large confidence bands described before for the high strikes and early maturities and for the low strikes can also be found here. Because their cause is the same, they will not be described again.
+
 
 Considering now the cost function value for the fitted parameters (Cost$=0.0025$), shown in \autoref{tab:HR}, and comparing it to the sum of the costs of each of the independent fits in the Static SABR model ($\Sigma_{\mathrm{Costs}}=0.0004+0.0002+0.0001+0.0001=0.0008$), in \autoref{tab:SSR}, we note that the cost of the former is higher than that of the latter.
 This is unsurprising, as the adjustments with the Static SABR were done independently of one another, and a better fit is therefore possible.
@@ -716,9 +722,14 @@ $\alpha$ & $\beta$ & $\rho_0$ & $a$ & $\nu_0$ & $b$ & Cost \\ \midrule
 \end{table}
 
 
-We now consider the adjustments above. Observing the theoretical curves in \autoref{fig:DS} we can see that they fit the market data relatively well, especially for the later maturities, though for the earlier maturities the fit doesn't appear to be so good.
+We now consider the adjustments above. Observing the theoretical curves in \autoref{fig:DS} we can see that they fit the market data relatively well, especially for the later maturities, though for the earlier maturities the curve doesn't seem to closely follow the data.
 
-Considering now the simulated curves, we again see that they accurately follow the theoretical curve for the regions around $S_0$, behaving very badly for the low strike regions and for high strikes with low maturities. This has been observed before in all models and is therefore expected.
+Analyzing the calibrated parameters in \autoref{tab:DSR}, we begin by noting that the value of $\alpha$ is typical from market observations. As we mentioned previously, the parameter $\beta$ controls how the implied volatility curve shifts when the stock prices move, and the calibrated value indicates that when the stock prices increase, the curve not only shifts to the right but also downwards, though only slightly.
+
+The parameter $a$ being $0$ means that the correlation function $\rho(t)$ is stuck at $\rho_0$ through time, and the parameter $b$ being very large means that the volatility of the volatility function $\nu(t)$ goes to $0$ extremely fast (e.g. at the end of the first month, this parameter is only $\nu=0.0578$). These results are very inconsistent with what we observed in the Static SABR model, where both the correlations (in absolute value) and the volatilities of the volatility decreased (slowly) with time. This seems to suggest that the functions chosen to model these two parameters were not appropriate.
+
+
+Considering now the simulated curves, we see that they accurately follow the theoretical curve for the regions around $S_0$, behaving very badly for the low strike regions and for high strikes with low maturities. This has been observed before in all models and is therefore expected.
 
 If we now compare the cost function of the Dynamic SABR model (Cost$=0.0108$), shown in \autoref{tab:DSR}, with the sum of the costs of the independent fits for the Static SABR ($\Sigma_{\mathrm{Costs}}=0.0004+0.0002+0.0001+0.0001=0.0008$), in \autoref{tab:SSR}, the former is much greater than that of the latter.
 This is unsurprising, since the Static SABR fits only a small amount of data for a single maturity and Dynamic SABR attempts to model a whole surface.
@@ -803,6 +814,40 @@ By analyzing this data we see that the relative errors increase when compared ei
 
 \newpage
 
+
+\section{Barrier Options}
+
+The Monte Carlo algorithms developed to price the European options in the previous sections, under each of the models studied, can be easily adapted to price Barrier options.
+We are only required to check at all simulation time steps whether each stock price process crossed the barrier level or not and, at the maturity, only use those that did to calculate the option price. This discretization poses a problem when pricing Barrier options, because these contracts assume a continuous time frame. This has been discussed in \autoref{subsection:Simulating stock prices}. Furthermore, as we discussed in \autoref{subsection:Pricing options from simulations}, the problem we observed before with the low number of simulated paths contributing to the prices of options with very high strikes and an early maturities is aggravated on Exotic options.
+
+Despite these expected shortcomings, we priced several Barrier options with different barrier levels, using all the different models described before. In these simulations we used a single maturity of \hl{21 days} and the calibrated parameters for each of the models, shown earlier in this chapter. From the Barrier option prices we extracted the corresponding implied volatilities, using eqs.\eqref{impvolform} and \eqref{barr2}, in order to compare the implied volatility curves with those shown in the previous sections.
+We should also note that these curves are simulated (mean of multiple Monte Carlo simulations) and not theoretical, as there are no closed-form solutions for the prices of Barrier options under each of the used models.
+The results of these simulations are shown in \autoref{fig:Barrier}.
+
+\vspace{\fill}
+\newpage
+
+\begin{figure}[H]
+  \begin{subfigmatrix}{2}
+    \subfigure[Constant Volatility model]{\includegraphics[width=0.49\linewidth,trim={0cm 2cm 0cm 2cm},clip]{Placeholder.png}}
+    \subfigure[Dupire's Local Volatility model]{\includegraphics[width=0.49\linewidth,trim={0cm 2cm 0cm 2cm},clip]{Placeholder.png}}
+        \subfigure[Static SABR model]{\includegraphics[width=0.49\linewidth,trim={0cm 2cm 0cm 2cm},clip]{Placeholder.png}}
+            \subfigure[Heston model]{\includegraphics[width=0.49\linewidth,trim={0cm 2cm 0cm 2cm},clip]{Placeholder.png}}
+                \subfigure[Dynamic SABR model]{\includegraphics[width=0.49\linewidth,trim={0cm 2cm 0cm 2cm},clip]{Placeholder.png}}
+  \end{subfigmatrix}
+    \caption[Implied volatility curves of simulated European call options and Barrier call options with barrier levels $B=1.05$, $B=1.1$ and $B=1.25$ under each of the models previously studied.]{Implied volatility curves of simulated European call options (light blue dot-dashed lines) and Barrier call options with barrier levels $B=1.05$ (red full line), $B=1.1$ (orange dashed line) and $B=1.25$ (purple dotted line) under each of the models previously studied.}\label{fig:Barrier}
+\end{figure} 
+
+\hl{check caption above}
+
+We now analyze the results of \autoref{fig:Barrier}.
+If we compare the different barrier level curves in any of the represented models we can clearly see that the most significant change 
+
+Observing the results shown in  we can conclude that the curves shown in each model are consistent with one another, so there is not much we can say on the model's impact on such contracts besides the obvious change in the implied volatility curve of the European contracts.
+
+
+\newpage
+
 \section{Mishaps Found in Implementation}
 During the implementation of all the models, some problems were found. They were mostly solved and the models were able to perform as expected, as we saw in the previous section. For future reference, and to prevent others from repeating the same mistakes, we now summarize not only the problems observed but also their causes and how we were able to solve them or~at least reduce their impact.
 
@@ -876,23 +921,8 @@ This is expected because the whole correlation mechanism, relating the two stoch
 
 Though this might seem trivial, some care must be taken when implementing the Monte Carlo pricer to use the updating equations in the correct order.
 
-\iffalse
-\section{Barrier Options}
 
-The Monte Carlo algorithms developed to price the European options in the previous sections under each of the models can be easily adapted to price Barrier options.
-We are only required to check at each time step if the stock price process crossed the barrier level or not and, at the maturity, only keep the processes that did. This discretization poses a problem when pricing Barrier options, because these contracts assume a continuous time frame. This has been discussed in \autoref{subsection:Simulating stock prices}. Furthermore, as we discussed in \autoref{subsection:Pricing options from simulations}, the problem we observed before with the low number of simulated paths contributing to the prices of options with very high strikes and an early maturities is further aggravated with this Exotic option contract.
 
-Despite these expected shortcomings, we priced several Barrier options with different barrier levels and using all the different models described before. In these simulations we assumed a single maturity of 21 days and the calibrated parameters for each of the models, shown earlier in this chapter. The results of these simulations are shown in \autoref{fig:Barrier}.
-
-\begin{figure}[H]
-  \begin{subfigmatrix}{2}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.35cm 0.85cm},clip]{Placeholder.png}}
-    \subfigure[bla bla bla bla]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{Placeholder.png}}
-  \end{subfigmatrix}
-    \caption[Bla bla bla bla]{Bla bla bla bla}\label{fig:Barrier}
-\end{figure} 
-
-\fi
 
 \newpage
 
@@ -911,8 +941,13 @@ Despite these expected shortcomings, we priced several Barrier options with diff
 
 \hlc[red]{why does implied volatility surface become flatter with maturity}
 
+\hlc[red]{hagan says that rho and beta have the same impact on the curve}
+
+\hlc[red]{analyze the calibrated parameters' values}
+
 \hl{put units in fitted parameters}
 
 \hl{redo heston proof}
+
 
 

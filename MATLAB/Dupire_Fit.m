@@ -11,9 +11,8 @@ S0=17099.4;        %initial stock price
 r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
 sigmamax=1.5;        %maximum value the local volatility can take
-M=1000;           %number of paths to be simulated
-aver=3;
-barr=[1.05,1.15,1.25];
+M=100000;           %number of paths to be simulated
+aver=100;
 %L=T*252*2
 
 
@@ -22,7 +21,6 @@ B(:,2)=B(:,2)/S0;     %normalize strike prices
 S0=1;
 B(:,1)=B(:,1)/252;    %convert maturities from days to years
 times=unique(B(:,1));
-T=times(matur);
 B=B(B(:,1)<=times(matur),:);  %restrict data to selected maturity
 
 
@@ -33,13 +31,15 @@ MaxT=max(B(:,1));   %maximum value for maturity in the mesh grid
 MinK=0.4;           %minimum value for strike in the mesh grid
 MaxK=1.6;          %minimum value for strike in the mesh grid
 dT=10.5/252;        %mesh grid size w.r.t. maturity
-dK=0.05*S0;         %mesh grid size w.r.t. strike
+dK=0.025*S0;         %mesh grid size w.r.t. strike
 
 
 interpol=Dupire(S0,r,B,MinT,MaxT,dT,MinK,MaxK,dK);
 
-Plotter(S0,r,M,T,sigmamax,interpol,aver,barr)
-%tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur,barr);
+%Plotter(S0,r,B,M,matur,sigmamax,interpol,aver)
+tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur);
+%tab=Printer(sigmamax,interpol,M,B,S0,r,aver);
+openvar('tab')
 
 beep
 toc
@@ -102,44 +102,30 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%    PLOT MATURITIES IN DIFFERENT FIGURES  %%%%%%%%%%%%
-function Plotter(S0,r,M,T,sigmamax,interpol,repetitions,barr)
+function Plotter(S0,r,B,M,matur,sigmamax,interpol,aver)
+times=unique(B(:,1));   %array with all maturity dates
 
-K=0.4:0.01:1.6;
-
-SimVol1=@(K,PriceVol)Pricer(S0,r,T,M,T*252*2,K',PriceVol,sigmamax,interpol,barr(1));
-SimVol2=@(K,PriceVol)Pricer(S0,r,T,M,T*252*2,K',PriceVol,sigmamax,interpol,barr(2));
-SimVol3=@(K,PriceVol)Pricer(S0,r,T,M,T*252*2,K',PriceVol,sigmamax,interpol,barr(3));
-SimVolEuro=@(K,PriceVol)PricerEuro(S0,r,T,M,T*252*2,K',PriceVol,sigmamax,interpol);
-
-    parfor j=1:repetitions
-        DV_tmp1(j,:)=SimVol1(K,"vol");
-        DV_tmp2(j,:)=SimVol2(K,"vol");
-        DV_tmp3(j,:)=SimVol3(K,"vol");
-        DVP_tmp1(j,:)=SimVol1(K,"price");
-        DVP_tmp2(j,:)=SimVol2(K,"price");
-        DVP_tmp3(j,:)=SimVol3(K,"price");
-        DV_tmpEuro(j,:)=SimVolEuro(K,"vol");
-        DVP_tmpEuro(j,:)=SimVolEuro(K,"price");
-    end
-    DV1=mean(DV_tmp1,1);
-    DV2=mean(DV_tmp2,1);
-    DV3=mean(DV_tmp3,1);
-    DVP1=mean(DVP_tmp1,1);
-    DVP2=mean(DVP_tmp2,1);
-    DVP3=mean(DVP_tmp3,1);
-    DVEuro=mean(DV_tmpEuro,1);
-    DVPEuro=mean(DVP_tmpEuro,1);
-    
-      %Plot implied volatility function under the Heston model
+for iter=1:matur
     figure
-    plot(K,DVEuro,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
+    
+    T = times(iter);
+    C=B(B(:,1)==T,2:3);  %Implied volatilities for the selected maturity
+        
+    %Plot original data points
+    scatter(C(:,1),C(:,2),100,'x','LineWidth',1.5);
     hold on;
-    plot(K,DV1,'-.','LineWidth',2);
-    plot(K,DV2,'--','LineWidth',2);
-    plot(K,DV3,':','LineWidth',2);
+    
+    %Calculate the implied volatility for an array of Ks and connect the dots to generate a function
+    K=0.4:0.01:1.6;
+    V=zeros(aver,size(K,2));
+    parfor i=1:aver
+    V(i,:)=Pricer(S0,r,T,M,T*252*2,K',"vol",sigmamax,interpol);
+    end
+    V=mean(V);
+    plot(K,V,'-','LineWidth',1.5)
     
     %Plot options
-    xlim([0.4,1.6])
+    xlim([0.5,1.6])
     ylim([0,1])
     box on;
     grid on;
@@ -147,39 +133,18 @@ SimVolEuro=@(K,PriceVol)PricerEuro(S0,r,T,M,T*252*2,K',PriceVol,sigmamax,interpo
     xlabel('K/S_0');
     ylabel('\sigma_{imp} (yr^{-1/2})')
     pbaspect([1.5 1 1])
-
-
-    lg={'European Call',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
-    legend(lg,'Location','northeast','FontSize',11);
-
-   
-    figure
-    plot(K,DVPEuro,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
-    hold on;
-    plot(K,DVP1,'-.','LineWidth',2);
-    plot(K,DVP2,'--','LineWidth',2);
-    plot(K,DVP3,':','LineWidth',2);
+    lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
+    title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
     
-    %Plot options
-    xlim([0.4,1.6])
-    ylim([0,0.6])
-    box on;
-    grid on;
-    set(gca,'fontsize',12)
-    xlabel('K/S_0');
-    ylabel('Option Price(€)')
-    pbaspect([1.5 1 1])
-
-    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
-    legend(lg,'Location','northeast','FontSize',11);
-
+    clear Volatility
+end
 end
 
 
 
 %%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%    PLOT MULTIPLE MATURITIES IN A SINGLE FIGURE  %%%%%%%%%%%%
-function MultiPlotter(S0,r,B,M,matur,sigmamax,interpol,b)
+function MultiPlotter(S0,r,B,M,matur,sigmamax,interpol)
 figure
 times=unique(B(:,1));
 for iter=1:matur
@@ -190,7 +155,7 @@ for iter=1:matur
     C=B(B(:,1)==T,2:3);
     
     X=0.4:0.01:1.6;
-    Y=Pricer(S0,r,T,M,L,X',"vol",sigmamax,interpol,b);
+    Y=Pricer(S0,r,T,M,L,X',"vol",sigmamax,interpol);
     
     %   Volatility=Pricer(S0,r,T,M,L,C(:,1),"vol",sigmamax,interpol);
     
@@ -212,12 +177,12 @@ end
 
 
 %%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS IN A SURFACE   %%%%%%%%%%%%%%%
-function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur,b)
+function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur)
     figure
      times=unique(B(:,1));   %array with all maturity dates
      
     %Plot original data points
-    scatter3(B(:,2),B(:,1),B(:,3),30,'LineWidth',0.5,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
+    scatter3(B(:,2),B(:,1),B(:,3),30,'LineWidth',1.75,'MarkerEdgeColor','k','MarkerFaceColor',[0.3010    0.7450    0.9330]);
     hold on;
     
     %set variables to plot the 2D-functions (not the surface)
@@ -225,7 +190,7 @@ function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur,b)
     DV2=zeros(size(times,1),size(K2,2));
     
     %Plot implied volatility surface
-    DupireVol=@(K,T)Pricer(S0,r,T,M,T*252*2,K',"vol",sigmamax,interpol,b);
+    DupireVol=@(K,T)Pricer(S0,r,T,M,T*252*2,K',"vol",sigmamax,interpol);
     [K,T] = meshgrid(K2,0.5/12:0.5/12:0.5+0.5/12); %create the grid to be evaluated
     DV_tmp=zeros(aver,size(K,2)); %matrix to be averaged (reducing noise) to generate the values
     f=1; %auxiliary variable
@@ -236,8 +201,8 @@ function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur,b)
         mn=mean(DV_tmp,1)';
         if i==2 || i==4 || i==6 || i==12
             DV2(f,:)=mn;
-            DV2max(f,:)=quantile(DV_tmp,0.9,1);
-            DV2min(f,:)=quantile(DV_tmp,0.1,1);
+            DV2max(f,:)=quantile(DV_tmp,0.975,1);
+            DV2min(f,:)=quantile(DV_tmp,0.025,1);
             plot3(K2,ones(1,size(K2,2))*T(i,1),DV2(f,:),'-.','LineWidth',2,'Color',[0.9500    0.200    0.1])
             hold on;
             f=f+1;
@@ -255,6 +220,7 @@ function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur,b)
     xlim([0.4,1.6])
     ylim([0.5/12,0.5+0.5/12])
     zlim([0,1])
+    caxis([0 1])
     box on;
     grid on;
     xlabel('K/S_0');
@@ -277,6 +243,7 @@ set(get(gca,'YLabel'),'rotation',360/(2*pi)*atan(y(2)/y(1)))
 %Contour Plot
 figure
 contourf(K,T,DV,25)
+caxis([0 1])
 pbaspect([1.5 1 1])
 xlim([0.4,1.6])
 ylim([0.5/12,0.5+0.5/12])
@@ -322,7 +289,7 @@ for iter=1:matur
     
     
     h = get(gca,'Children');
-    lgd=legend([h(3) h(2) h(1)],{'Market Data','Simulated Function (mean)','90% Confidence Interval'},'Location','northeast','FontSize',11);
+    lgd=legend([h(3) h(2) h(1)],{'Market Data','Simulated Function (mean)','95% Confidence Band'},'Location','northeast','FontSize',11);
     title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
     set(gca,'Children',[h(3) h(2) h(1)])
     
@@ -353,7 +320,7 @@ end
 
 
 %%% CALCULATE MONTE CARLO PRICE/IMPLIED VOLATILITY OF EUROPEAN OPTION UNDER SABR %%%
-function Result=Pricer(S0,r,T,M,L,C,PriceVol,sigmamax,interpol,b)
+function Result=Pricer(S0,r,T,M,L,C,PriceVol,sigmamax,interpol)
 dt = T/L;      %time steps
 N=size(C,1);
 
@@ -362,53 +329,7 @@ N=size(C,1);
 %%%%We just need to simulate one vector of stock prices for all paths and update it at each time step
 S = S0*ones(M,1);                  %define initial vector of stock prices
 sigma=interpol(0,S0)*ones(M,1);    %define the initial vector of volatilities
-barrier = zeros(M,1);
-for k = 1:L
-    S(:)=S(:)+S(:)*r*dt+sqrt(dt)*sigma(:).*S(:).*randn(M,1);   %GBM formula
-    
-    for i=1:M
-        %At each step, calculate the new local volatility value for each path (maximized by threshold "sigmamax")
-        sigma(i)=min(interpol(k*dt,S(i)),sigmamax);
-    end
-        barrier=max(barrier,S>b);
-end
-S=S.*barrier;
 
-Y=zeros(M,N);
-for j=1:N
-    for i=1:M
-        Y(i,j) = max(S(i)-C(j,1),0);      %Calculate the payoff of all paths (assuming calls)
-    end
-end
-
-if PriceVol=="price"
-    Result=exp(-r*T)*mean(Y); %Output the discounted expected payoff
-else
-    Result=zeros(1,N);
-    for j=1:N
-        volatility=@(sigma)barrier_bs(S0,C(j,1),r,sigma,T,"call",b)-exp(-r*T)*mean(Y(:,j));
-        res=fzero(volatility,0.0001);   %Calculate the expected implied volatility
-        
-        if ~isnan(res)
-            Result(j)=res;
-        else
-            Result(j)=0;
-        end
-    end
-end
-
-end
-
-
-function Result=PricerEuro(S0,r,T,M,L,C,PriceVol,sigmamax,interpol)
-dt = T/L;      %time steps
-N=size(C,1);
-
-%%NOTE:
-%%%%We don't need to simulate an entire matrix of stock prices for all time steps and for all paths.
-%%%%We just need to simulate one vector of stock prices for all paths and update it at each time step
-S = S0*ones(M,1);                  %define initial vector of stock prices
-sigma=interpol(0,S0)*ones(M,1);    %define the initial vector of volatilities
 for k = 1:L
     S(:)=S(:)+S(:)*r*dt+sqrt(dt)*sigma(:).*S(:).*randn(M,1);   %GBM formula
     
@@ -444,14 +365,15 @@ end
 end
 
 
+
 %%% PRINT A TABLE WITH MODEL/MARKET IMPLIED VOL/PRICES AND REL. ERRORS %%%
-function tab=Printer(sigmamax,interpol,M,B,S0,r,aver,b)
+function tab=Printer(sigmamax,interpol,M,B,S0,r,aver)
 format longG      %Change format for maximum precision
 MKTVols=B(:,3);   %Market implied volatilities
 MKTPrices=european_bs(S0,B(:,2),r,B(:,3),B(:,1),"call");  %Market (converted) prices
 
 Vols=[]; Prices=[];
-    DupireVol=@(K,T)Pricer(S0,r,T,M,T*252*2,K',"vol",sigmamax,interpol,b);    
+    DupireVol=@(K,T)Pricer(S0,r,T,M,T*252*2,K',"vol",sigmamax,interpol);    
     times=unique(B(:,1));   %array with all maturity dates
     K2=unique(B(:,2));
     for i=1:size(times,1)
@@ -485,30 +407,5 @@ if putcall=="call"
     price = S0.*N1 - K.*exp(-r.*T).*N2;
 elseif putcall=="put"
     price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
-end
-end
-
-
-function price=barrier_bs(S0,K,r,sigma,T,putcall,B)
-if B<K
-    price=european_bs(S0,K,r,sigma,T,putcall);
-else
-x1=(B/S0)^(-1+2*r/sigma^2);
-x2=(B/S0)^(1+2*r/sigma^2);
-d3= (log(S0./B) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
-d4= (log(S0./B) - (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
-d5= (log(S0.*K./(B.^2)) - (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
-d6= (log(S0./B) + (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
-d7= (log(S0./B) - (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
-d8= (log(S0.*K./(B.^2)) - (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
-N3 = normcdf(d3);
-N4 = normcdf(d4);
-N5 = normcdf(d5);
-N6 = normcdf(d6);
-N7 = normcdf(d7);
-N8 = normcdf(d8);
-if putcall=="call"
-    price = S0.*(N3+x2.*(N4-N5)) - K.*exp(-r.*T).*(N6+x1.*(N7-N8));
-end
 end
 end

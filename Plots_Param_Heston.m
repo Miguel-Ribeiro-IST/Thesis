@@ -10,7 +10,7 @@ rho=-0.5;
 chi=1;%eta!!!
 kappa=10;
 
-%%{
+%{
 kappa1=1;
 kappa2=10;
 kappa3=100;
@@ -62,10 +62,10 @@ ttl="\textbf{Dependence on $\rho$}";
 lg={['$\rho$=',num2str(rho1)],['$\rho$=',num2str(rho2)],['$\rho$=',num2str(rho3)]};
 %}
 
-%{
-chi1=0.5;
-chi2=1;
-chi3=2;
+%%{
+chi1=1;
+chi2=5;
+chi3=10;
 for i=1:size(K,2)
     HV1(i)=HestonVol(K(i),2/12,kappa,nubar,nu0,rho,chi1);
     HV2(i)=HestonVol(K(i),2/12,kappa,nubar,nu0,rho,chi2);

@@ -81,6 +81,8 @@ The payoff function of this type of option is therefore given by
 Before simulating Barrier options and studying their behavior, we can deduce the effect of the barrier level $B$ on the overall price of the option. For an up-and-in Barrier option, if the barrier level is too high, the price of the option will be very low. This is due to the fact that the likelihood of a stock price increasing enough to surpass such a high barrier level, activating the option, is very low. On the other hand, if the barrier level is very close to $S_0$, the probability of the stock price reaching this threshold is approximately $1$. Thus, the price of such an option would be very similar to that of its European equivalent.
 With these two examples, we can conclude that the higher the barrier level, the lower the Barrier option price.
 
+From eq.\eqref{barrier} we can furthermore conclude that the prices of Barrier options are always smaller than or equal to those of their equivalent European counterparts (i.e. with same strike and maturity). This should be straightforward, since the Barrier option becomes equal to its European counterpart only if the Barrier threshold is broken, and is worthless otherwise.
+
 
 
 
@@ -206,6 +208,7 @@ The results published originally by Black \textit{et al.} state that, at time $t
 \noindent This is a very important result that can be used to precisely price European options, so long as all the parameters are exactly known and remain constant throughout the option's duration. Both assumptions are never true for any real market option, though.
 
 
+\paragraph{Put-Call Parity}
 From eq.\eqref{callputBS} we can also derive the relationship between the call and put prices, $C$ and $P$, known as the \emph{put-call parity}, given by
 \begin{equation}
 C=S_0-Ke^{-rT}+P.
@@ -213,9 +216,10 @@ C=S_0-Ke^{-rT}+P.
 \noindent Because of this duality, we can always easily obtain the prices of put options from the prices of call options with the same underlying asset, maturity and strike. For this reason, some of the results presented in later sections only apply to call options, though we can just as easily find their put option equivalent.
 
 
+\paragraph{Barrier Options}
 As we did for European call and put options, we can equally derive the theoretical prices of Barrier options, changing the boundary condition to incorporate the barrier level~\citep{taleb}. The resulting \emph{up-and-in call} Barrier option price is given by
-\begin{equation}
-C_{Barr}=S_0\left(N(d_3)+b\left(N(d_4)-N(d_5)\right)\right)-Ke^{-rT}\left(N(d_6)+a\left(N(d_7)-N(d_8)\right)\right),
+\begin{equation}\label{barr1}
+C_{Barr}^*=S_0\left(N(d_3)+b\left(N(d_4)-N(d_5)\right)\right)-Ke^{-rT}\left(N(d_6)+a\left(N(d_7)-N(d_8)\right)\right),
 \end{equation}
 \noindent where we define the variables $a$, $b$ and $d_3$ through $d_8$ as
 \begin{equation}
@@ -243,3 +247,15 @@ d_7=\frac{1}{\sigma\sqrt{T}}\left[\log\left(\frac{S_0}{B}\right)-\left(r-\frac{\
 d_8=\frac{1}{\sigma\sqrt{T}}\left[\log\left(\frac{S_0K}{B^2}\right)-\left(r-\frac{\sigma^2}{2}\right)T\right],
 \end{equation}
 \noindent where $B$ defines the barrier level, at which the option becomes activated.
+
+We should note that the formula in eq.\eqref{barr1} only holds for Barrier options with barrier levels greater than the strike price (i.e. $B>K$).
+For the cases where this condition is not met, the Barrier option price should be equal to that of its European counterpart. To see this, we note that a (up-and-in) Barrier option only has value if, at the maturity, the stock price is greater than the strike \emph{and} the barrier was broken until then. If the barrier level is lower than the strike, the option can't reach the strike price without breaking the barrier, which means that the second constraint is pointless. Thus, in this case, the Barrier option price is equal to its European counterpart.
+The real price of an up-and-in call Barrier option is therefore
+\begin{equation}\label{barr2}
+C_{Barr}=\begin{cases} 
+      C_{Barr}^*, & \mathrm{if}\ \ \ B>K\\
+      C_{Euro}, & \mathrm{otherwise}
+   \end{cases}
+\end{equation}
+\noindent where $C_{Barr}^*$ is given by eq.\eqref{barr1} and $C_{Euro}$ is the equivalent European option price.
+

@@ -239,14 +239,16 @@
 @book{Hull,
     author    = "John Hull",
     title     = "Options, Futures, and Other Derivatives",
-    year      = "2012",
-    publisher = "Boston: Prentice Hall"
+    year      = "2009",
+    isbn={9780136015864},
+    publisher = "Prentice Hall"
 }
 
 @book{Saltelli,
 	author= "Andrea Saltelli and others",
 	title="Global Sensitivity Analysis: The Primer", 
 	year="2008",
+	isbn="9780470059975",
 	publisher="John Wiley"
 }
 
@@ -264,7 +266,10 @@
 @article{Andersen,
   title="A Simple Approach to the Pricing of Bermudan Swaptions in the Multi-Factor LIBOR Market Model",
   author="Leif Andersen",
-  year="1999"
+  year = {2000},
+month = {01},
+volume = {3(1)},
+booktitle = {Journal of Computational Finance}
 }
 
 @article{Sobol,
@@ -282,22 +287,26 @@
   title="Elementary Stochastic Calculus with Finance in View",
   author="Thomas Mikosch",
   series="Advanced Series on Statistical Science and Applied Probability",
-  year="1998"
+  year="1998",
+  publisher="World Scientific Publishing Company",
+  isbn="9789813105294"
 }
 
 
 @book{Wei,
   title="Time Series Analysis: Univariate and Multivariate Methods",
-  author="William W. S. Wei",
+  author="William W. S. Wei and others",
   year="2006",
-  publisher="Pearson Addison Wesley"
+  publisher="Pearson Addison Wesley",
+  isbn="9780201159110"
 }
 
 @misc{BIS,
       author = {{Bank for International Settlements}},
       title = "Semiannual OTC Derivatives Statistics",
       note = {(Accessed: 2018-05-20)},
-      howpublished = "\url{http://stats.bis.org/statx/srs/table/d5.1}"
+      howpublished = "\url{http://stats.bis.org/statx/srs/table/d5.1}",
+      year={2018}
 }
 
 @misc{Guardian,
@@ -318,19 +327,6 @@
   pages={637--654},
   year={1973},
   publisher={The University of Chicago Press}
-}
-
-@article{Saltelli2,
-title = "Variance based sensitivity analysis of model output. Design and estimator for the total sensitivity index",
-journal = "Computer Physics Communications",
-volume = "181",
-number = "2",
-pages = "259 - 270",
-year = "2010",
-issn = "0010-4655",
-doi = "https://doi.org/10.1016/j.cpc.2009.09.018",
-url = "http://www.sciencedirect.com/science/article/pii/S0010465509003087",
-author = "Andrea Saltelli and others"
 }
 
 @misc{FT,
@@ -355,7 +351,8 @@ author = "Andrea Saltelli and others"
   title="The Mathematics of Financial Derivatives: A Student Introduction",
   author="Paul Wilmott and Sam Howison and Jeff Dewynne",
   year="1995",
-  publisher="Cambridge University Press"
+  publisher="Cambridge University Press",
+  isbn="9781139810975"
 }
 
 
@@ -370,9 +367,7 @@ author = "Andrea Saltelli and others"
   title={An Engine, Not a Camera: How Financial Models Shape Markets},
   author={Donald A. MacKenzie},
   isbn={9780262134606},
-  lccn={2005052115},
   series={Inside technology},
-  url={https://books.google.pt/books?id=LHKxAAAAIAAJ},
   year={2006},
   publisher={MIT Press}
 }
@@ -383,7 +378,8 @@ author = "Andrea Saltelli and others"
   author="Paul Wilmott",
   series={The Wiley Finance Series},
   year={2013},
-  publisher={Wiley}
+  publisher={Wiley},
+  isbn="9780470065372"
 }
 
 @book{Wilmott3,
@@ -391,7 +387,8 @@ author = "Andrea Saltelli and others"
   author={Paul Wilmott},
   series={The Wiley Finance Series},
   year={2006},
-  publisher={Wiley}
+  publisher={Wiley},
+  isbn="9780470065372"
 }
 
 
@@ -430,7 +427,7 @@ month = {01},
 pages = {84-108},
 title = {Managing Smile Risk},
 volume = {1},
-booktitle = {Wilmott Magazine}
+journal = {Wilmott Magazine}
 }
 
 
@@ -467,9 +464,11 @@ year = "2007",
 author = "Yasufumi Osajima"
 }
 
-@article{deGraaf,
+@mastersthesis{deGraaf,
   title={Finite difference methods in derivatives pricing under stochastic volatility models},
-  author={C.S.L. de Graaf}
+  author={C.S.L. de Graaf},
+  year={2012},
+  school={Leiden University}
 }
 
 @book{Glasserman,
@@ -508,7 +507,8 @@ year = {2007}
 
 @article{Hansen,
   title={The CMA Evolution Strategy: A Tutorial},
-  author={Nikolaus Hansen}
+  author={Nikolaus Hansen},
+  year={2016}
 }
 
 @incollection{Hansen2,
@@ -539,7 +539,10 @@ author = "Rui Dilão and Daniele Muraro"
 @article{Kahl,
   title={Not-so-complex logarithms in the Heston model},
   author={Christian Kahl and Peter J{\"a}ckel},
-  publisher={Citeseer}
+year = {2005},
+pages = {94-103},
+volume = {19},
+journal = {Wilmott Magazine}
 }
 
 @article{Rollin,
@@ -553,22 +556,17 @@ author = "Sebastian del Baño Rollin and others"
 }
 
 @article{Schoutens,
-  title={A perfect calibration! Now what?},
-  author={Wim Schoutens and others}
+    author = {Schoutens, W. and Simons, E. and Tistaert, J.},
+    journal = {Wilmott Magazine},
+    pages = {66--78},
+    title = {A perfect calibration! Now what?},
+    year = {2004}
 }
 
 @article{Labordere,
 title={A General Asymptotic Implied Volatility for Stochastic Volatility Models},
 author={Pierre Henry Labordère},
-year={2005},
-month={May}
-}
-
-
-@misc{MATLABMS,
-  title = {MultiStart {Algorithm}},
-  howpublished = {\url{http://www.mathworks.com/help/gads/multistart.html}},
-  note = {(Accessed: 2018-05-28)}
+year={2005}
 }
 
 @misc{MATLABextrap,
@@ -583,7 +581,8 @@ month={May}
       author = {Hansen, Nikolaus},
   title = {{CMA-ES Source Code - MATLAB and Octave - Code for Reading}},
   howpublished = {\url{http://www.lri.fr/~hansen/purecmaes.m}},
-  note = {(Accessed: 2018-05-28)}
+  note = {(Accessed: 2018-05-28)},
+  year={2014}
 }
 
 @misc{InvEuro,
@@ -628,7 +627,8 @@ https://us.spindices.com/indices/equity/dow-jones-industrial-average}},
   author={Jim Gatheral},
   series={Wiley Finance},
   year={2006},
-  publisher={Wiley}
+  publisher={Wiley},
+  isbn="9780470068250"
 }
 
 @article{duffie,
@@ -647,13 +647,17 @@ https://us.spindices.com/indices/equity/dow-jones-industrial-average}},
   author={F.D. Rouah},
   series={Wiley Finance},
   year={2013},
-  publisher={Wiley}
+  publisher={Wiley},
+  isbn="9781118695135"
 }
 
-@misc{feller,
-    author = {Hansjörg Albrecher and Philipp Mayer and Wim Schoutens and Jurgen Tistaert},
-    title = { The Little Heston Trap},
-    year = {2006}
+@article{feller,
+author = {Albrecher, Hansjörg and Mayer, Philipp and Schoutens, Wim and Tistaert, Jurgen},
+year = {2007},
+month = {03},
+pages = {83-92},
+title = {The Little Heston Trap},
+journal = {Wilmott}
 }
 
 @misc{chourdakis,
@@ -682,9 +686,9 @@ pages = {281-300},
 year = {1987}
 }
 
-@misc{dewynne,
+@article{dewynne,
     author = {JN Dewynne and S Ehrlichman and Paul Wilmott},
-    title = {A simple volatility surface parametrization},
+    title = {A simple volatility surface parameterization},
     year = {1998}
 }
 
@@ -701,7 +705,56 @@ booktitle = {Journal of Electronic Imaging}
 
 @book{taleb,
   title={Dynamic Hedging: Managing Vanilla and Exotic Options},
-  author={Taleb, N.},
-  year={1997},
+  author={Taleb, N.N.},
+  isbn={9780471353478},
+  series={Wiley Finance Series},
+  year={2002},
   publisher={Wiley}
+}
+
+
+
+@article{bollerslev,
+  title={Generalized Autoregressive Conditional Heteroskedasticity},
+  author={Bollerslev, Tim},
+  journal={Journal of econometrics},
+  volume={31},
+  number={3},
+  pages={307--327},
+  year={1986},
+  publisher={Elsevier}
+}
+
+@book{rebonato,
+title={Volatility and correlation: the perfect hedger and the fox},
+publisher={Wiley},
+author={Rebonato, Riccardo},
+year={2004},
+isbn="9780470091395"
+}
+
+
+
+@misc{WFE,
+      author = {{World Federation of Exchanges}},
+      title = {{WFE Market Highlights}},
+  howpublished = {\url{http://www.world-exchanges.org/home/index.php/statistics/market-highlights}},
+  note = {(Accessed: 2018-08-01)}
+}
+
+@book{quants,
+  title={Capital Ideas: The Improbable Origins of Modern Wall Street},
+  author={Bernstein, P.L.},
+  isbn={9781118523988},
+  year={2012},
+  publisher={Wiley}
+}
+
+@book{compfinance,
+  title={Tools for Computational Finance},
+  author={Seydel, R.},
+  isbn={9783540406044},
+  series={Universitext (1979)},
+  year={2004},
+  publisher={Springer}
 }

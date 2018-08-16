@@ -32,7 +32,7 @@ We are now able to estimate the volatility of any given asset at the present mom
 Our goal is therefore to model the volatility of any given stock price, and, with this model, predict its future behavior, using this knowledge to better price options.
 We begin by introducing the concept of implied volatility, crucial to fully grasping the concepts used later. Afterwards, we will introduce four models to replicate market volatility: one with local volatility (Dupire's formula) and three with stochastic volatility (Heston and Static/Dynamic SABR).
 
-We should note that other very common models exist. The GARCH model (Generalized Autoregressive Conditional Heteroskedasticity) along with all its many variations (EGARCH, NGARCH, ...) is particularly popular among econometricians. However, this model is mostly used to forecast volatility, and performs poorly when used to price derivatives~\citep{chourdakis}. Because pricing is our objective, GARCH will not be covered in this work. We will also study the constant volatility model, as used by Black \textit{et al.}, as a benchmark for the quality of our models.
+We should note that other very common models exist. The GARCH model~\citep{bollerslev} (Generalized Autoregressive Conditional Heteroskedasticity) along with all its many variations (EGARCH, NGARCH, ...) is particularly popular among econometricians. However, this model is mostly used to forecast volatility, and performs poorly when used to price derivatives~\citep{chourdakis}. Because pricing is our objective, GARCH will not be covered in this work. We will also study the constant volatility model, as used by Black \textit{et al.}, as a benchmark for the quality of our models.
 
 
 
@@ -131,7 +131,7 @@ For later comparison, we note that the value of relative change of the option pr
 
 \section{Local Volatility}
 \label{section:localvolatility}
-In their original work, Black \textit{et al.} assumed that volatility is constant throughout the whole option duration. From market data, it can be clearly seen that this is not the case~\citep{DJIA}. There may be times when new information reaches the market  (e.g. the results of an election) and trading increases, driving volatility up. It is equally true that shortly before this information is known, trading may stall due to expectancy, and volatilities go down. 
+In their original work, Black \textit{et al.} assumed that volatility is constant throughout the whole option duration~\citep{Scholes}. From market data, it can be clearly seen that this is not the case~\citep{DJIA}. There may be times when new information reaches the market  (e.g. the results of an election) and trading increases, driving volatility up. It is equally true that shortly before this information is known, trading may stall due to expectancy, and volatilities go down. 
 
 The constant volatility BS model is therefore clearly incapable of completely grasping real-world trading. We should use a model where volatility is dynamic, measuring the uncertainty on the stock price movement at any point in time.
 However, as we saw in \autoref{section:impliedvolatility}, the market's view of volatility also depends on the stock price itself.
@@ -311,7 +311,7 @@ Despite its problems, Dupire's formula is still very much used by practitioners 
 
 \section{Stochastic Volatility}
 \label{section:stochastic volatility}
-As stated before, the volatility is not constant, is not observable and is very unpredictable, despite our attempts to model it. This seems to indicate that volatility is itself also a stochastic process. Some research has been done into this hypothesis, and many models have been developed to replicate real-world volatilities with this assumption.
+As stated before, the volatility is not constant, is not observable and is very unpredictable, despite our attempts to model it. This seems to indicate that volatility is itself also a stochastic process~\citep{rebonato}. Some research has been done into this hypothesis, and many models have been developed to replicate real-world volatilities with this assumption.
 
 We assume that the stock price follows the diffusion process
 \begin{equation}\label{stochvol}
@@ -580,6 +580,7 @@ As for the Heston model, we again need to calibrate the parameters of this model
 
 
 \subsection{Dynamic SABR Model}
+\label{subsection:Dynamic SABR Model}
 One of the main setbacks of the static SABR model is the fact that it should only be calibrated on a set of options with the same maturity. The model behaves badly when we try to fit options with different maturities~\citep{Hagan}. 
 
 To solve this problem, Hagan \textit{et al.} suggested a similar model known as \emph{Dynamic SABR}~\citep{Hagan}. It follows the same diffusion processes presented in eqs.\eqref{dF} and\eqref{dsigma} but with time-dependent parameters $\rho(t)$ and $\nu(t)$,
@@ -628,8 +629,8 @@ B(T)=\frac{1}{\omega^2}\left(\frac{(1-\beta)^2}{24}+\frac{\omega\beta\eta_1(T)}{
 
 
 We now need to empirically choose some appropriate functions for $\rho(t)$ and $\nu(t)$.
-We can choose these functions such that the integrals in eqs.\eqref{nu1}-\eqref{eta2} are analytically  solvable, greatly simplifying the calibration of this model.
-One possible solution~\citep{Fernandez} is to define $\rho(t)$ and $\nu(t)$ as
+We can choose these functions such that the integrals in eqs.\eqref{nu1}-\eqref{eta2} are analytically  solvable, greatly simplifying the calibration of this model. Hagan \textit{et al.} showed that the calibrated volatility of volatility, $\nu$, decreases with the maturity (in the Static SABR model)~\citep{Hagan}, which seems to suggest that the function $\nu(t)$ should decrease with time. As for the correlation parameter, $\rho$, these authors claimed that its time-dependent behavior is heavily dependent on the type of underlying asset traded. Using a stock index as the underlying asset (which is also the underlying asset for which we have data, shown in \autoref{chapter:mktdata}), Fernandez \textit{et al.} show that this parameter decreases (in absolute value) with maturity, indicating that $\rho(t)$ also decreases (in absolute value) with time~\citep{Fernandez}.
+These authors thus suggest that we define $\rho(t)$ and $\nu(t)$ as
 \begin{equation}\label{rhot}
 \rho(t)=\rho_0e^{-at},
 \end{equation}
@@ -651,4 +652,4 @@ In this particular case, $\nu_1^2(T)$, $\nu_2^2(T)$, $\eta_1(T)$ and $\eta_2^2(T
 \eta_2^2(T)=\frac{3\nu_0^2\rho_0^2}{T^4(a+b)^4}\left[e^{-2(a+b)T}-8e^{-(a+b)T}+(7+2T(a+b)(-3+(a+b)T))\right].
 \end{equation}
 
-There exist other more complicated functions for $\rho(t)$ and $\nu(t)$ which, due to their increased complexity, can better fit the data. An example of such functions can be found in Fernandez~\citep{Fernandez}. The main concern with these functions is that they usually don't have analytically solvable solutions for the integrals in eqs.eqs.\eqref{nu1}-\eqref{eta2}, and need to be computed numerically. For this reason, these will not be considered in the present work.
+There are other possible functions for $\rho(t)$ and $\nu(t)$. An example of such functions can be found in Fernandez \textit{et al.}~\citep{Fernandez}. The main concern with these functions is that they usually don't have analytically solvable solutions for the integrals in eqs.eqs.\eqref{nu1}-\eqref{eta2}, and these integrals need to be computed numerically, which greatly increases computation time. For this reason, they will not be considered in the present work.

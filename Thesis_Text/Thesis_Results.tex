@@ -2,7 +2,7 @@
 \label{chapter:results}
 Having described the implementation of all the models introduced in \autoref{chapter:volatility} and the calibration and interpolation methods referenced in \autoref{chapter:implementation}, in this chapter we study the results of the calibration and compare all the models.
 
-We will calibrate the SABR and Heston models' parameters to a dataset of implied volatilities for European options with different maturities and strike prices. This data was kindly provided by \emph{BNP Paribas} and is shown in \autoref{chapter:mktdata}. As stated, the closed form solutions will be used in this calibration procedure. After the calibration, we are able to produce a function from these closed-form solutions using the models' calibrated parameters. These functions - henceforth named \emph{theoretical functions} - should, in principle, closely fit the implied volatility data.
+We will calibrate the SABR and Heston models' parameters to a dataset of implied volatilities for European options with different maturities and strike prices. This data is shown in \autoref{chapter:mktdata}. As stated, the closed form solutions will be used in this calibration procedure. After the calibration, we are able to produce a function from these closed-form solutions using the models' calibrated parameters. These functions - henceforth named \emph{theoretical functions} - should, in principle, closely fit the implied volatility data.
 
 To validate the SABR and Heston models' closed-form solutions, after finding the optimal parameters with the calibration procedure, we will input them into a Monte Carlo pricer, adapted to each model, and calculate the simulated option prices of each calibrated model. This price will then be converted into an implied volatility (using eq.\eqref{impvolform}) in order for the simulation to be comparable to the data and the closed form solutions. To better grasp the behavior of the simulations we will repeat them a large number of times, $N_{\mathrm{reps}}$, averaging the results to produce a function - henceforth named \emph{simulated function} -  and extracting from them the 95\% confidence bands of the simulations - these confidence bands are obtained by sorting the simulated implied volatilities for each strike, and then extracting both the 97.5\% highest and the 2.5\% lowest and using these values as the upper and lower bounds of the confidence bands, so that 95\% of all observations are contained between them.
 
@@ -186,10 +186,11 @@ The fitted implied volatility is represented in \autoref{tab:ConstVolPar2} as we
 \end{table}
 
 
-
+\iffalse
 First, when we compare the implied volatility fitted to all the maturities with the results of the independent fits (in \autoref{tab:ConstVolPar}) we see that the former is actually the average of the latter. \hl{why?}
+\fi
 
-If we now compare their cost function values, we see that the cost of the dependent fit ($0.1248$), is larger than the sum of the costs of the independent fits ($0.0635+0.0282+0.0164+0.0069=0.1150$). This is indeed expected: when fitting all maturities at once, the optimizer will find the implied volatility that minimizes the cost for all maturities, which will not be the one that minimizes the cost of each single maturity.
+If we compare their cost function values, we see that the cost of the dependent fit ($0.1248$), is larger than the sum of the costs of the independent fits ($0.0635+0.0282+0.0164+0.0069=0.1150$). This is indeed expected: when fitting all maturities at once, the optimizer will find the implied volatility that minimizes the cost for all maturities, which will not be the one that minimizes the cost of each single maturity.
 
 As for the plots in \autoref{fig:ConstVol2} they look very similar to those in \autoref{fig:ConstVol}, so not much more can be added regarding their analysis.
 
@@ -241,6 +242,7 @@ As before, the relative errors of the option prices seem to increase with the st
 \newpage
 
 \section{Dupire Model}
+\label{section:Dupire Model}
 The stochastic differential equation for the stock price paths under the local volatility model was hypothesized to be given by
 \begin{equation}\label{dupmodds}
 dS(t)=rS(t)dt+\sigma(S(t),t)S(t)dW(t),
@@ -820,8 +822,11 @@ By analyzing this data we see that the relative errors increase when compared ei
 The Monte Carlo algorithms developed to price the European options in the previous sections, under each of the models studied, can be easily adapted to price Barrier options.
 We are only required to check at all simulation time steps whether each stock price process crossed the barrier level or not and, at the maturity, only use those that did to calculate the option price. This discretization poses a problem when pricing Barrier options, because these contracts assume a continuous time frame. This has been discussed in \autoref{subsection:Simulating stock prices}. Furthermore, as we discussed in \autoref{subsection:Pricing options from simulations}, the problem we observed before with the low number of simulated paths contributing to the prices of options with very high strikes and an early maturities is aggravated on Exotic options.
 
-Despite these expected shortcomings, we priced several Barrier options with different barrier levels, using all the different models described before. In these simulations we used a single maturity of \hl{21 days} and the calibrated parameters for each of the models, shown earlier in this chapter. From the Barrier option prices we extracted the corresponding implied volatilities, using eqs.\eqref{impvolform} and \eqref{barr2}, in order to compare the implied volatility curves with those shown in the previous sections.
+Despite these expected shortcomings, we priced several Barrier options with different barrier levels, using all the different models described before. In these simulations we used a single maturity of 42 days and the calibrated parameters for each of the models, shown earlier in this chapter.
+\iffalse
+From the Barrier option prices we extracted the corresponding implied volatilities, using eqs.\eqref{impvolform} and \eqref{barr2}, in order to compare the implied volatility curves with those shown in the previous sections.
 We should also note that these curves are simulated (mean of multiple Monte Carlo simulations) and not theoretical, as there are no closed-form solutions for the prices of Barrier options under each of the used models.
+\fi
 The results of these simulations are shown in \autoref{fig:Barrier}.
 
 \vspace{\fill}
@@ -829,26 +834,27 @@ The results of these simulations are shown in \autoref{fig:Barrier}.
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
-    \subfigure[Constant Volatility model]{\includegraphics[width=0.49\linewidth,trim={0cm 2cm 0cm 2cm},clip]{Placeholder.png}}
-    \subfigure[Dupire's Local Volatility model]{\includegraphics[width=0.49\linewidth,trim={0cm 2cm 0cm 2cm},clip]{Placeholder.png}}
-        \subfigure[Static SABR model]{\includegraphics[width=0.49\linewidth,trim={0cm 2cm 0cm 2cm},clip]{Placeholder.png}}
-            \subfigure[Heston model]{\includegraphics[width=0.49\linewidth,trim={0cm 2cm 0cm 2cm},clip]{Placeholder.png}}
-                \subfigure[Dynamic SABR model]{\includegraphics[width=0.49\linewidth,trim={0cm 2cm 0cm 2cm},clip]{Placeholder.png}}
+    \subfigure[Constant Volatility model]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.4cm 1cm 1cm},clip]{BarrConst}}
+    \subfigure[Dupire's Local Volatility model]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.4cm 1cm 1cm},clip]{BarrDup}}
+        \subfigure[Static SABR model]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.4cm 1cm 1cm},clip]{BarrStat}}
+            \subfigure[Heston model]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.4cm 1cm 1cm},clip]{BarrHest}}
+                \subfigure[Dynamic SABR model]{\includegraphics[width=0.49\linewidth,trim={0.5cm 0.4cm 1cm 1cm},clip]{BarrDyn}}
   \end{subfigmatrix}
-    \caption[Implied volatility curves of simulated European call options and Barrier call options with barrier levels $B=1.05$, $B=1.1$ and $B=1.25$ under each of the models previously studied.]{Implied volatility curves of simulated European call options (light blue dot-dashed lines) and Barrier call options with barrier levels $B=1.05$ (red full line), $B=1.1$ (orange dashed line) and $B=1.25$ (purple dotted line) under each of the models previously studied.}\label{fig:Barrier}
+    \caption[Option price curves of simulated European call options and Barrier call options with barrier levels $B=1.05$, $B=1.1$ and $B=1.2$ under each of the models previously studied.]{Option price curves of simulated European call options (light blue dot-dashed lines) and Barrier call options with barrier levels $B=1.05$ (red full line), $B=1.1$ (orange dashed line) and $B=1.25$ (purple dotted line) under each of the models previously studied, for options with maturity of 42 days.}\label{fig:Barrier}
 \end{figure} 
 
-\hl{check caption above}
 
 We now analyze the results of \autoref{fig:Barrier}.
-If we compare the different barrier level curves in any of the represented models we can clearly see that the most significant change 
+First, we note that, as expected, when we increase the barrier level the option price decreases. This is indeed observed in all models' simulations, and its cause has been explained before.
 
-Observing the results shown in  we can conclude that the curves shown in each model are consistent with one another, so there is not much we can say on the model's impact on such contracts besides the obvious change in the implied volatility curve of the European contracts.
+Possibly the most striking result that we can observe is just how different the price curves are for the simulated barrier options across the models. As an extreme example, we can note that the curve for the Barrier option with barrier level $B=1.1$ under Dupire's model is actually higher than the curve with barrier level $B=1.05$ under Heston's model, which should really not occur. To explain this phenomenon we can begin by noting that volatility is particularly important in barrier options. A higher volatility translates into a higher probability of the barrier being activated and thus a higher probability of activating the option.
+Because each model produces a different volatility behavior, it should be expected for the prices of barrier options to also be different. Furthermore, we should also note that the models were calibrated on European options. Indeed, when we compare all the European option curves we can clearly see that they are the same across all models. Thus, we can conclude that even though the models agree when pricing European options (as they should, since they were all calibrated on the same data set), they don't necessarily agree on the prices of Barrier options.
 
+A more in depth study is required to verify which model produces the most accurate Barrier option prices, but additional data would be required and this study is out of the scope of this work.
 
 \newpage
 
-\section{Mishaps Found in Implementation}
+\section{Pitfalls Found in Implementation}
 During the implementation of all the models, some problems were found. They were mostly solved and the models were able to perform as expected, as we saw in the previous section. For future reference, and to prevent others from repeating the same mistakes, we now summarize not only the problems observed but also their causes and how we were able to solve them or~at least reduce their impact.
 
 \subsection{Dupire Model}
@@ -927,8 +933,6 @@ Though this might seem trivial, some care must be taken when implementing the Mo
 \newpage
 
 
-\hlc[red]{check with Claude if BNPP data assumes a 0 interest rate or not}
-
 \hlc[red]{why is the coupled constant implied volatility the average of the independent fits of the constant implied vols?}
 
 \hlc[red]{dynamic sabr exponential functions for rho should match the data for the individual fits}
@@ -943,7 +947,7 @@ Though this might seem trivial, some care must be taken when implementing the Mo
 
 \hlc[red]{hagan says that rho and beta have the same impact on the curve}
 
-\hlc[red]{analyze the calibrated parameters' values}
+\hlc[red]{replot dupire surface with 100000 x 10 paths}
 
 \hl{put units in fitted parameters}
 

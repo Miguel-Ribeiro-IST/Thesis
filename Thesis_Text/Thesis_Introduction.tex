@@ -52,3 +52,34 @@ Options are also very useful to speculators (i.e. investors that try to predict 
 Due to all their advantages, and unlike some other types of derivatives, options have a price. Finding the ideal price for an option is a fundamental concern to investors, because knowing their appropriate value can give them a chance to take advantage of under or overpriced options.
 Finding this price can be very difficult for some option types, however, and though a lot of research has been done towards this goal, a great deal more is still required.
 
+
+\section{Volatility}
+Volatility is a quantity that greatly affects option prices, and is used as a parameter in all pricing models. It's very difficult to define it without the necessary financial background, so we will postpone this description to \autoref{chapter:volatility}, where we will study it in great detail.
+For now, we can say that despite its importance, and despite our great efforts to study it, this parameter remains as one of the most elusive phenomena in all of quantitative finance. This elusiveness is mainly caused by our inability not only to predict its future behavior but even actually to accurately measuring it, which clearly gives rise to all sorts of problems when using it in any option pricing model.
+
+Due to its importance, many models have been developed throughout the years in an attempt to model this parameter, with varying degrees of success. We will analyze in detail some of the most famous ones in the following chapters, comparing them with one another.
+
+\section{Repository}
+In the development of this thesis we created many code files, using MATLAB language, from which we obtained the results shown later. They are available in an online repository, which can be accessed freely at \url{https://github.com/Miguel-Ribeiro-IST/Thesis}.
+The code is commented to some degree, to ease the interpretation of all the steps taken.
+
+\section{Objectives}
+The goal of this thesis is to study some of the most commonly used models to forecast volatility. We will approach Dupire's local volatility model and Heston, Static/Dynamic SABR stochastic volatility models. We will begin by clearly defining each model, and give some insight regarding their advantages and disadvantages.
+
+We will then train all models in a data set of real European option prices, so that they can best replicate real market behavior.
+
+Afterwards, we will implement each trained model on a Monte Carlo numerical pricer, to obtain some simulated option prices. The models will also be compared with one another, to find which is the most suitable in our case.
+
+Finally, the Monte Carlo pricers will be modified to price Barrier options.
+
+\section{Thesis Outline}
+In this work multiple volatility models will be studied.
+In \autoref{chapter:background} we begin by giving some insights required to understand the posterior sections. We will approach the options' payoff and value functions as well as the Black-Scholes formula and consequent results.
+
+In \autoref{chapter:volatility} we introduce the concept of volatility, implied volatility and the Greek Vega. We then describe the models to be used, namely Dupire's local volatility model and Heston, Static/Dynamic SABR stochastic volatility models.
+
+Then, in \autoref{chapter:implementation} we focus on the how each model will be implemented, calibrated and validated.
+
+Afterwards, in \autoref{chapter:results} we comment on the results obtained with each of the models and compare them to one another. We also apply these models to price Barrier options.
+
+Finally, in \autoref{chapter:conclusions} we give a general overview of the work done and some of the main conclusions made.

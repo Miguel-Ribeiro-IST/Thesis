@@ -6,7 +6,7 @@ The theoretical models introduced in \autoref{chapter:volatility} attempt to rep
 
 Currently, the two most used methods to computationally price options are known as \emph{finite differences}~\citep{Hull} and \emph{Monte Carlo}~\citep{Glasserman}.
 
-The finite differences method is an extremely fast procedure when used to price either European or American-type options, making it very appealing in these circumstances. However, when applied to other option types whose payoff depends on the stock price path itself (e.g. Asian options, that depend on the average value of all the stock prices until maturity), the algorithm requires some considerable changes that make it very slow, rendering it almost useless.
+The finite differences method is an extremely fast procedure when used to price either European or American-type options, making it very appealing in these circumstances. However, when we increase the number of dimensions of the problem, such as when dealing with options whose payoff depends on the past history of the stock price (e.g. Asian options, which are derivatives that depend on the average value of the stock price until maturity), the algorithm requires some considerable modifications that make it slower and more complex.
 The implementation of both Heston and SABR models (presented before) using finite differences can nonetheless be found in deGraaf~\citep{deGraaf}.
 
 
@@ -126,7 +126,7 @@ One possible interpolation method is known as \emph{Delaunay triangulation}~\cit
       \caption[Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles don't contain any other points inside. A circle for which this property does not hold is also represented, though no triangulation is possible in this case.]{Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles (green) don't contain any other points inside. A circle for which this property does not hold (orange dashed) is also represented, though no triangulation is possible in this case.\\{\small Source: \url{https://www.ti.inf.ethz.ch/ew/Lehre/CG13/lecture/Chapter\%206.pdf}}}\label{fig:Delaunay}
     \end{figure}
 
- We can easily adapt this algorithm to 3-dimensions (as is the case of our data), using spheres instead of circles.
+We can easily adapt this algorithm to 3-dimensions (as is the case of our data), using spheres instead of circles.
 The resulting interpolated surface will simply be a set of merged triangles, with the data points serving as a vertices. Though this is usually a good approximation, it will produce wrong results when calculating the derivatives used in the local volatility formula (e.g. calculating the second derivative on the triangular planes of the interpolation results in zero). If we used the first version of Dupire's formula, shown in eq.\eqref{dupire}, where we use the second derivative in the denominator, the resulting local volatility surface would become highly unrealistic. However, since we will use the formula in eq.\eqref{dupire2}, which is not so sensitive to this value, no significant problems are expected.
 
 The function \emph{scatteredInterpolant}, implemented in MATLAB, applies this Delaunay triangulation to a set of scattered data, and will therefore be used in the implied volatility surface generation. With this function we are also able to perform extrapolation, which is important, since during the simulations it is possible that some of the paths reach prices above/below the highest/smallest strikes for which we have data. This extrapolation method calculates the surface gradient at the interpolation boundary and assumes that the gradients remain constant outside the boundary, thus extending the surface~\citep{MATLABextrap}.
@@ -264,4 +264,6 @@ Furthermore, unlike many other optimizers, the CMA-ES is almost non-parametric. 
 As for disadvantages, because we have to generate a set of samples at each iteration, if this generation process is slow (such as the Monte Carlo pricer), the convergence may stall significantly, particularly when many parameters are used in the model. Other algorithms may perform faster than CMA-ES, but this optimizer is expected to outperform them in terms of precision.
 
 This optimizer was implemented by Hansen in MATLAB (as well as in other computer languages) as a function named \emph{purecmaes}~\citep{CMAES} and will be used with only very slight changes, to account for the volatility models used used.
+
+We should note that several other optimization algorithms were used, namely Simulated Annealing~\citep{MATLABsa}, Multi Start~\citep{MATLABms}, Pattern Search~\citep{MATLABps} and Genetic Algorithm~\citep{MATLABga}, all implemented in MATLAB, but CMA-ES not only greatly outperformed them in terms of accuracy, always finding lower cost values that the others, but often also in terms of computation time. For this reason, we chose CMA-ES for all implementations.
 

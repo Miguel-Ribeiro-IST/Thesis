@@ -14,17 +14,17 @@ B=A.data(:,:);
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;
 r = 0;
-matur=4;           %maturity until which we want to fit the data. If matur=5, all maturities until the fifth maturity in the file are chosen.
+matur=2;           %maturity until which we want to fit the data. If matur=5, all maturities until the fifth maturity in the file are chosen.
 OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
 
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
 SimPoints=false;
-M=100000;
-repetitions=100;
-barr=[1.05,1.15,1.25];
+M=10000;
+repetitions=10;
+barr=[1.05,1.1,1.2];
 %L=T*252*2
-
+alpha=0.254;beta=0.6348;rho0=-0.4166;a=0;nu0=1.8673;b=41.6943;
 
 %%%%%%%%%%%%%      ORIGINAL DATA MODIFICATIONS     %%%%%%%%%%%%
 B(:,2)=B(:,2)/S0;
@@ -116,12 +116,12 @@ end
 
 
 function Plotter_Sim(alpha,rho0,nu0,a,b,beta,S0,r,M,T,repetitions,barr)
-
 K=0.4:0.01:1.6;
 
 SimVol1=@(K,PriceVol)Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,K',PriceVol,barr(1));
 SimVol2=@(K,PriceVol)Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,K',PriceVol,barr(2));
 SimVol3=@(K,PriceVol)Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,K',PriceVol,barr(3));
+SimVolEuro=@(K,PriceVol)PricerEuro(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,K',PriceVol);
 
 
 
@@ -132,6 +132,8 @@ SimVol3=@(K,PriceVol)Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,K',PriceVol
         DVP_tmp1(j,:)=SimVol1(K,"price");
         DVP_tmp2(j,:)=SimVol2(K,"price");
         DVP_tmp3(j,:)=SimVol3(K,"price");
+        DV_tmpEuro(j,:)=SimVolEuro(K,"vol");
+        DVP_tmpEuro(j,:)=SimVolEuro(K,"price");
     end
     DV1=mean(DV_tmp1,1);
     DV2=mean(DV_tmp2,1);
@@ -139,16 +141,14 @@ SimVol3=@(K,PriceVol)Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,K',PriceVol
     DVP1=mean(DVP_tmp1,1);
     DVP2=mean(DVP_tmp2,1);
     DVP3=mean(DVP_tmp3,1);
-
-
+    DVEuro=mean(DV_tmpEuro,1);
+    DVPEuro=mean(DVP_tmpEuro,1);
+    
+      %Plot implied volatility function under the Heston model
     figure
-    SABRVol=@(K)sigmaSABR(alpha,rho0,nu0,a,b,beta,K,S0*exp(r*T),T);
-    for i=1:size(K,2)
-        HV(i)=SABRVol(K(i));
-    end
-    plot(K,HV,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
+    plot(K,DVEuro,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
     hold on;
-    plot(K,DV1,'-.','LineWidth',2);
+    plot(K,DV1,'LineWidth',2);
     plot(K,DV2,'--','LineWidth',2);
     plot(K,DV3,':','LineWidth',2);
     
@@ -163,17 +163,14 @@ SimVol3=@(K,PriceVol)Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,K',PriceVol
     pbaspect([1.5 1 1])
 
 
-    lg={'European Call',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
-    legend(lg,'Location','northeast','FontSize',11);
-
+    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lgd=legend(lg,'Location','northeast','FontSize',11);
+    title(lgd,"Dynamic SABR")
    
     figure
-    for i=1:size(K,2)
-        HV2(i)=european_bs(S0,K(i),r,HV(i),T,"call");
-    end
-    plot(K,HV2,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
+    plot(K,DVPEuro,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
     hold on;
-    plot(K,DVP1,'-.','LineWidth',2);
+    plot(K,DVP1,'LineWidth',2);
     plot(K,DVP2,'--','LineWidth',2);
     plot(K,DVP3,':','LineWidth',2);
     
@@ -187,9 +184,9 @@ SimVol3=@(K,PriceVol)Pricer(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,K',PriceVol
     ylabel('Option Price(€)')
     pbaspect([1.5 1 1])
 
-    lg={'European Call',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
-    legend(lg,'Location','northeast','FontSize',11);
-
+    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lgd=legend(lg,'Location','northeast','FontSize',11);
+        title(lgd,"Dynamic SABR")
 end
 
 
@@ -225,7 +222,7 @@ if PriceVol=="price"
 else
     Result=zeros(1,N);
     for j=1:N
-        volatility=@(sigma)european_bs(S0,C(j,1),r,sigma,T,"call")-exp(-r*T)*mean(Y(:,j));
+        volatility=@(sigma)barrier_bs(S0,C(j,1),r,sigma,T,"call",barr)-exp(-r*T)*mean(Y(:,j));
         res=fzero(volatility,0.0001);
         
         if ~isnan(res)
@@ -237,6 +234,46 @@ else
 end
 end
 
+
+
+function Result=PricerEuro(alpha,rho0,nu0,a,b,beta,S0,r,T,M,L,C,PriceVol)
+dt = T/L;
+N=size(C,1);
+S = S0*ones(M,1);
+sigma=alpha*ones(M,1);
+
+for k = 1:L
+    rho=rho0*exp(-a*dt*(k-1));
+    nu=nu0*exp(-b*dt*(k-1));
+    Z1=randn(M,1);
+    Z2=rho*Z1+sqrt(1-rho^2)*randn(M,1);
+    S(:)=max(S(:),0).*(1+r*dt)+exp(-r*(T-dt*k)*(1-beta)).*sigma(:).*max(S(:),0).^beta.*sqrt(dt).*Z1+beta/2*exp(-2*r*(T-dt*k)*(1-beta))*sigma(:).^2.*max(S(:),0).^(2*beta-1)*dt.*(Z1.^2-1);
+    sigma(:)=sigma(:).*(1+nu*sqrt(dt).*Z2+nu^2/2*dt*(Z2.^2-1));
+end
+
+Y=zeros(M,N);
+for j=1:N
+    for i=1:M
+        Y(i,j) = max(S(i)-C(j,1),0);
+    end
+end
+
+if PriceVol=="price"
+    Result=exp(-r*T)*mean(Y);
+else
+    Result=zeros(1,N);
+    for j=1:N
+        volatility=@(sigma)european_bs(S0,C(j,1),r,sigma,T,"call")-exp(-r*T)*mean(Y(:,j));
+        res=fzero(volatility,0.0001);
+        
+        if ~isnan(res)
+            Result(j)=res;
+        else
+            Result(j)=0;
+        end
+    end
+end
+end
 
 
 function tab=Printer(alpha,rho0,nu0,a,b,beta,B,S0,r)
@@ -267,6 +304,31 @@ if putcall=="call"
     price = S0.*N1 - K.*exp(-r.*T).*N2;
 elseif putcall=="put"
     price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
+end
+end
+
+
+function price=barrier_bs(S0,K,r,sigma,T,putcall,B)
+if B<K
+    price=european_bs(S0,K,r,sigma,T,putcall);
+else
+x1=(B/S0)^(-1+2*r/sigma^2);
+x2=(B/S0)^(1+2*r/sigma^2);
+d3= (log(S0./B) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d4= (log(S0./B) - (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d5= (log(S0.*K./(B.^2)) - (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d6= (log(S0./B) + (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d7= (log(S0./B) - (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d8= (log(S0.*K./(B.^2)) - (r - 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+N3 = normcdf(d3);
+N4 = normcdf(d4);
+N5 = normcdf(d5);
+N6 = normcdf(d6);
+N7 = normcdf(d7);
+N8 = normcdf(d8);
+if putcall=="call"
+    price = S0.*(N3+x2.*(N4-N5)) - K.*exp(-r.*T).*(N6+x1.*(N7-N8));
+end
 end
 end
 

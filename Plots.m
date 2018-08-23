@@ -1,6 +1,7 @@
 clear;
 %figure
-%{
+%%{
+figure
 K=1;
 syms S;
 call=piecewise(S<K,0,S>K,S-K);
@@ -13,7 +14,7 @@ ylabel('Payoff')
 yticks([]);
 xticks([1]);
 xticklabels({'K'})
-legend({'call','put'},'Location','northeast','FontSize',11)
+legend({'Call','Put'},'Location','northeast','FontSize',11)
 p.LineWidth=2;
 c.LineWidth=2;
 pbaspect([1.5 1 1])
@@ -392,7 +393,7 @@ end
 end
 %}
 
-%%{
+%{
 figure
 format long
 r=0.01;
@@ -528,4 +529,73 @@ d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
 N=@(x)1/(sqrt(2*pi))*exp(-x.^2/2);
 res=S0*sqrt(T)*N(d1);
 end
+%}
+
+
+
+%%{
+figure
+format long
+r=0.01;
+S0=1;
+d=1000;
+sigma=0.3;
+
+K=linspace(0.4,1.6,1000);
+pric=zeros(1,size(K,2));
+pric2=zeros(1,size(K,2));
+
+T=6/12;
+for i=1:size(K,2)
+pric=european_bs(S0,K,r,sigma,T,"call");
+end
+plot(K,pric,'LineWidth',2);
+hold on;
+
+
+for i=1:size(K,2)
+pric2=european_bs(S0,K,r,sigma,T,"put");
+end
+plot(K,pric2,'LineWidth',2);
+hold on;
+
+T=0;
+for i=1:size(K,2)
+pric=european_bs(S0,K,r,sigma,T,"call");
+end
+plot(K,pric,'--','LineWidth',2);
+hold on;
+
+
+for i=1:size(K,2)
+pric2=european_bs(S0,K,r,sigma,T,"put");
+end
+plot(K,pric2,'--','LineWidth',2);
+hold on;
+
+
+
+xlim([0.4,1.6])
+ylim([0,0.6])
+
+xlabel('K/S_0');
+ylabel('Value (€)')
+pbaspect([1.5 1 1])
+set(gca,'fontsize',12)
+grid on;
+legend({'Call (at Inception)','Put (at Inception)','Call (at Maturity)','Put (at Maturity)'},'Location','northeast','FontSize',11)
+
+
+function price=european_bs(S0,K,r,sigma,T,putcall)
+d1 = (log(S0./K) + (r + 0.5.*sigma.^2).*T)./(sigma.*sqrt(T));
+d2 = d1 - sigma.*sqrt(T);
+N1 = normcdf(d1);
+N2 = normcdf(d2);
+if putcall=="call"
+    price = S0.*N1 - K.*exp(-r.*T).*N2;
+elseif putcall=="put"
+    price = S0.*N1 - K.*exp(-r*T).*N2 + K.*exp(-r.*T) - S0;
+end
+end
+
 %}

@@ -3,42 +3,42 @@
  \nomgroup{G}
 
   \item [{$\sigma$}]\begingroup Stock price volatility.\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
   \item [{$\nu$}]\begingroup Stock price variance.\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
   \item [{$\theta$}]\begingroup Model parameter set.\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
 
  \nomgroup{R}
 
-  \item [{$S$}]\begingroup Stock price.\nomeqref {0}\nompageref{xvii}
+  \item [{$S$}]\begingroup Stock price.\nomeqref {0}\nompageref{xix}
   \item [{$r$}]\begingroup Risk-free interest rate.\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
   \item [{$K$}]\begingroup Option strike price.\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
   \item [{$T$}]\begingroup Option maturity date.\nomeqref {0}
-		\nompageref{xvii}
-  \item [{$V$}]\begingroup Option price.\nomeqref {0}\nompageref{xvii}
+		\nompageref{xix}
+  \item [{$V$}]\begingroup Option price.\nomeqref {0}\nompageref{xix}
   \item [{$C$}]\begingroup Call option price.\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
   \item [{$P$}]\begingroup Put option price.\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
 
  \nomgroup{S}
 
   \item [{$Euro$}]\begingroup European type option.\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
   \item [{$Amer$}]\begingroup American type option.\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
   \item [{$Barr$}]\begingroup Barrier type option.\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
   \item [{$call$}]\begingroup Call type option.\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
   \item [{$put$}]\begingroup Put type option.\nomeqref {0}
-		\nompageref{xvii}
-  \item [{mkt}]\begingroup Market data.\nomeqref {0}\nompageref{xvii}
-  \item [{mdl}]\begingroup Model result.\nomeqref {0}\nompageref{xvii}
+		\nompageref{xix}
+  \item [{mkt}]\begingroup Market data.\nomeqref {0}\nompageref{xix}
+  \item [{mdl}]\begingroup Model result.\nomeqref {0}\nompageref{xix}
   \item [{$imp$,$i$}]\begingroup Implied (related to volatility).\nomeqref {0}
-		\nompageref{xvii}
+		\nompageref{xix}
 
 \end{thenomenclature}

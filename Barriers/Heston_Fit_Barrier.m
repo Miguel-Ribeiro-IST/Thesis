@@ -9,15 +9,15 @@ B=A.data(:,:);
 S0=17099.4;               %initial stock price
 r = 0;                    %risk-free rate. Forward prices in data file assumed r=0.0
 matur=2;                  %maturity until which we want to fit the data. If matur=5, all maturities until the fifth are chosen.
-OptAlg="CMA";      %"CMA" or "MultiStart" optimization algorithms
+OptAlg="CMA";             %"CMA" or "MultiStart" optimization algorithms
 
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
 %After calibrating all the model's parameters, we may want to simulate the implied volatilities using Monte Carlo
 SimPoints=true;   %true or false - define if Monte Carlo simulation should be executed
-M=100000;           %number of paths to be simulated
+M=10000;           %number of paths to be simulated
 repetitions=10;
-barr=[1.05,1.2,1.4];
+barr=[1.05,1.1,1.2];
 %L=T*252*2
 
 
@@ -212,7 +212,8 @@ SimVolEuro=@(K,PriceVol)PricerEuro(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,P
 
 
     lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
-    legend(lg,'Location','northeast','FontSize',11);
+    lgd=legend(lg,'Location','northeast','FontSize',11);
+    title(lgd,"Heston")
 
    
     figure
@@ -232,8 +233,9 @@ SimVolEuro=@(K,PriceVol)PricerEuro(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,P
     ylabel('Option Price(€)')
     pbaspect([1.5 1 1])
 
-    lg={'European Call',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
-    legend(lg,'Location','northeast','FontSize',11);
+    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lgd=legend(lg,'Location','northeast','FontSize',11);
+        title(lgd,"Heston")
 end
 
 

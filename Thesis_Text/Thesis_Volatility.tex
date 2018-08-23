@@ -7,10 +7,17 @@ As mentioned, volatility is a measure of the uncertainty of future stock price m
       \caption[Example of three identical GBM processes with different volatilities]{Example of three identical GBM processes with maturity $T=1\SI{}{\year}$, interest rate $r=0.01\SI{}{\per\year}$ and initial stock price $S_0=1\SI{}{\EUR}$. The volatilities are $\sigma=0.05\SI{}{\year\tothe{-1/2}}$, $\sigma=0.1\SI{}{\year\tothe{-1/2}}$ and $\sigma=0.2\SI{}{\year\tothe{-1/2}}$ for the orange, blue and red plot lines represented, respectively. To emphasize this effect, the underlying Brownian Motion $\{W(t),\ t>0\}$ used to generate all three paths was the same.}\label{fig:VarVol}
     \end{figure}
 
-Of all the parameters in the BS formula (eq.\eqref{BS2}), volatility is the only one we can't easily measure from market data.
-Furthermore, unlike the interest rate, volatility has a great impact on the behavior of stock prices and, consequently, on the price of options~\citep{Wilmott3}.
+\section{Why Volatility is Important}
+\label{section: Why Volatility is Important}
+Volatility is of the utmost importance when trading options. We can show that the greater the volatility of a stock, the higher the price of its corresponding option. 
+To understand why option price increases with volatility we can note that volatility is very desirable to investors when dealing with options. A high volatility means that there is an increased probability that the stock price will increase or decrease very significantly. In the case of a call option, if the stock price increases considerably, the investor earns a large amount of money. If the price decreases considerably, the investor may let the option expire, thus avoiding further losses. Thus we see that a higher volatility provides a greater change of potentially very high profits with a limited potential downfall. We thus conclude that a higher volatility increases the value of an option and this parameter has a great influence on the option price.
+Furthermore, of all the parameters in the BS formula (eq.\eqref{BS2}), volatility is the only one we can't easily measure from market data.
 These two factors make volatility one of the most important subjects in all of mathematical finance and thus the focus of much research.
 
+
+
+
+\section{Estimating Volatility}
 Usually, volatility can be estimated empirically from the standard deviation of the historical rate of log-returns~\citep{Hull}.
 We begin by measuring the stock price at fixed time intervals (e.g. daily, monthly), such that $S_i$ corresponds to the stock price at the end of the $i$th interval. We define the log-return rate, $u_i$, as
 \begin{equation}
@@ -28,9 +35,9 @@ The volatility (measured yearly) can be \emph{estimated} with
 \noindent where $\tau$ defines the time interval length measured in years. As an example, if we only have monthly data for the $S_i$ prices, the time interval would obviously be one month, which, measured in years is equal to $1/12$, which corresponds to $\tau$.
 The volatility can also be measured in other time periods: we can define a monthly or a daily volatility, instead of a yearly volatility as we defined before, but these are less common and will therefore not be used.
 
-We are now able to estimate the volatility of any given asset at the present moment. With this result, we could assume that the volatilities remain constant over time and use today's volatility to price options with maturities in the future. The clear problem with this approach is that, when observing market data, we can see that volatilities change over time, so that even if we had the exact value of this parameter in the present, it can, and will, change in the future. If we try to price options assuming a constant volatility, our options will become mispriced, causing potential losses.
-Our goal is therefore to model the volatility of any given stock price, and, with this model, predict its future behavior, using this knowledge to better price options.
-We begin by introducing the concept of implied volatility, crucial to fully grasping the concepts used later. Afterwards, we will introduce four models to replicate market volatility: one with local volatility (Dupire's formula) and three with stochastic volatility (Heston and Static/Dynamic SABR).
+We are now able to estimate the volatility of any given asset at the present moment. With this result, we could assume that the volatilities remain constant over time and use today's volatility to price options with maturities in the future. The clear problem with this approach is that, when observing market data, we can see that \emph{volatilities change over time, so that even if we had the exact value of this parameter in the present, it can, and will, change in the future. If we try to price options assuming a constant volatility, our options will become mispriced, causing potential losses: volatility is itself a random process}.
+Our goal is therefore to model the instantaneous volatility of any given stock price (i.e. its volatility at a given point in time), and, with this model, predict its future behavior, using this knowledge to better price options.
+We begin by introducing the concept of implied volatility, crucial to fully grasping the concepts used later. Afterwards, we will introduce four models to replicate volatility: one using local volatility (Dupire's formula), where we assume that the volatility depends on the stock price and time (i.e. $\sigma_t=f(t,S_t)$), and three others using stochastic volatility (Heston and Static/Dynamic SABR), where the volatility also depends on a Brownian motion process (i.e. $\sigma_t=f(t,S_t,W_t^\sigma)$).
 
 We should note that other very common models exist. The GARCH model~\citep{bollerslev} (Generalized Autoregressive Conditional Heteroskedasticity) along with all its many variations (EGARCH, NGARCH, ...) is particularly popular among econometricians. However, this model is mostly used to forecast volatility, and performs poorly when used to price derivatives~\citep{chourdakis}. Because pricing is our objective, GARCH will not be covered in this work. We will also study the constant volatility model, as used by Black \textit{et al.}, as a benchmark for the quality of our models.
 
@@ -41,16 +48,21 @@ We should note that other very common models exist. The GARCH model~\citep{bolle
 \emph{Implied volatility} can be described as the value of stock price volatility that, when input into the BS pricer in eq.\eqref{callputBS}, outputs a value equal to the market price of a given option.
 In other words, it would be the stock price volatility that the seller/buyer of the option used when pricing it (assuming the BS model was used).
 
-Because eq.\eqref{callputBS} is not invertible w.r.t. $\sigma$, we need to use some numerical procedure (e.g. Newton's method) to find the value of implied volatility that matches the market and model prices, i.e. we must find, numerically, the solution to the equation
+We can also relate implied volatility to the volatility of the stock price as
+\begin{equation}
+\sigma_{imp}=\sqrt{\frac{1}{T}\int_0^T(\sigma(t))^2dt},
+\end{equation}
+\noindent where $\sigma_{imp}$ denotes the implied volatility and $\sigma(t)$ is the volatility of the stock price. Thus, the implied volatility can be thought of as the (root mean square) average of the volatility.
+
+Because eq.\eqref{callputBS} is not explicitly invertible w.r.t. $\sigma$, we need to use some numerical procedure (e.g. Newton's method) to find the value of implied volatility that matches the market and model prices, i.e. we must find, numerically, the solution to the equation
 \begin{equation}\label{impvolform}
 C(\sigma_{imp})=C_{\mathrm{mkt}},
 \end{equation}
 \noindent where $C(\sigma_{imp})$ corresponds to the result of eq.\eqref{callputBS} using $\sigma_{imp}$ as (implied) volatility and $C_{\mathrm{mkt}}$ to the price of the call option observed in the market (it could also be the call option price resulting from a model or simulation).
 
 
-It can be shown that the relation between implied volatility and market option price is a monotonous increasing function.
+We deduced in \autoref{section: Why Volatility is Important} that the relation between implied volatility and market option price is a monotonous increasing function.
 This means that we can obtain the implied volatility of an option from its price and vice versa (i.e. the relationship is bijective). This duality is so fundamental that investors often disclose options by providing their implied volatility instead of their price~\citep{Wilmott}, as is indeed the case for the data we will use later to calibrate the models.
-To understand why option price is an increasing monotonous function w.r.t. the volatility we note that volatility is very desirable to investors when dealing with options. A high volatility means that there is an increased probability that the stock price will increase or decrease very significantly. In the case of a call option, if the stock price increases considerably, the investor earns a large amount of money. If the price decreases considerably, the investor may let the option expire. Thus we see that a higher volatility provides a greater change of potentially very high profits with a limited potential downfall. We thus conclude that a higher volatility increases the value of an option.
 
 
 
@@ -78,10 +90,23 @@ The presence of a smile in the data instead of a skew, and vice-versa, is determ
 
 The dependence of the implied volatility on the maturity date is more complex, but in general it decreases with the maturity.
 
+In \autoref{fig:realimpliedvol} we plot an example of an implied volatility surface, along with its contour plot, which we obtained from real market data. This surface is again represented in \autoref{section:Dupire Model}. 
+\begin{figure}[!htb]
+  \begin{subfigmatrix}{2}
+    \subfigure[Implied Volatility Surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 1.9cm 0.85cm},clip]{ImpVS.png}}
+    \subfigure[Implied Volatility Contour Plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{ImpVSC.png}}
+  \end{subfigmatrix}
+  \caption[Representation of a real implied volatility surface and its respective contour plot.]{Representation of a real implied volatility surface and its respective contour plot.}
+  \label{fig:realimpliedvol}
+\end{figure}
+
+As we can see from \autoref{fig:realimpliedvol} in this case we have a mixture of a smile and a skew behavior and the implied volatility does decrease with maturity, as expected.
+
 It can also be shown that the implied volatility is the same for calls and puts~\citep{Hull}, though the causes of the volatility smile/skew for put options are the opposite of the ones described before for calls.
 
-Though the implied volatility is usually defined for European options, we can just as easily adapt this term for Barrier options. We again have to solve eq.\eqref{impvolform}, but now using the (Barrier) implied volatility, $\sigma_{imp,Barr}$, to generate the theoretical Barrier option price, $C(\sigma_{imp,Barr})$. This result will be used later when we study barrier options.
-
+\iffalse
+\hl{Though the implied volatility is usually defined for European options, we can just as easily adapt this term for Barrier options.} We again have to solve eq.\eqref{impvolform}, but now using the (Barrier) implied volatility, $\sigma_{imp,Barr}$, to generate the theoretical Barrier option price, $C(\sigma_{imp,Barr})$. This result will be used later when we study barrier options.
+\fi
 
 \section{Option Price Sensitivity and Vega}
 \label{section:vega}
@@ -131,9 +156,9 @@ For later comparison, we note that the value of relative change of the option pr
 
 \section{Local Volatility}
 \label{section:localvolatility}
-In their original work, Black \textit{et al.} assumed that volatility is constant throughout the whole option duration~\citep{Scholes}. From market data, it can be clearly seen that this is not the case~\citep{DJIA}. There may be times when new information reaches the market  (e.g. the results of an election) and trading increases, driving volatility up. It is equally true that shortly before this information is known, trading may stall due to expectancy, and volatilities go down. 
+In their original work, Black \textit{et al.} assumed that volatility is constant throughout the whole option duration~\citep{Scholes}. From market data, it can be clearly seen that this is not the case~\citep{DJIA}. There may be times when new information reaches the market  (e.g. the results of an election) and trading increases, driving volatility up. It is equally true that shortly before this information is known, trading may stall due to expectancy, and volatilities go down.
 
-The constant volatility BS model is therefore clearly incapable of completely grasping real-world trading. We should use a model where volatility is dynamic, measuring the uncertainty on the stock price movement at any point in time.
+The constant volatility BS model is therefore clearly insufficient of completely grasping real-world trading. We should use a model where volatility is dynamic, measuring the uncertainty on the stock price movement at any point in time.
 However, as we saw in \autoref{section:impliedvolatility}, the market's view of volatility also depends on the stock price itself.
 The volatility should therefore be a function of both time and stock price: $\sigma(S(t),t)$. We call this model \emph{local volatility} and the geometric Brownian motion from eq.\eqref{GBM} is transformed into the new diffusion process
 \begin{equation}\label{GBM2}
@@ -194,7 +219,7 @@ Assuming the trinomial model, the expected value of the change is given by
 \begin{equation}
 (\delta S)^2(\phi^++\phi^--(\phi^+-\phi^-)^2)\approx (\phi^++\phi^-)(\delta S)^2
 \end{equation}
-\noindent where we take only the first order terms. The expected value of the change of a GBM can be thought of as its drift term (i.e. $rS\delta t$), and the variance is its stochastic term squared (i.e. $(\sigma SdW)^2=\sigma^2S^2\delta t$), so that we have
+\noindent where we take only the first order terms. The expected value of the change of a Geometric Brownian Motion can be thought of as its drift term (i.e. $rS\delta t$), and the variance is its stochastic term squared (i.e. $(\sigma SdW)^2=\sigma^2S^2\delta t$), so that we have
 \begin{equation}
 \begin{split}
 rS\delta t&=(\phi^+-\phi^-)\delta S;\\
@@ -305,6 +330,15 @@ First, it can be shown that the local volatility surface changes with time~\cite
 Secondly, some authors have pointed out that the volatility smile obtained from Dupire's local-volatility model doesn't follow real market dynamics~\citep{Hagan}: it can be shown that when the price of the stock either increases or decreases, the volatility smile predicted by Dupire's model shifts in the opposite direction. The minimum of the volatility smile would therefore be offset and no longer correspond to the local stock price (i.e. the spot price). The volatility smile dynamics obtained from the local-volatility model would thus be actually worse than if we assumed a constant volatility.
 Finally, the gradients used in eq.\eqref{dupire2} have to be generated numerically. This numerical differentiation is very unstable, especially when done on our rough interpolated surface, which might lead to errors in the local volatility obtained.
 
+As an example, in \autoref{fig:LocVol} we show a local volatility surface, obtained by applying Dupire's formula to real data, along with its corresponding contour plot. This surface will again be represented in \autoref{section:Dupire Model} and studied with greater detail there.
+\begin{figure}[!htb]
+  \begin{subfigmatrix}{2}
+    \subfigure[$\sigma_{loc}$ surface]{\includegraphics[width=0.49\linewidth,trim={1.7cm 0.45cm 2.cm 0.85cm},clip]{LocalV.eps}}
+    \subfigure[$\sigma_{loc}$ contour plot]{\includegraphics[width=0.49\linewidth,trim={0.2cm 0.5cm 1.25cm 1.55cm},clip]{LocalVC.eps}}
+  \end{subfigmatrix}
+    \caption[Example of a real local volatility surface and corresponding contour plot.]{Example of a real local volatility surface and corresponding contour plot.}\label{fig:LocVol}
+\end{figure}  
+
 Despite its problems, Dupire's formula is still very much used by practitioners and performs surprisingly well, as we will see in \autoref{chapter:results}.
 
 
@@ -340,12 +374,12 @@ Another model, known as \emph{SABR}, is also widely used by practitioners, espec
 
 \subsection{Heston Model}
 The \emph{Heston model} was developed in 1993 by Steven Heston~\citep{Heston} and it states that stock prices satisfy the relations
-\begin{equation}\label{hestons}
-\boxed{dS(t)=rS(t)dt+\sqrt{\nu(t)}S(t)dW_1(t),}
-\end{equation}
-\begin{equation}\label{hestonv}
-\boxed{d\nu(t)=\kappa(\overline{\nu}-\nu(t))dt+\eta\sqrt{\nu(t)}dW_2(t),}
-\end{equation}
+\begin{subequations}
+\begin{empheq}[box=\widefbox]{align}
+&dS(t)=rS(t)dt+\sqrt{\nu(t)}S(t)dW_1(t),\label{hestons}\\
+&d\nu(t)=\kappa(\overline{\nu}-\nu(t))dt+\eta\sqrt{\nu(t)}dW_2(t),\label{hestonv}
+\end{empheq}
+\end{subequations}
 \noindent with $\nu(t)$ corresponding to the stock price variance (i.e. the square of the volatility, $\nu(t)=(\sigma(t))^2$) and where $W_1(t)$ and $W_2(t)$ have a constant correlation $\rho$. We furthermore define $\nu_0$ as the initial variance (i.e. variance at time $t=0$). The original model used a drift parameter $\mu$ instead of the risk-free measure drift $r$ presented here, but a measure transformation, using Gisarnov's theorem, can be easily implemented~\citep{rouah}.
 
 The parameters $\kappa$, $\overline{\nu}$ and $\eta$ are, respectively, the \emph{mean-reversion rate} (i.e. how fast the variance converges to its mean value), the \emph{long-term variance} (i.e. the mean value of variance) and the \emph{volatility of the variance} (i.e. how erratic is the variance process).
@@ -523,13 +557,13 @@ A_2=\alpha\cosh\frac{\alpha t}{2}+\xi\sinh\frac{\alpha t}{2}.
 
 With this result we are now able to find the prices of options under the Heston model for a given set of parameters $\theta$. We just need to calibrate the parameters to some market data to be able to model the volatility process.
 
-
+\subsubsection{Negative Variance and Feller's Condition}
 One last consideration is required for the Heston model.
-By analyzing eqs.\eqref{hestons} and\eqref{hestonv} we can see that the square root of the variance is used. This shouldn't pose a problem, since the variance of any process is always positive. However, because in our case this variable is itself stochastic, we must guarantee that it doesn't become negative, or else the square root would output imaginary numbers. To ensure this, we can apply Feller's condition~\citep{feller} and force the parameters to obey
+By analyzing eqs.\eqref{hestons} and \eqref{hestonv} we can see that the square root of the variance is used. This shouldn't pose a problem, since the variance of any process is always positive. However, because in our case this variable is itself stochastic, we must guarantee that it doesn't become negative, or else the square root would output imaginary numbers. To ensure this, we can apply Feller's condition~\citep{feller} and force the parameters to obey
 \begin{equation}
 2\kappa\overline{\nu}>\eta^2.
 \end{equation}
-\noindent However, this condition restricts the sample space of our model. One possible alternative is to set the variance to zero every time it becomes negative:
+\noindent However, this condition restricts the reachable space of our model. One possible alternative is to set the variance to zero every time it becomes negative:
 \begin{equation}
 \nu=\max\left[\nu^*,0\right],
 \end{equation}
@@ -538,12 +572,12 @@ By analyzing eqs.\eqref{hestons} and\eqref{hestonv} we can see that the square r
 
 \subsection{Static SABR Model}
 One other very famous model for stochastic volatility was developed by Hagan \textit{et al.}~\citep{Hagan} and is known as \emph{SABR} - we will henceforth refer to it by \emph{Static SABR}, to distinguish it from the \emph{Dynamic SABR} model that we will see next. SABR stands for "\emph{stochastic-}$\alpha\beta\rho$" and in this model it is assumed that the option prices and volatilities follow~\citep{Geeske}
-\begin{equation}\label{dF}
-\boxed{dS(t)=rS(t)dt+e^{-r(T-t)(1-\beta)}\sigma(t)(S(t))^\beta dW_1(t),}
-\end{equation}
-\begin{equation}\label{dsigma}
-\boxed{d\sigma(t)=\nu\sigma(t) dW_2(t),}
-\end{equation}
+\begin{subequations}
+\begin{empheq}[box=\widefbox]{align}
+&dS(t)=rS(t)dt+e^{-r(T-t)(1-\beta)}\sigma(t)(S(t))^\beta dW_1(t),\label{dF}\\
+&d\sigma(t)=\nu\sigma(t) dW_2(t),\label{dsigma}
+\end{empheq}
+\end{subequations}
 \noindent where we define $\alpha=\sigma(0)$ as the starting volatility and $S_0=S(0)$ as the starting stock price. Furthermore, as before, the two Brownian motion processes $W_1(t)$ and $W_2(t)$ have a \emph{constant} correlation of $\rho$.
 
 The parameters $\beta$ and $\nu$ correspond, respectively to the \emph{skewness} (i.e. how the volatility smile moves when the stock price changes) and the \emph{volatility of volatility} (i.e. how erratic is the volatility process).
@@ -584,12 +618,12 @@ As for the Heston model, we again need to calibrate the parameters of this model
 One of the main setbacks of the static SABR model is the fact that it should only be calibrated on a set of options with the same maturity. The model behaves badly when we try to fit options with different maturities~\citep{Hagan}. 
 
 To solve this problem, Hagan \textit{et al.} suggested a similar model known as \emph{Dynamic SABR}~\citep{Hagan}. It follows the same diffusion processes presented in eqs.\eqref{dF} and\eqref{dsigma} but with time-dependent parameters $\rho(t)$ and $\nu(t)$,
-\begin{equation}\label{dF2}
-\boxed{dS(t)=rS(t)dt+e^{-r(T-t)(1-\beta)}\sigma(t) (S(t))^\beta dW_1(t),}
-\end{equation}
-\begin{equation}\label{dsigma2}
-\boxed{d\sigma(t)=\nu(t)\sigma(t) dW_2(t),}
-\end{equation}
+\begin{subequations}
+\begin{empheq}[box=\widefbox]{align}
+&dS(t)=rS(t)dt+e^{-r(T-t)(1-\beta)}\sigma(t)(S(t))^\beta dW_1(t),\label{dF2}\\
+&d\sigma(t)=\nu(t)\sigma(t) dW_2(t),\label{dsigma2}
+\end{empheq}
+\end{subequations}
 \noindent with the correlation between $W_1(t)$ and $W_2(t)$ now given by
 \begin{equation}
 dW_1(t)dW_2(t)=\rho(t) dt, \ \ \ \forall t>0.

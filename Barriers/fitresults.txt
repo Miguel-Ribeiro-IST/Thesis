@@ -2,3 +2,15 @@ kappa=53.4355;nubar=0.0653;nu0=0.1046;rho=-0.4086;chi=6.2554;
 
 
 alpha=0.254;beta=0.6348;rho0=-0.4166;a=0;nu0=1.8673;b=41.6943;
+
+
+matur=1;alpha=0.2381;beta=0.3766;rho=-0.3760;nu=2.1022;
+matur=2;alpha=0.2434;beta=0.7362;rho=-0.3664;nu=1.4451;
+matur=3;alpha=0.2375;beta=0.7750;rho=-0.3119;nu=1.1420;
+matur=4;alpha=0.2267;beta=0.8771;rho=-0.2383;nu=0.8215;
+
+
+matur=1;sigma=0.3174;
+matur=2;sigma=0.2918;
+matur=3;sigma=0.2742;
+matur=4;sigma=0.2518;

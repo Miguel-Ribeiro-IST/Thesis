@@ -9,11 +9,11 @@ B=A.data(:,:);
 tic
 S0=17099.4;        %initial stock price
 r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
-matur=4;           %maturity until which we want to fit the data.
+matur=2;           %maturity until which we want to fit the data.
 sigmamax=1.5;        %maximum value the local volatility can take
-M=1000;           %number of paths to be simulated
-aver=3;
-barr=[1.05,1.15,1.25];
+M=10000;           %number of paths to be simulated
+aver=10;
+barr=[1.05,1.1,1.2];
 %L=T*252*2
 
 
@@ -22,8 +22,8 @@ B(:,2)=B(:,2)/S0;     %normalize strike prices
 S0=1;
 B(:,1)=B(:,1)/252;    %convert maturities from days to years
 times=unique(B(:,1));
-T=times(matur);
-B=B(B(:,1)<=times(matur),:);  %restrict data to selected maturity
+T=times(4);
+B=B(B(:,1)<=times(4),:);  %restrict data to selected maturity
 
 
 
@@ -132,9 +132,9 @@ SimVolEuro=@(K,PriceVol)PricerEuro(S0,r,T,M,T*252*2,K',PriceVol,sigmamax,interpo
     
       %Plot implied volatility function under the Heston model
     figure
-    plot(K,DVEuro,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
+    plot(K,DVEuro,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
     hold on;
-    plot(K,DV1,'-.','LineWidth',2);
+    plot(K,DV1,'LineWidth',2);
     plot(K,DV2,'--','LineWidth',2);
     plot(K,DV3,':','LineWidth',2);
     
@@ -149,14 +149,15 @@ SimVolEuro=@(K,PriceVol)PricerEuro(S0,r,T,M,T*252*2,K',PriceVol,sigmamax,interpo
     pbaspect([1.5 1 1])
 
 
-    lg={'European Call',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
-    legend(lg,'Location','northeast','FontSize',11);
+    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lgd=legend(lg,'Location','northeast','FontSize',11);
+    title(lgd,"Dupire")
 
    
     figure
-    plot(K,DVPEuro,'LineWidth',2,'Color',[0.9500    0.2250    0.0580]);
+    plot(K,DVPEuro,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
     hold on;
-    plot(K,DVP1,'-.','LineWidth',2);
+    plot(K,DVP1,'LineWidth',2);
     plot(K,DVP2,'--','LineWidth',2);
     plot(K,DVP3,':','LineWidth',2);
     
@@ -171,8 +172,8 @@ SimVolEuro=@(K,PriceVol)PricerEuro(S0,r,T,M,T*252*2,K',PriceVol,sigmamax,interpo
     pbaspect([1.5 1 1])
 
     lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
-    legend(lg,'Location','northeast','FontSize',11);
-
+    lgd=legend(lg,'Location','northeast','FontSize',11);
+title(lgd,"Dupire")
 end
 
 

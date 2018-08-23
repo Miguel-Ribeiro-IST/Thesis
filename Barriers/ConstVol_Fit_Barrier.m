@@ -2,18 +2,31 @@ clear;
 A = importdata('Data_BNPP.txt','\t',1);
 B=A.data(:,:);
 
+
+
+
+%%%%%%%%%%%%%%%% CHECK MATURITY DATE AND RESPECTIVE PARAMETERS %%%%%%%%%
+
+
+
+
+
+%matur=1;sigma=0.3174;
+matur=2;sigma=0.2918;
+%matur=3;sigma=0.2742;
+%matur=4;sigma=0.2518;
+
+
 %%%%%%%%%%%%%%%%%%%%  INPUT PARAMETERS  %%%%%%%%%%%%%%%%%%%
 S0=17099.4;
 r = 0;
-matur=4;
 OptAlg="CMA";
 
 %%%%%%%%%%%%%%%%%%%   MONTE CARLO SIMULATION %%%%%%%%%%%%%%
 SimPoints=false;
 M=10000;
-repetitions=3;
-barr=[1.05,1.15,1.25];
-sigma=0.2518;
+repetitions=10;
+barr=[1.05,1.1,1.2];
 %L=T*252*2
 
 
@@ -48,6 +61,7 @@ beep
 %B=input data file
 %x0=optimization starting parameters
 function Plotter_Sim(sigma,S0,r,M,T,repetitions,barr)
+
 K=0.4:0.01:1.6;
 
 SimVol1=@(K,PriceVol)Pricer(sigma,K',S0,r,T,T*252*2,M,PriceVol,barr(1));
@@ -95,9 +109,9 @@ SimVolEuro=@(K,PriceVol)PricerEuro(sigma,K',S0,r,T,T*252*2,M,PriceVol);
     pbaspect([1.5 1 1])
 
 
-    lg={'European Call',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
-    legend(lg,'Location','northeast','FontSize',11);
-
+    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lgd=legend(lg,'Location','northeast','FontSize',11);
+    title(lgd,"Constant Vol")
    
     figure
     plot(K,DVPEuro,'-.','LineWidth',2,'Color',[0.0010    0.60    0.8330]);
@@ -117,7 +131,8 @@ SimVolEuro=@(K,PriceVol)PricerEuro(sigma,K',S0,r,T,T*252*2,M,PriceVol);
     pbaspect([1.5 1 1])
 
     lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
-    legend(lg,'Location','northeast','FontSize',11);
+    lgd=legend(lg,'Location','northeast','FontSize',11);
+    title(lgd,"Constant Vol")
 end
 
 

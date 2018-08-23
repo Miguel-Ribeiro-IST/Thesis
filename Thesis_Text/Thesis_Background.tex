@@ -107,6 +107,15 @@ In particular, with eqs.\eqref{callput} in mind, the price functions of European
 \noindent with $C(K,T)$ and $P(K,T)$ being the values (i.e. prices) of European call and put options, respectively, and $\mathbb{E}[\cdot]$, $\mathbbm{1}_{\{\cdot\}}$ corresponding to the expected value and indicator functions, respectively.
 
 When selling or buying options, investment banks add some premium to this zero-profit price, to account for the risk taken. Though this premium is important to define, it is besides the scope of this work and will not be considered here.
+
+\subsection{Put-Call Parity}
+One important aspect of option prices is known as \emph{put-call parity}. It can be easily shown that the prices of call options are inherently related to the prices of put options with the same strike prices and maturities. This relationship is given by
+\begin{equation}
+C(K,T)=S(0)-Ke^{-rT}+P(K,T),
+\end{equation}
+\noindent where $S(0)$ denotes the stock price at inception (i.e. when the option is bought).
+
+Because of this duality, we can always easily obtain the prices of put options from the prices of call options with the same underlying asset, maturity and strike. For this reason, some of the results presented in later sections only apply to call options, though we can just as easily find their put option equivalent.
     
 \section{Black-Scholes Formulae}
 \label{section:Black-Scholes Formulae}
@@ -191,32 +200,33 @@ Many other diffusion processes exist, and this choice made by Black \textit{et a
     \end{figure}
 
 With this result, pricing options is fairly straightforward - we simply need to solve the PDE in eq.\eqref{BS2} as we would for the diffusion equation's initial value problem~\citep{Dilao}.
-The results published originally by Black \textit{et al.} state that, at time $t$, call and put options can be valued as
-\begin{equation}\label{callputBS}
-\begin{split}
+The results published originally by Black \textit{et al.} state that call and put options can be valued as
+\begin{subequations}\label{callputBS}
+\begin{empheq}[box=\widefbox]{align}
 &C=N(d_1)S_0-N(d_2)Ke^{-rT};\\
 &P=-N(-d_1)S_0+N(-d_2)Ke^{-rT},
-\end{split}
-\end{equation}
+\end{empheq}
+\end{subequations}
 \noindent where $N(\cdot)$ is the cumulative distribution function of the standard normal distribution and where $d_1$, $d_2$ are given by
-\begin{equation}\label{d1d2}
-\begin{split}
+\begin{subequations}\label{d1d2}
+\begin{empheq}[box=\widefbox]{align}
 &d_1=\frac{1}{\sigma\sqrt{T}}\left[\log\left(\frac{S_0}{K}\right)+\left(r+\frac{\sigma^2}{2}\right)T\right];\\
-&d_2=d_1-\sigma\sqrt{T}.\\
-\end{split}
-\end{equation}
-\noindent This is a very important result that can be used to precisely price European options, so long as all the parameters are exactly known and remain constant throughout the option's duration. Both assumptions are never true for any real market option, though.
+&d_2=d_1-\sigma\sqrt{T}.
+\end{empheq}
+\end{subequations}
+
+This is a very important result that can be used to precisely price European options, so long as all the parameters are exactly known and remain constant throughout the option's duration. Both assumptions are never true for any real market option, though.
+
+In \autoref{fig:Inception} we represent the values of call and put options at both the inception (i.e. when the option is bought) and at maturity. Notice how at maturity the value functions tend to the payoff functions, shown in \autoref{fig:Payoff} (take into account that the x-axis in \autoref{fig:Payoff} represents $S(T)$ and in \autoref{fig:Inception} we have $K/S_0$, so they are opposite).
+\begin{figure}[!htb]
+    \centering
+      \includegraphics[width=.65\columnwidth]{Inception.eps}
+      \caption[Call and Put option values at inception and maturity]{Call and Put option values at inception and maturity with $T=0.5\SI{}{\year}$, interest rate $r=0.01\SI{}{\per\year}$, volatility $\sigma=0.3\SI{}{\year\tothe{-1/2}}$ and initial stock price $S_0=1\SI{}{\EUR}$.}\label{fig:Inception}
+    \end{figure}
 
 
-\paragraph{Put-Call Parity}
-From eq.\eqref{callputBS} we can also derive the relationship between the call and put prices, $C$ and $P$, known as the \emph{put-call parity}, given by
-\begin{equation}
-C=S_0-Ke^{-rT}+P.
-\end{equation}
-\noindent Because of this duality, we can always easily obtain the prices of put options from the prices of call options with the same underlying asset, maturity and strike. For this reason, some of the results presented in later sections only apply to call options, though we can just as easily find their put option equivalent.
-
-
-\paragraph{Barrier Options}
+\iffalse
+\subsubsection{Barrier Options}
 As we did for European call and put options, we can equally derive the theoretical prices of Barrier options, changing the boundary condition to incorporate the barrier level~\citep{taleb}. The resulting \emph{up-and-in call} Barrier option price is given by
 \begin{equation}\label{barr1}
 C_{Barr}^*=S_0\left(N(d_3)+b\left(N(d_4)-N(d_5)\right)\right)-Ke^{-rT}\left(N(d_6)+a\left(N(d_7)-N(d_8)\right)\right),
@@ -259,3 +269,4 @@ C_{Barr}=\begin{cases}
 \end{equation}
 \noindent where $C_{Barr}^*$ is given by eq.\eqref{barr1} and $C_{Euro}$ is the equivalent European option price.
 
+\fi

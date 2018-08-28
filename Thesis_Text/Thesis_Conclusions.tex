@@ -22,22 +22,22 @@ We began by implementing Dupire's local volatility model, a non-parametric model
 
 We also studied Heston and Static/Dynamic SABR stochastic volatility models, which, as the name implies, assume that volatility itself is a stochastic variable, correlated with the stock price. These models are particularly famous due to their closed form solutions that enable us to easily calibrate them, i.e. find the values of the model variables that best fit the data. This calibration was done using a weight function and the CMA-ES optimization algorithm.
 
-Having obtained the deterministic dependence of Dupire's model and having calibrated all the stochastic volatility models, we can input them all into a numerical pricer, using Monte Carlo simulation to output the models' option price predictions, which we then compared to the real data, to validate them. We also benchmarked each of these models against the simpler model of constant volatility, as assumed by Black and Scholes.
+Having trained all models, we input them into a numerical pricer, using the Monte Carlo method to estimate the option prices under each model, which we then compared to the real data, for validation. We also benchmarked each of these models against the simpler model of constant volatility, as assumed by Black and Scholes.
 Finally, adapting the Monte Carlo pricers we were also able to price Barrier options.
 
 \section{Achievements}
 Regarding the stochastic volatility models, we saw that their theoretical predictions (obtained with the respective closed form solutions) accurately followed real European call option prices, even for deep in- and out-of-the money options.
-For data on a single maturity, the Static SABR model clearly performed best, as is verified by the observed low value of the cost function observed with this model, though some overfitting is expected to have occurred. It also greatly outperforms the constant volatility model assumption, which was unsurprising. When dealing with multiple maturities, the Heston model is performed better than Dynamic SABR, though both models outperform the constant volatility model.
+For data on a single maturity, the Static SABR model clearly performed best, as is verified by the observed low value of the cost function observed with this model, though some overfitting is expected to have occurred. It also vastly outperforms the constant volatility model, which was unsurprising. When dealing with multiple maturities, the Heston model is performed better than Dynamic SABR, though both models outperform the constant volatility model.
 
-For near-the-money strikes (i.e. $K\sim S_0$), the Monte Carlo simulations of all these models seemed to match both the data and the theoretical predictions, suggesting that the simulations were working properly.
+For near-the-money strikes (i.e. $K\sim S_0$), the Monte Carlo simulations of all stochastic volatility models seemed to match both the data and the theoretical predictions, suggesting that the simulations were working properly.
 
 As for Dupire's local volatility model, for which no theoretical predictions were available, we observed that for near-the-money options the predictions obtained with the Monte Carlo simulations followed the real data very closely.
 
 On all Monte Carlo simulations we also observed some divergence for options with lower strikes, which we were able to explain using the Greek Vega and the relative change of the stock price w.r.t. volatility. One other divergent behavior was found in options with very high strikes and short maturities, which we linked to the low number of simulated paths that are able to reach such strikes in the Monte Carlo simulations.
 
-We were also able to price barrier options by adapting the Monte Carlo algorithm, though we weren't able to validate our results. This achievement serves to prove that pricing Exotic options with our methods is possible.
+We were then able to price barrier options by adapting the Monte Carlo algorithm, though we weren't able to validate our results due to a lack of data for such contracts. This achievement serves to prove that pricing Exotic options with our methods is possible.
 
-In conclusion, we may say all models greatly surpass the constant volatility model, providing results that better match real world data. However, great care should be employed when applying the calibrations to Monte Carlo pricers, particularly for deep out-of-the-money options, since the results might diverge.
+In conclusion, we may say all models greatly surpass the constant volatility model, providing results that better match real world data. However, great care should be employed when applying the calibrations to Monte Carlo pricers, particularly for deep in-of-the-money call (or deep out-of-the-money put) options, since the results might diverge.
 
 
 \section{Future Work}

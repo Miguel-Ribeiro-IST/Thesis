@@ -1,9 +1,9 @@
 \chapter{Implementation}
 \label{chapter:implementation}
 To apply the models described before, we first need to train them on some real data.
-This training enables us to adapt each of our models to real market conditions, allowing us to forecast, to some extent, how the volatility of some real stock will behave in the future. This training procedure will be explained in the next section.
+This training enables us to adapt each of our models to real market conditions, allowing us to forecast, to some extent, how the volatility of some real stock will behave in the future. This training procedure will be explained in the next sections.
 
-Having trained our models, we should be able to price any option, using some numerical algorithms, which we will approach at the end of this chapter.
+Having trained our models, we should be able to price \emph{any} option, using some numerical algorithms, which we will approach at the end of this chapter.
 
 \section{Surface Interpolation (Dupire model)}
 \label{section:Surface Interpolation (Dupire)}
@@ -36,7 +36,7 @@ From the interpolated surface obtained, we need to extract the gradients to be a
 
  
 Having interpolated the implied volatility surface and obtained all the required gradients, we are able to generate the \emph{local} volatility surface. To do this, we evaluate the interpolated implied volatility surface and all the required gradients at multiple points $K_j$, $T_i$ to produce multiple local volatility values $\sigma(K_j,T_i)$ with eq.\eqref{dupire2}. The points should be uniformly spaced in a grid.
-Interpolating again between these grid points we are able to generate a surface for $\sigma(K,T)$. We now simply need to make a variable change $\sigma(K,T)\implies \sigma(S,t)$ to be able to properly obtain the local volatility surface, as presented in \autoref{fig:LocVol}.
+Interpolating between these grid points with Delaunay's triangulation we are able to generate a surface for $\sigma(K,T)$. We now simply need to make a variable change $\sigma(K,T)\implies \sigma(S,t)$ to be able to properly obtain the local volatility surface, as presented in \autoref{fig:LocVol}.
 
 
 \section{Model Calibration (Heston and SABR models)}
@@ -100,7 +100,7 @@ We must also mention the fact that, while volatility models are commonplace in f
 \fi
 
 \subsubsection{Using the Closed-Form Solutions}
-To find the cost value of any given set of parameters we need first to price the options under each model using those parameters. This could be done using some numerical method, such as Monte Carlo simulation, which we will approach in the next section. However, such methods are usually relatively slow to execute and calibrating the models with these (which requires a large number of options to be priced) would become too cumbersome.
+To find the cost value of any given set of parameters we need first to price the options under each model using those parameters. This could be done using some numerical method, such as Monte Carlo simulation, which we will approach in the next section. However, such methods are usually relatively slow to execute and using them to calibrate the models (which requires a large number of options to be priced) would become too cumbersome.
 
 Fortunately, as we mentioned before, both Heston and SABR have closed-form solutions, shown in eqs. \eqref{CH}, \eqref{sabr} and \eqref{dynsabr}, that we can use to directly price the options with each model's parameters, without the need to run any slow numerical pricers. With these closed-form solutions, we are able to find the prices and respective implied volatilities extremely fast, which is extremely useful. The optimization algorithms should then have no problem in finding optimal solutions for each model's parameters.
 

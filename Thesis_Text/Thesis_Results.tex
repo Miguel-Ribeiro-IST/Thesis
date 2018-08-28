@@ -28,7 +28,7 @@ $S_0$($\EUR$) & $r$($\SI{}{\per\year}$) & $\Delta t$(days) & $N_{\mathrm{paths}}
 
 The Monte Carlo pricers of each model will then be modified to price Barrier options instead of the European options used in the calibration. These results will be studied with some detail but, due to a lack of real market data, there is no way to corroborate their validity.
 
-As a side note, we should also point out that for the maturities we used the typical market convention of defining a month as having only 21 days, to account only for the days when exchanges are open. Thus, we assume that a year has 252 (open market) days.
+As a side note, we should also point out that, for the maturities, we used the typical market convention of defining a month as having only 21 days, to account only for the days when exchanges are open. Thus, we assume that a year has 252 (open market) days.
 
 
 \section{Constant Volatility Model}
@@ -290,7 +290,7 @@ $T_{min}$(days) & $T_{max}$(days) & $\Delta T$(days) & $K_{min}/S_0$ & $K_{max}/
   \label{tab:DupR}
 \end{table}
 
-From this local volatility grid, we obtain the local volatility surface simply by interpolating the values, using the Delaunay triangulation method as before. This surface is represented in \autoref{fig:DupLocVol}.
+The resulting local volatility surface is represented in \autoref{fig:DupLocVol}.
 
 \begin{figure}[H]
   \begin{subfigmatrix}{2}
@@ -831,11 +831,11 @@ As for the Static SABR model, it showed a very significant improvement of $99.3\
 
 Regarding now the Heston and Dynamic SABR models, we can see that they also present a considerable improvement of $98.0\%$ and $91.3\%$, respectively, over the constant volatility model with dependent fits, which is also unsurprising for the same reasons as before.
 
-Comparing now the cost resulting from the Heston model with that from Dynamic SABR, we see that even though both models fit the same data on a range of different maturities, Heston outperforms the Dynamic SABR quite significantly. This is further corroborated by the comparison of the theoretical functions in Figures \ref{fig:H} and \ref{fig:DS}, from which it is clear that the Heston model's curves seemed to better fit the data.
+Comparing now the cost resulting from the Heston model with that from Dynamic SABR, we see that even though both models fit the same data on a range of different maturities, Heston outperforms the Dynamic SABR quite significantly. This is further corroborated by the comparison of the theoretical functions in Figures \ref{fig:H} and \ref{fig:DS}, from which it is clear that the Heston model's curves better fit the data.
 
 
 
-Finally, we can compare the sum of the costs from Static SABR with the costs from both Heston and Dynamic SABR models. To this regard we can say that the fact that we have a significantly lower cost for Static SABR model is unsurprising since the calibration performed under this model was done for multiple maturities, independently, meaning that a better fit is possible, at the cost of the aforementioned overfitting.
+Finally, we can compare the sum of the costs from Static SABR with the costs from both Heston and Dynamic SABR models. To this regard we can say that the fact that we have a significantly lower cost for Static SABR model is unsurprising since the calibration performed under this model was done for multiple maturities, independently, meaning that a better fit is possible, at the expense of the aforementioned overfitting.
 
 \vfill
 \newpage

@@ -20,7 +20,7 @@ for i=1:size(K,2)
     HV3(i)=SABRVol(K(i),alpha3,rho,nu,beta);
 end
 ttl="\textbf{Dependence on $\alpha$}";
-lg={['$\alpha$=',num2str(alpha1)],['$\alpha$=',num2str(alpha2)],['$\alpha$=',num2str(alpha3)]};
+lg={['$\alpha$=',num2str(alpha1),' $\mathrm{yr}^{-1/2}$'],['$\alpha$=',num2str(alpha2),' $\mathrm{yr}^{-1/2}$'],['$\alpha$=',num2str(alpha3),' $\mathrm{yr}^{-1/2}$']};
 %}
 
 %{
@@ -60,7 +60,7 @@ for i=1:size(K,2)
     HV3(i)=SABRVol(K(i),alpha,rho,nu3,beta);
 end
 ttl="\textbf{Dependence on $\nu$}";
-lg={['$\nu$=',num2str(nu1)],['$\nu$=',num2str(nu2)],['$\nu$=',num2str(nu3)]};
+lg={['$\nu$=',num2str(nu1),' $\mathrm{yr}^{-1/2}$'],['$\nu$=',num2str(nu2),' $\mathrm{yr}^{-1/2}$'],['$\nu$=',num2str(nu3),' $\mathrm{yr}^{-1/2}$']};
 %}
 
 p=plot(K,HV1);

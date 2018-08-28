@@ -1,119 +1,11 @@
 \chapter{Implementation}
 \label{chapter:implementation}
-\section{Option Pricing}
-\label{section:Option Pricing}
-The theoretical models introduced in \autoref{chapter:volatility} attempt to replicate the behavior of real-world volatilities. With these predictions, we should be able to better reproduce real option prices than if we assumed a simple constant volatility, as done by Black \textit{et al.}
+To apply the models described before, we first need to train them on some real data.
+This training enables us to adapt each of our models to real market conditions, allowing us to forecast, to some extent, how the volatility of some real stock will behave in the future. This training procedure will be explained in the next section.
 
-Currently, the two most used methods to computationally price options are known as \emph{finite differences}~\citep{Hull} and \emph{Monte Carlo}~\citep{Glasserman}.
+Having trained our models, we should be able to price any option, using some numerical algorithms, which we will approach at the end of this chapter.
 
-The finite differences method is an extremely fast procedure when used to price either European or American-type options, making it very appealing in these circumstances. However, when we increase the number of dimensions of the problem, such as when dealing with options whose payoff depends on the past history of the stock price (e.g. Asian options, which are derivatives that depend on the average value of the stock price until maturity), the algorithm requires some considerable modifications that make it slower and more complex.
-The implementation of both Heston and SABR models (presented before) using finite differences can nonetheless be found in deGraaf~\citep{deGraaf}.
-
-
-With the Monte Carlo algorithm, we begin by simulating a very large number of stock price paths (e.g. 100\,000 simulations). The option's payoff is then calculated for each of these simulated paths and averaged, providing a fairly good estimate of the option's future payoff. The option's price can be extracted from its expected payoff, using eq.\eqref{pricepayoff}. This algorithm can be easily adapted to price path-dependent options, making it very attractive in such cases.
-In the past, simulating all the stock price paths took prohibitively long computation times and this method was often discarded for this reason. However, with the recent advancements in computer hardware and new algorithmic developments, such as GPU implementation, this shortcoming has been, to some extent, mitigated, making the Monte Carlo algorithm quite popular in the present.
-For these reasons, the Monte Carlo method will be used for the implementation and analysis of the models introduced in \autoref{chapter:volatility}, so this model will be studied to some extent in the present chapter.
-
-
-\subsection{Simulating stock prices}
-\label{subsection:Simulating stock prices}
-As stated, to implement the Monte Carlo algorithm, one needs to simulate stock price paths. However, by analyzing eq.\eqref{GBM}, we can see that the stock prices depend on a Brownian motion process which, due to its self-similarity, is not differentiable~\citep{Mikosch}. It follows that stock price paths can never be exactly simulated. Despite this, we can approximate the movement of stock price paths by discretizing the Brownian motion process in time, thus avoiding its self-similarity problem. We now introduce two of the most common discretization procedures.
-
-\subsubsection{Euler–Maruyama discretization}
-One of the simplest and most used discretization methods is known as \emph{Euler–Maruyama discretization}, and can be applied to stochastic differential equations of the type
-\begin{equation}\label{SDE}
-dX(t)=a(X(t))dt+b(X(t))dW(t),
-\end{equation}
-\noindent where $a(X(t))$ and $b(X(t))$ are given functions of $X(t)$ and where $\{W(t),\ t>0\}$ defines a one-dimensional Brownian motion process.
-To apply this discretization, we begin by partitioning the time interval $[0,T]$ into $N$ subintervals of width $\Delta t=T/N$ and then iteratively defining
-\begin{equation}
-X_{n+1}=X_n+a(X_n)\Delta t+b(X_n)\Delta W_n,\ \ \ n=1,\ldots,N,
-\end{equation}
-\noindent with $X_{0}$ equal to some given value and where $\Delta W_n=W_{t+\Delta t}-W_{t}$.
-Using the known properties of Brownian motion processes, it can be shown that $\Delta W_n\sim \sqrt{\Delta t}Z(t)$, where $Z(t)\sim N(0,1)$ defines a normal distributed random variable.
-
-Applying this discretization to the Geometric Brownian motion followed by stock price paths, as seen in eq.\eqref{GBM}, we arrive at
-\begin{equation}
-S(t+\Delta t)=S(t)+rS(t)\Delta t+\sigma(S(t),t)S(t)\sqrt{\Delta t}Z.
-\end{equation}
-
-Due to its simplicity, the Euler–Maruyama discretization method is the most common in the simulation of stock price paths whenever we have constant or deterministic volatilities.
-
-
-\subsubsection{Milstein Discretization}
-For stochastic volatility models, such as Heston and SABR, where the volatility itself follows a stochastic process, the Euler–Maruyama discretization may not be sufficiently accurate. In these cases, we can apply the more precise Milstein method~\citep{Milstein}, defined as
-\begin{equation}
-X_{n+1}=X_n+a(X_n)\Delta t+b(X_n)\Delta W_n+\frac{1}{2}b(X_n)b'(X_n)((\Delta W_n)^2-\Delta t),
-\end{equation}
-\noindent where $b'(X_n)$ denotes the derivative of $b(X_n)$ w.r.t. $X_n$. Note that when $b'(X_n)=0$, the Milstein method degenerates to the simpler Euler–Maruyama discretization. This discretization should be applied not only to the stock price process but also to the stochastic volatility.
-
-Applying this discretization to the stock price and variance processes of the Heston model produces
-\begin{equation}
-S(t+\Delta t)=S(t)+rS(t)\Delta t+S(t)\sqrt{\nu(t)}\sqrt{\Delta t}(Z_1(t))+\frac{1}{2}\nu(t)S(t)\Delta t((Z_1(t))^2-1),
-\end{equation}
-\begin{equation}
-\nu(t+\Delta t)=\nu(t)+\kappa(\overline{\nu}-\nu(t))\Delta t+\eta\sqrt{\nu(t)\Delta t}(Z_2(t))+\frac{\eta^2}{4}\Delta t((Z_2(t))^2-1),
-\end{equation}
-\noindent where $Z_1$ and $Z_2$ are two normal random variables with a correlation of $\rho$.
-
-
-As for the SABR model, this discretization results in
-\begin{equation}
-\begin{split}
-S(t+\Delta t)=&S(t)+rS(t)\Delta t+e^{-r(T-t)(1-\beta)}\sigma(t)S^\beta(t)\sqrt{\Delta t}(Z_1(t))+\\
-&+\frac{\beta}{2}e^{-2r(T-t)(1-\beta)}\sigma^2(t)S^{2\beta-1}(t)\Delta t((Z_1(t))^2-1),
-\end{split}
-\end{equation}
-\begin{equation}
-\sigma(t+\Delta t)=\sigma(t)+\nu\sigma(t)\sqrt{\Delta t}(Z_2(t))+\frac{\nu^2}{2}\sigma(t)\Delta t((Z_2(t))^2-1).
-\end{equation}
-
-For the Dynamic SABR model, the discretization is the same as its Static equivalent, replacing only the variables $\nu$ and $\rho$ by the functions $\nu(t)$ and $\rho(t)$, respectively
-
-
-In all of these models we need to generate two correlated normal variables, $Z_1(t)$ and $Z_2(t)$, say with a correlation of $\rho(t)$. This can be easily achieved with
-\begin{equation}\label{normcorr}
-\begin{split}
-&Z_1(t)\sim N(0,1);\\
-&Z_2(t)=\rho(t) Z_1(t)+\sqrt{1-(\rho(t))^2}Y(t),
-\end{split}
-\end{equation}
-\noindent where $Y(t)\sim N(0,1)$ is a random variable independent of $Z_1(t)$.
-
-Because it is more precise, the Milstein method will be used in the implementation of the Heston and Static/Dynamic SABR stochastic volatility models. The simpler Euler–Maruyama discretization will be assumed for both constant and Dupire's local volatility.
-
-It is important to note that, the smaller our subintervals $\Delta t$ are, the better is the approximation done when discretizing the Brownian motion process. However, by decreasing $\Delta t$ we increase the number of intervals needed and, with it, the number of calculations required to generate a stock price path. This compromise between computation time and precision must be handled appropriately.
-In \autoref{fig:Steps} we can see how the size of the subintervals influences the resemblance of a simulated GBM process to its continuous version.
-
-\begin{figure}[!htb]
-    \centering
-      \includegraphics[width=.65\columnwidth]{Steps.eps}
-      \caption[Effect of the subinterval size on the GBM discretization]{Effect of the subinterval size on the GBM discretization with maturity $T=1\SI{}{\year}$, interest rate $r=0.01\SI{}{\per\year}$, volatility $\sigma=0.1\SI{}{\year\tothe{-1/2}}$ and initial stock price $S_0=1\SI{}{\EUR}$. The subinterval sizes selected were $\Delta t=0.002\SI{}{\year}$, $\Delta t=0.02\SI{}{\year}$ and $\Delta t=0.1\SI{}{\year}$ for the blue, red and orange plot lines, respectively. To emphasize this effect, the underlying Brownian Motion $\{W(t),\ t>0\}$ used to generate all three paths was the same.}\label{fig:Steps}
-    \end{figure}
-
-We should also note that this discretization is more problematic when we try to price Barrier options. As we stated before, a Barrier option becomes activated/void if the stock price reaches a certain barrier level $B$. When we discretize a continuous stock price process, we ignore any prices that this process might have taken in the time between two time steps. However, it is perfectly possible that during this interval the stock price goes below/above this barrier level, which is not considered in the discretization. A barrier option might have crossed a barrier with a non-discretized Brownian motion process and not with its discretization. Thus, Barrier options will always be underpriced or overpriced when priced with Monte Carlo. This problem can be mitigated by significantly increasing the number of time steps, reducing their size, though this will increase computation time. Furthermore, reducing the step size merely diminishes the severity of the problem and doesn't actually solve it.
-
-
-\subsection{Pricing options from simulations}
-\label{subsection:Pricing options from simulations}
-To price options using the Monte Carlo algorithm, we generate $M$ paths by recursively calculating $\{S_i(t_j),\ \ i=1,\ldots,M,\ \ t_j=0,\ldots,T\}$, using either of the discretization methods described before.
-
-When the stock price at the maturity, $S_i(T)$, is obtained for all paths, the option's payoff for each path is calculated using eqs.\eqref{callput}-\eqref{barrier}. We then average all these results and discount them back to the present, obtaining the option's value
-\begin{equation}\label{mcpricer}
-\begin{split}
-&C(K,T)=e^{-rT}\frac{1}{M}\sum_{i=1}^M\text{Payoff}_{i,call}(K,T);\\
-&P(K,T)=e^{-rT}\frac{1}{M}\sum_{i=1}^M\text{Payoff}_{i,put}(K,T),
-\end{split}
-\end{equation}
-\noindent where $\text{Payoff}_{i,\cdot}(K,T)$ denotes the payoff function of the chosen option type (e.g. European, Barrier, ...) for the i\textsuperscript{th} path.
- 
-
-Despite its versatility, the Monte Carlo method can lead to an erroneous estimate for the price of options, in particular for options with very high strike prices. To understand this problem, notice that the payoff function of European options is zero for stocks below the strike. If we have a very large strike, very few of the simulated paths will actually cross the strike at maturity and contribute to the calculation of the option's price (all the other paths will contribute with a payoff of zero). The averaging procedure shown in eq.\eqref{mcpricer} will therefore be performed on an extremely small subset of paths, thus producing a bad estimation for the option price.
-We could counter this effect by simulating an even larger number of paths, so that we always have a significant number of paths above a given strike that end up contributing to the option's price, though this comes at the cost of increased computation times.
-Furthermore, on the limit, there will always be a strike high enough that none of the simulated paths reach it, meaning that the option's value for that simulation would be zero. This does not hold in real life, since there is always a positive price for any option, even for extremely high strikes.
-This problem is further aggravated for Barrier options, since only the paths that are above the strike price at maturity \emph{and} have crossed the barrier level contribute to the option price. This further reduces the number of paths considered and is quite problematic for high barrier levels.
-
-\section{Surface Interpolation (Dupire)}
+\section{Surface Interpolation (Dupire model)}
 \label{section:Surface Interpolation (Dupire)}
 To apply Dupire's local volatility model, as shown in eq.\eqref{dupire2}, we need to generate the implied volatility surface from the market data. Because we only have data for a finite set of maturities and strikes, the implied volatility surface must be obtained by some form of interpolation and extrapolation. From this interpolated surface we must also calculate the gradients needed for the local volatility formula.
 
@@ -122,50 +14,55 @@ One possible interpolation method is known as \emph{Delaunay triangulation}~\cit
 
 \begin{figure}[!htb]
     \centering
-      \includegraphics[width=.4\columnwidth]{Delaunay.eps}
-      \caption[Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles don't contain any other points inside. A circle for which this property does not hold is also represented, though no triangulation is possible in this case.]{Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles (green) don't contain any other points inside. A circle for which this property does not hold (orange dashed) is also represented, though no triangulation is possible in this case.\\{\small Source: \url{https://www.ti.inf.ethz.ch/ew/Lehre/CG13/lecture/Chapter\%206.pdf}}}\label{fig:Delaunay}
+      \includegraphics[width=.35\columnwidth]{Delaunay.eps}
+      \caption[Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles don't contain any other points inside. A circle for which this property does not hold is also represented, though no triangulation is possible in this case.]{Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles (green) don't contain any other points inside. A circle for which this property does not hold (orange dashed) is also represented, though no triangulation is possible in this case.\\{\small Adapted from: \url{https://www.ti.inf.ethz.ch/ew/Lehre/CG13/lecture/Chapter\%206.pdf}}}\label{fig:Delaunay}
     \end{figure}
 
 We can easily adapt this algorithm to 3-dimensions (as is the case of our data), using spheres instead of circles.
-The resulting interpolated surface will simply be a set of merged triangles, with the data points serving as a vertices. Though this is usually a good approximation, it will produce wrong results when calculating the derivatives used in the local volatility formula (e.g. calculating the second derivative on the triangular planes of the interpolation results in zero). If we used the first version of Dupire's formula, shown in eq.\eqref{dupire}, where we use the second derivative in the denominator, the resulting local volatility surface would become highly unrealistic. However, since we will use the formula in eq.\eqref{dupire2}, which is not so sensitive to this value, no significant problems are expected.
+The resulting interpolated surface will simply be a set of merged triangles, with the data points serving as vertices. Though this is usually a good approximation, it will produce wrong results when calculating the derivatives used in the local volatility formula (i.e. calculating the second derivative on the triangular planes of the interpolation results in zero, since the gradient of a plane is constant). If we used the first version of Dupire's formula, shown in eq.\eqref{dupire}, where we use the second derivative in the denominator, the resulting local volatility surface would become highly unrealistic. However, since we will use the formula in eq.\eqref{dupire2}, which is not so sensitive to this value, no significant problems are expected.
 
-The function \emph{scatteredInterpolant}, implemented in MATLAB, applies this Delaunay triangulation to a set of scattered data, and will therefore be used in the implied volatility surface generation. With this function we are also able to perform extrapolation, which is important, since during the simulations it is possible that some of the paths reach prices above/below the highest/smallest strikes for which we have data. This extrapolation method calculates the surface gradient at the interpolation boundary and assumes that the gradients remain constant outside the boundary, thus extending the surface~\citep{MATLABextrap}.
+The function \emph{scatteredInterpolant}, implemented in MATLAB, applies this Delaunay triangulation to a set of scattered data, and will therefore be used in the implied volatility surface generation. With this function we are also able to perform extrapolation, which is important, since during the simulations it is possible that some of the paths reach prices above/below the highest/smallest strikes for which we have data. This extrapolation is done by calculating the surface gradient at the interpolation boundary and assuming that these gradients remain constant outside the boundary, thus extending the surface~\citep{MATLABextrap}.
 
 
-From the interpolated surface obtained, we need to calculate the gradients. These have to be obtained numerically, as we do not have an analytical formula for the surface. To obtain them we use the formulas
-\begin{equation}
-\pdv{\sigma_{imp}}{K}(K,T)=\frac{\sigma_{imp}(K+\Delta K,T)-\sigma_{imp}(K-\Delta K,T)}{2\Delta K}
-\end{equation}
-\begin{equation}
-\pdv{^2\sigma_{imp}}{K^2}(K,T)=\frac{\sigma_{imp}(K+\Delta K,T)+\sigma_{imp}(K-\Delta K,T)-2\sigma_{imp}(K,T)}{(\Delta K)^2}
-\end{equation}
-\begin{equation}
-\pdv{\sigma_{imp}}{T}(K,T)=\frac{\sigma_{imp}(K,T+\Delta T)-\sigma_{imp}(K,T)}{\Delta T}
-\end{equation}
-\noindent where $\Delta K$ and $\Delta T$ are some (small) intervals for the strike and maturity, respectively. Note that the derivative of the implied volatility w.r.t. maturity is different from the derivative w.r.t. strike. This is due to the fact that negative maturities make no mathematical sense. If we used the same formula as for the derivative w.r.t. the strikes, the case of $T=0$ would require $\sigma_{imp}(\cdot,T-\Delta T<0)$, which makes no sense. We thus use the forward derivative in this case. As for the strikes, since there is no mathematical restriction for negative values (though they make no sense in financial terms), we are allowed to use both $\sigma_{imp}(K\pm\Delta K,\cdot)$.
+From the interpolated surface obtained, we need to extract the gradients to be able to use Dupire's formula. These have to be obtained numerically, as we do not have an analytical formula for the surface. To obtain them we use the formulas
+\begin{subequations}
+\begin{align}
+&\pdv{\sigma_{imp}}{K}(K,T)=\frac{\sigma_{imp}(K+\Delta K,T)-\sigma_{imp}(K-\Delta K,T)}{2\Delta K}\\
+&\pdv{^2\sigma_{imp}}{K^2}(K,T)=\frac{\sigma_{imp}(K+\Delta K,T)+\sigma_{imp}(K-\Delta K,T)-2\sigma_{imp}(K,T)}{(\Delta K)^2}\\
+&\pdv{\sigma_{imp}}{T}(K,T)=\frac{\sigma_{imp}(K,T+\Delta T)-\sigma_{imp}(K,T)}{\Delta T}\label{dsdt}
+\end{align}
+\end{subequations}
+\noindent where $\Delta K$ and $\Delta T$ are some (small) intervals for the strike and maturity, respectively. Note that the derivative of the implied volatility w.r.t. maturity is different from the derivative w.r.t. strike. This is due to the fact that negative maturities make no mathematical sense. If we used the same formula as for the derivative w.r.t. the strikes, the case of $T=0$ would require $\sigma_{imp}(\cdot,T-\Delta T<0)$, which makes no sense. We thus use the forward derivative in this case, as shown in eq.\eqref{dsdt}. As for the strikes, since there is no mathematical restriction for negative values (though they make no sense in financial terms), we are allowed to use both $\sigma_{imp}(K\pm\Delta K,\cdot)$.
 
  
-\section{Model Calibration (Heston and SABR)}
+Having interpolated the implied volatility surface and obtained all the required gradients, we are able to generate the \emph{local} volatility surface. To do this, we evaluate the interpolated implied volatility surface and all the required gradients at multiple points $K_j$, $T_i$ to produce multiple local volatility values $\sigma(K_j,T_i)$ with eq.\eqref{dupire2}. The points should be uniformly spaced in a grid.
+Interpolating again between these grid points we are able to generate a surface for $\sigma(K,T)$. We now simply need to make a variable change $\sigma(K,T)\implies \sigma(S,t)$ to be able to properly obtain the local volatility surface, as presented in \autoref{fig:LocVol}.
+
+
+\section{Model Calibration (Heston and SABR models)}
 \label{section:Model Calibration}
-Both SABR and Heston stochastic volatility models contain parameters that need to be calibrated in order to appropriately replicate market option prices.
+Both SABR and Heston stochastic volatility models contain parameters that need to be calibrated to appropriately replicate market option prices.
 
 
-Calibrating the models' parameters means finding the optimal values for these parameters such that the difference between the prices of real market options and options priced under the models' assumptions is minimized. However, because we are modeling volatilities, one possibly better calibration procedure would be to use the difference between the implied volatilities of market options and options priced under each model. This difference should be measured with a cost function, such as the least-squares error, given by
+Calibrating the models' parameters means finding the optimal values for these parameters such that the difference between the prices of real market options and the prices of options under each of the models' assumptions is minimized. However, because we are modeling volatilities, it is more appropriate to minimize the difference between the implied volatilities of market options and options priced under each model.
+
+\subsection{Cost Function}
+This difference should be measured with a cost function, which we have to minimize, such as the least-squares error, given by
 \begin{equation}\label{cost}
 \boxed{\mathrm{Cost}(\theta)=\sum_{i=1}^n\sum_{j=1}^mw_{i,j}\left(\sigma_{imp,\mathrm{mkt}}(T_i,K_j)-\sigma_{imp,\mathrm{mdl}}(T_i,K_j;\theta)\right)^2,}
 \end{equation}
-\noindent where we denote $\theta$ as the model's parameter set, $w_i$ corresponds to some weight function and where $\sigma_{imp,\mathrm{mkt}}(\cdot)$ and $\sigma_{imp,\mathrm{mdl}}(\cdot)$ correspond to the real-market and the model's implied volatilities, respectively, for maturities $\{T_i,\ i=1,\ldots,n\}$ and strikes $\{K_j,\ j=1,\ldots,m\}$. This will be the cost function used in the calibration of all models.
+\noindent where we denote $\theta$ as the model's parameter set, $w_i$ corresponds to some weight function and where $\sigma_{imp,\mathrm{mkt}}(\cdot)$ and $\sigma_{imp,\mathrm{mdl}}(\cdot)$ correspond to the real-market and the model's implied volatilities, respectively, for maturities $\{T_i,\ i=1,\ldots,n\}$ and strikes $\{K_j,\ j=1,\ldots,m\}$. This will be the cost function used in the calibration of the stochastic volatility models.
 
 
-
+\subsubsection{Weight function}
 The weight function $w_{i,j}$ should be chosen such that higher weights are given to options with strikes closer to the current stock price $S_0$, because these points have a higher influence in the shape of the volatility smile than the others.
 One example of such a function is
 \begin{equation}\label{weight}
 w_{i,j}=\left(1-\left|1-\frac{K_j}{S_0}\right|\right)^2,
 \end{equation}
 \noindent where we assume strikes are restricted to $K<2S_0$.
-This function is represented in \autoref{fig:weights}. Many other possible weight functions are also possible. One other possibility is to give a higher weight to the earliest maturities, though this will not be used.
-    
+This function is represented in \autoref{fig:weights}. Many other possible weight functions are also possible, taking into account the maturity date, for example, but no other weight functions will be considered.
+
 \begin{figure}[!htb]
   \begin{minipage}[b]{0.65\linewidth}
     \centering
@@ -192,6 +89,7 @@ $K/S_0$ & Weight \\ \midrule
     
 \noindent As we can see, the maximum weight value is given to the point where the strike equals the initial stock price ($K=S_0$) and less weight is given for points farther from this value.
 
+\iffalse
 To obtain the value of the cost function for a given set of parameters, we need to calculate $m\times n$ model option prices (see eq.\eqref{cost}). We could achieve this by implementing the Monte Carlo method with the discretization procedures described before.
 Because we want to calibrate the model's parameters, a large number $N$ of instances of the cost function will have to be executed for our optimization algorithms to converge to an optimal solution.
 Thus, it can be seen that a very great number of Monte Carlo pricers will have to be executed ($m\times n\times N$). For this reason, even with GPU implementation and advanced hardware, using Monte Carlo to calibrate the model's parameters will become prohibitively slow. We could reduce the computation time by limiting the number of simulated paths, but this would worsen the price estimation obtained, making the optimization procedure much more difficult.
@@ -199,9 +97,12 @@ Thus, we can conclude that, though the Monte Carlo algorithm is very useful to p
 
 
 We must also mention the fact that, while volatility models are commonplace in finance, investors use different models with different parameters to price their options. This means that even if our calibrated model perfectly fits market data at a given time, after a while the prices will change and the calibration will become outdated. Therefore, a frequent recalibration of the parameters is required which demands fast calibration methods to be employed, further dismissing the Monte Carlo calibration.
+\fi
 
+\subsubsection{Using the Closed-Form Solutions}
+To find the cost value of any given set of parameters we need first to price the options under each model using those parameters. This could be done using some numerical method, such as Monte Carlo simulation, which we will approach in the next section. However, such methods are usually relatively slow to execute and calibrating the models with these (which requires a large number of options to be priced) would become too cumbersome.
 
-Fortunately, as mentioned, both Heston and SABR have closed-form solutions, shown in eqs. \eqref{CH}, \eqref{sabr} and \eqref{dynsabr}, that we can use to directly price the options with each model's parameters, without the need to run the slow Monte Carlo pricer. With these closed-form solutions, not only are we able to find the prices and implied volatilities extremely fast, but the result obtained should also be very accurate, with very little to no error. With both these properties, the optimization algorithms should have no problem in finding optimal solutions for each model's parameters, and doing so very fast.
+Fortunately, as we mentioned before, both Heston and SABR have closed-form solutions, shown in eqs. \eqref{CH}, \eqref{sabr} and \eqref{dynsabr}, that we can use to directly price the options with each model's parameters, without the need to run any slow numerical pricers. With these closed-form solutions, we are able to find the prices and respective implied volatilities extremely fast, which is extremely useful. The optimization algorithms should then have no problem in finding optimal solutions for each model's parameters.
 
 
 
@@ -209,7 +110,7 @@ Fortunately, as mentioned, both Heston and SABR have closed-form solutions, show
 
 \subsection{Optimization Algorithms}
 There are many optimization algorithms able to find the parameter set that minimizes the cost function shown in eq.\eqref{cost}.
-Our main concern when choosing the best algorithm for this calibration is the nonlinearity of our cost function. This is problematic because several local minima might exist and an unsuitable algorithm may get stuck in these points, causing the globally optimal solution to not be found.
+Our main concern when choosing the best algorithm for this calibration is the nonlinearity of our cost function. This is problematic because several local minima might exist and an unsuitable algorithm might get stuck in these points, causing the globally optimal solution to not be found.
 
 With this issue in mind, we selected a powerful algorithm known as \emph{CMA-ES}~\citep{Hansen2} (short for Covariance Matrix Adaptation Evolution Strategy), which we will summarize below. It should be noted that we will only provide a general idea of how this optimizer works. For detailed descriptions, the original source should be consulted.
 
@@ -237,11 +138,14 @@ We classify each of these points according to their fitness (i.e. the cost funct
 At each iteration, the new mean is produced from a weighted average of the points, with the weights proportional to each point's fitness.
 The method for the covariance matrix update is rather complex and depends not only on the $\mu$ best samples but also on the values of the covariance matrices used in previous iterations. All the basic equations required for the implementation of this optimizer can be found in \autoref{chapter:CMAESAlg}. For a more detailed explanation, as well as other aspects of the algorithm, see Hansen ~\citep{Hansen}.
 
-These sampling-classification-adaptation steps are repeated until some stopping criterion is met, such as a fixed number of iterations or an minimum error threshold.
+These sampling-classification-adaptation steps are repeated until some stopping criterion is met, such as a fixed number of iterations or a minimum error threshold.
 When this stopping criterion is verified, the mean vector of the last iteration is assumed as the optimal parameter vector, $\theta^{*}$.
 
 
 The number of candidate solutions generated at each step, $\lambda$, and the ones that remain after classification, $\mu$, can be chosen arbitrarily, but an adequate heuristic is to choose $\lambda=\left\lfloor4+3\log D\right\rfloor+1$ and $\mu=\left\lfloor\lambda/2\right\rfloor+1$.
+
+\vfill
+\newpage
 
 This optimization procedure is summarized in Algorithm \ref{CMAES}.
 
@@ -261,9 +165,141 @@ Define covariance matrix $\mathbf{C}=I$\;
 
 The complexity of the covariance matrix updating process makes the CMA-ES a very robust optimization algorithm, enabling it to find the global optimum of highly nonlinear functions~\citep{DilaoCMA}.
 Furthermore, unlike many other optimizers, the CMA-ES is almost non-parametric. It simply requires a starting guess, to generate the starting mean vector, and the algorithm is expected to converge to a global minimum.
-As for disadvantages, because we have to generate a set of samples at each iteration, if this generation process is slow (such as the Monte Carlo pricer), the convergence may stall significantly, particularly when many parameters are used in the model. Other algorithms may perform faster than CMA-ES, but this optimizer is expected to outperform them in terms of precision.
+As for disadvantages, because we have to generate a set of samples at each iteration, if this generation process is slow (which isn't our case, because we use the closed-form solutions to price options), the convergence may stall significantly, particularly when many parameters are used in the model. Other algorithms may perform faster than CMA-ES, but this optimizer is expected to outperform them in terms of precision.
 
-This optimizer was implemented by Hansen in MATLAB (as well as in other computer languages) as a function named \emph{purecmaes}~\citep{CMAES} and will be used with only very slight changes, to account for the volatility models used used.
+This optimizer was implemented by Hansen in MATLAB (as well as in other computer languages) as a function named \emph{purecmaes}~\citep{CMAES} and will be used almost unchanged (with only very slight changes, to account for the volatility models used used).
 
 We should note that several other optimization algorithms were used, namely Simulated Annealing~\citep{MATLABsa}, Multi Start~\citep{MATLABms}, Pattern Search~\citep{MATLABps} and Genetic Algorithm~\citep{MATLABga}, all implemented in MATLAB, but CMA-ES not only greatly outperformed them in terms of accuracy, always finding lower cost values that the others, but often also in terms of computation time. For this reason, we chose CMA-ES for all implementations.
+
+
+
+\vfill
+\newpage
+
+
+\section{Numerical Option Pricing}
+\label{section:Option Pricing}
+Having trained all the models on some real market data, we should now be able to price any European options. These contracts only account for a share of the market, though, and the closed form solutions introduced before don't apply to Exotic options, which are also quite important. We thus need some numerical method to price such contracts.
+
+Currently, the two most used methods to computationally price options are known as \emph{finite differences}~\citep{Hull} and \emph{Monte Carlo}~\citep{Glasserman}.
+
+The finite differences method is an extremely fast procedure when used to price either European or American-type options, making it very appealing in these circumstances. However, when we increase the dimensionality of the problem (i.e. the number of underlying independent variables, such as $S$ and $t$), such as when dealing with options whose payoff depends on the past history of the stock price (e.g. Asian options, which are derivatives that depend on the average value of the stock price until maturity), the algorithm requires some considerable modifications that make it slower and more complex, which is why we will not cover it in this thesis.
+The implementation of both Heston and SABR models (presented before) using finite differences can nonetheless be found in deGraaf~\citep{deGraaf}.
+
+
+With the Monte Carlo algorithm, we begin by simulating a very large number of stock price paths (e.g. 100\,000 simulations). The option's payoff is then calculated for each of these simulated paths and averaged, providing a fairly good estimate of the option's future payoff. The option's price can be extracted from its expected payoff, using eq.\eqref{pricepayoff}. This algorithm can be easily adapted to price path-dependent options, making it very attractive in such cases.
+In the past, simulating all the stock price paths took prohibitively long computation times and this method was often discarded for this reason. However, with the recent advancements in computer hardware and new algorithmic developments, such as GPU implementation, this shortcoming has been, to some extent, mitigated, making the Monte Carlo algorithm quite popular in the present.
+For these reasons, the Monte Carlo method will be used for the implementation and analysis of the models introduced in \autoref{chapter:volatility}, so this model will be studied to some extent in the present chapter.
+
+
+\subsection{Simulating stock prices}
+\label{subsection:Simulating stock prices}
+As stated, to implement the Monte Carlo algorithm, one needs to simulate stock price paths. However, by analyzing eq.\eqref{GBM}, we can see that the stock prices depend on a Brownian motion process which, due to its self-similarity, is not differentiable~\citep{Mikosch}. It follows that stock price paths can never be exactly simulated. Despite this, we can approximate the movement of stock price paths by discretizing the Brownian motion process in time, avoiding its self-similarity problem. We now introduce two of the most common discretization procedures.
+
+\subsubsection{Euler–Maruyama discretization}
+\label{subsubsection:EulerMaruyama discretization}
+One of the simplest and most used discretization methods is known as \emph{Euler–Maruyama discretization}, which can be applied to stochastic differential equations of the type
+\begin{equation}\label{SDE}
+dX(t)=a(X(t))dt+b(X(t))dW(t),
+\end{equation}
+\noindent where $a(X(t))$ and $b(X(t))$ are given functions of the stochastic variable $X(t)$ and where $\{W(t),\ t>0\}$ defines a one-dimensional Brownian motion process.
+To apply this discretization, we begin by partitioning the time interval $[0,T]$ into $N$ subintervals of width $\Delta t=T/N$ and then iteratively defining
+\begin{equation}
+X_{n+1}=X_n+a(X_n)\Delta t+b(X_n)\Delta W_n,\ \ \ n=1,\ldots,N,
+\end{equation}
+\noindent with $X_{0}$ equal to the initial value of the stochastic variable $X(t)$ and where $\Delta W_n=W(t+\Delta t)-W(t)$.
+Using the known properties of Brownian motion processes, it can be shown that $\Delta W_n\sim \sqrt{\Delta t}Z(t)$, where $Z(t)\sim N(0,1)$ defines a normal distributed random variable~\citep{Mikosch}.
+
+Applying this discretization to the Geometric Brownian motion followed by stock price paths, as seen in eq.\eqref{GBM}, we arrive at
+\begin{equation}
+S(t+\Delta t)=S(t)+rS(t)\Delta t+\sigma(S(t),t)S(t)\sqrt{\Delta t}Z(t).
+\end{equation}
+
+Due to its simplicity, the Euler–Maruyama discretization method is the most common in the simulation of stock price paths whenever we have constant or deterministic volatilities.
+
+When using the constant volatility model, we simply need to replace $\sigma(S(t),t)$ by a constant $\sigma$ and we can easily generate the GBM.
+As for Dupire's local volatility, to simulate a stock price path we need to sample the local volatility surface at the point $\sigma(S_i,t_j)$ when we are at the time step $t_j$ of the simulation with a stock price $S_i$ and assume that value as the local volatility, to be used on the generation of the next stock price value, $S_{i+1}$. We iterate this procedure for all time steps until we reach the maturity.
+
+
+
+
+\subsubsection{Milstein Discretization}
+For stochastic volatility models, such as Heston and SABR, where the volatility itself follows a stochastic process, the Euler–Maruyama discretization may not be sufficiently accurate. In these cases, we can apply the more precise Milstein method~\citep{Milstein}, defined as
+\begin{equation}
+X_{n+1}=X_n+a(X_n)\Delta t+b(X_n)\Delta W_n+\frac{1}{2}b(X_n)b'(X_n)((\Delta W_n)^2-\Delta t),
+\end{equation}
+\noindent where $b'(X_n)$ denotes the derivative of $b(X_n)$ w.r.t. $X_n$. Note that when $b'(X_n)=0$ (i.e. the volatility doesn't depend on the stock price), the Milstein method degenerates to the simpler Euler–Maruyama discretization. This discretization should be applied not only to the stock price process but also to the stochastic volatility.
+
+Applying this discretization to the stock price and variance processes of the Heston model produces
+\begin{equation}\label{milsteinheston1}
+S(t+\Delta t)=S(t)+rS(t)\Delta t+S(t)\sqrt{\nu(t)}\sqrt{\Delta t}(Z_1(t))+\frac{1}{2}\nu(t)S(t)\Delta t((Z_1(t))^2-1),
+\end{equation}
+\begin{equation}
+\nu(t+\Delta t)=\nu(t)+\kappa(\overline{\nu}-\nu(t))\Delta t+\eta\sqrt{\nu(t)\Delta t}(Z_2(t))+\frac{\eta^2}{4}\Delta t((Z_2(t))^2-1),
+\end{equation}
+\noindent where $Z_1$ and $Z_2$ are two normal random variables with a correlation of $\rho$.
+
+
+As for the SABR model, this discretization results in
+\begin{equation}
+\begin{split}
+S(t+\Delta t)=&S(t)+rS(t)\Delta t+e^{-r(T-t)(1-\beta)}\sigma(t)S^\beta(t)\sqrt{\Delta t}(Z_1(t))+\\
+&+\frac{\beta}{2}e^{-2r(T-t)(1-\beta)}\sigma^2(t)S^{2\beta-1}(t)\Delta t((Z_1(t))^2-1),
+\end{split}
+\end{equation}
+\begin{equation}\label{milsteinsabr2}
+\sigma(t+\Delta t)=\sigma(t)+\nu\sigma(t)\sqrt{\Delta t}(Z_2(t))+\frac{\nu^2}{2}\sigma(t)\Delta t((Z_2(t))^2-1).
+\end{equation}
+
+For the Dynamic SABR model, the discretization is the same as its Static equivalent, replacing only the variables $\nu$ and $\rho$ with the functions $\nu(t)$ and $\rho(t)$, respectively.
+
+
+In all these models we need to generate two correlated normal variables, $Z_1(t)$ and $Z_2(t)$, with a correlation of $\rho(t)$. This can be easily achieved using
+\begin{subequations}\label{normcorr}
+\begin{align}
+&Z_1(t)\sim N(0,1);\\
+&Z_2(t)=\rho(t) Z_1(t)+\sqrt{1-(\rho(t))^2}Y(t),
+\end{align}
+\end{subequations}
+\noindent where $Y(t)\sim N(0,1)$ is a random variable independent of $Z_1(t)$.
+
+Because it is more precise, the Milstein method will be used in the implementation of the Heston and Static/Dynamic SABR stochastic volatility models. The simpler Euler–Maruyama discretization will be assumed for both constant and Dupire's local volatility.
+
+To generate a stock price path in both the Heston and SABR models, at each time step we have to solve eqs.\eqref{milsteinheston1}-\eqref{milsteinsabr2}, obtaining the values of $S(t+\Delta t)$ and $\sigma(t+\Delta t)$, which we will used in next time step as $S(t)$ and $\sigma(t)$. We iterate this procedure until we reach the maturity.
+
+It is important to note that, the smaller our subintervals $\Delta t$ are, the better is the approximation done when discretizing the Brownian motion process. However, by decreasing $\Delta t$ we increase the number of intervals needed and, with it, the number of calculations required to generate a stock price path. This compromise between computation time and precision must be handled appropriately.
+In \autoref{fig:Steps} we can see how the size of the subintervals influences the resemblance of a simulated GBM process to its "continuous" version.
+
+\begin{figure}[!htb]
+    \centering
+      \includegraphics[width=.65\columnwidth]{Steps.eps}
+      \caption[Effect of the size of the subinterval $\Delta t$ on the GBM discretization]{Effect of the size of the subinterval $\Delta t$ on the GBM discretization, with maturity $T=1\SI{}{\year}$, interest rate $r=0.01\SI{}{\per\year}$, volatility $\sigma=0.1\SI{}{\year\tothe{-1/2}}$ and initial stock price $S_0=1\SI{}{\EUR}$. To emphasize this effect, the underlying Brownian Motion $\{W(t),\ t>0\}$ used to generate all three paths was the same.}\label{fig:Steps}
+    \end{figure}
+
+We should also note that this discretization is more problematic when we try to price Barrier options. As we stated before, a Barrier option becomes activated/void if the stock price reaches a certain barrier level $B$. When we discretize a continuous stock price process, we ignore any prices that this process might have taken in the period between two time steps. However, it is perfectly possible that during this interval the real stock price goes below/above this barrier level and back up/down, which is not considered in the discretization. A barrier option might have crossed a barrier with a non-discretized Geometric Brownian motion process and not with its discretization. Thus, Barrier options will always be underpriced or overpriced (depending on the type of barrier contract) when the Monte Carlo method is used. This problem can be mitigated by significantly increasing the number of time steps, reducing their size, though this will increase computation time. Furthermore, reducing the step size merely diminishes the severity of the problem and doesn't actually solve it.
+
+
+\subsection{Pricing options from simulations}
+\label{subsection:Pricing options from simulations}
+Now that we are able to simulate stock prices, to price options using the Monte Carlo algorithm, we generate $M$ paths by recursively calculating $\{S_i(t_j),\ \ i=1,\ldots,M,\ \ t_j=0,\ldots,T\}$, using either of the discretization methods described before.
+
+When the stock price at the maturity, $S_i(T)$, is obtained for all paths, the option's payoff for each path is calculated using eqs.\eqref{callput}-\eqref{barrier}. We then average all these results and discount them back to the present, obtaining the option's value
+\begin{subequations}\label{mcpricer}
+\begin{align}
+&C(K,T)=e^{-rT}\frac{1}{M}\sum_{i=1}^M\text{Payoff}_{i,call}(K,T);\\
+&P(K,T)=e^{-rT}\frac{1}{M}\sum_{i=1}^M\text{Payoff}_{i,put}(K,T),
+\end{align}
+\end{subequations}
+\noindent where $\text{Payoff}_{i,\cdot}(K,T)$ denotes the payoff function of the chosen option type (e.g. European, Barrier, ...) for the i\textsuperscript{th} path.
+ 
+
+The payoff function of a European option is quite trivial to obtain, we simply need to apply eq.\eqref{callput} to the stock price at maturity of each simulation.
+Pricing barrier options is only very slightly more complex: besides applying the discretization methods described before, we are also required to check at all simulation time steps whether each stock price process crossed the barrier level or not and, at the maturity, only use those that did to calculate the option price using eq.\eqref{barrier}.
+
+Despite its versatility, the Monte Carlo method can lead to an erroneous estimate for the price of options, particularly for European call options with very high strike prices or puts with very low strikes. To understand this problem, notice that the payoff function of European call options is zero for stocks below the strike. If we have a very large strike, very few of the simulated paths will actually cross the strike at maturity and contribute to the calculation of the option's price (all the other paths will contribute with a payoff of zero). The averaging procedure shown in eq.\eqref{mcpricer} will therefore be performed on an extremely small subset of paths, thus producing a very rough estimation for the option price.
+We could counter this effect by simulating an even larger number of paths, so that we always have a significant number of paths above any given strike contributing to the option's price, though this comes at the cost of increased computation times.
+Furthermore, on the limit, there will always be a strike high enough that none of the simulated paths reach it, meaning that the option's value for that simulation would be zero. This does not hold in real life, since there is always a non-zero price for any option, even for extremely high strikes.
+This problem is further aggravated for Barrier options, since only the paths that are above the strike price at maturity \emph{and} have crossed the barrier level contribute to the option price. This further limits the subset of paths considered and is quite problematic for high barrier levels.
+
+In short, the Monte Carlo method is very simple and quite versatile, though it must be used with some care to work properly.
 

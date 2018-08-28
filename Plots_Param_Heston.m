@@ -20,7 +20,7 @@ for i=1:size(K,2)
     HV3(i)=HestonVol(K(i),2/12,kappa3,nubar,nu0,rho,chi);
 end
 ttl="\textbf{Dependence on $\kappa$}";
-lg={['$\kappa$=',num2str(kappa1)],['$\kappa$=',num2str(kappa2)],['$\kappa$=',num2str(kappa3)]};
+lg={['$\kappa$=',num2str(kappa1),' $\mathrm{yr}^{-1}$'],['$\kappa$=',num2str(kappa2),' $\mathrm{yr}^{-1}$'],['$\kappa$=',num2str(kappa3),' $\mathrm{yr}^{-1}$']};
 %}
 
 %{
@@ -33,7 +33,7 @@ for i=1:size(K,2)
     HV3(i)=HestonVol(K(i),2/12,kappa,nubar3,nu0,rho,chi);
 end
 ttl="\textbf{Dependence on $\overline{\nu}$}";
-lg={['$\overline{\nu}$=',num2str(nubar1)],['$\overline{\nu}$=',num2str(nubar2)],['$\overline{\nu}$=',num2str(nubar3)]};
+lg={['$\overline{\nu}$=',num2str(nubar1),' $\mathrm{yr}^{-1}$'],['$\overline{\nu}$=',num2str(nubar2),' $\mathrm{yr}^{-1}$'],['$\overline{\nu}$=',num2str(nubar3),' $\mathrm{yr}^{-1}$']};
 %}
 
 %{
@@ -46,7 +46,7 @@ for i=1:size(K,2)
     HV3(i)=HestonVol(K(i),2/12,kappa,nubar,nu03,rho,chi);
 end
 ttl="\textbf{Dependence on $\nu_0$}";
-lg={['$\nu_0$=',num2str(nu01)],['$\nu_0$=',num2str(nu02)],['$\nu_0$=',num2str(nu03)]};
+lg={['$\nu_0$=',num2str(nu01),' $\mathrm{yr}^{-1}$'],['$\nu_0$=',num2str(nu02),' $\mathrm{yr}^{-1}$'],['$\nu_0$=',num2str(nu03),' $\mathrm{yr}^{-1}$']};
 %}
 
 %{
@@ -64,15 +64,15 @@ lg={['$\rho$=',num2str(rho1)],['$\rho$=',num2str(rho2)],['$\rho$=',num2str(rho3)
 
 %%{
 chi1=1;
-chi2=5;
-chi3=10;
+chi2=2.5;
+chi3=5;
 for i=1:size(K,2)
     HV1(i)=HestonVol(K(i),2/12,kappa,nubar,nu0,rho,chi1);
     HV2(i)=HestonVol(K(i),2/12,kappa,nubar,nu0,rho,chi2);
     HV3(i)=HestonVol(K(i),2/12,kappa,nubar,nu0,rho,chi3);
 end
 ttl="\textbf{Dependence on $\eta$}";
-lg={['$\eta$=',num2str(chi1)],['$\eta$=',num2str(chi2)],['$\eta$=',num2str(chi3)]};
+lg={['$\eta$=',num2str(chi1),' $\mathrm{yr}^{-1}$'],['$\eta$=',num2str(chi2),' $\mathrm{yr}^{-1}$'],['$\eta$=',num2str(chi3),' $\mathrm{yr}^{-1}$']};
 %}
 
 p=plot(K,HV1);

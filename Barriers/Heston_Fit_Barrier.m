@@ -211,7 +211,7 @@ SimVolEuro=@(K,PriceVol)PricerEuro(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,P
     pbaspect([1.5 1 1])
 
 
-    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lg={'European',['B=',num2str(barr(1)),' €'],['B=',num2str(barr(2)),' €'],['B=',num2str(barr(3)),' €']};
     lgd=legend(lg,'Location','northeast','FontSize',11);
     title(lgd,"Heston")
 
@@ -233,7 +233,7 @@ SimVolEuro=@(K,PriceVol)PricerEuro(kappa,nubar,nu0,rho,chi,K',S0,r,T,T*252*2,M,P
     ylabel('Option Price(€)')
     pbaspect([1.5 1 1])
 
-    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lg={'European',['B=',num2str(barr(1)),' €'],['B=',num2str(barr(2)),' €'],['B=',num2str(barr(3)),' €']};
     lgd=legend(lg,'Location','northeast','FontSize',11);
         title(lgd,"Heston")
 end

@@ -163,7 +163,7 @@ SimVolEuro=@(K,PriceVol)PricerEuro(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,K',P
     pbaspect([1.5 1 1])
 
 
-    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lg={'European',['B=',num2str(barr(1)),' €'],['B=',num2str(barr(2)),' €'],['B=',num2str(barr(3)),' €']};
     lgd=legend(lg,'Location','northeast','FontSize',11);
     title(lgd,"Dynamic SABR")
    
@@ -184,7 +184,7 @@ SimVolEuro=@(K,PriceVol)PricerEuro(alpha,rho0,nu0,a,b,beta,S0,r,T,M,T*252*2,K',P
     ylabel('Option Price(€)')
     pbaspect([1.5 1 1])
 
-    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lg={'European',['B=',num2str(barr(1)),' €'],['B=',num2str(barr(2)),' €'],['B=',num2str(barr(3)),' €']};
     lgd=legend(lg,'Location','northeast','FontSize',11);
         title(lgd,"Dynamic SABR")
 end

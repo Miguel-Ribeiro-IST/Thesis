@@ -10,33 +10,38 @@
 
 \chapter{Conclusions}
 \label{chapter:conclusions}
+\iffalse
 Pricing options remains one of the most important problems in quantitative finance. Black and Scholes developed a model that enables us to easily price European options, but to use it we must assume that volatility remains constant throughout the option's duration.
 Market data clearly shows that this assumption doesn't match what the observations, so we require some models to model this dynamic variable.
 Volatility is particularly important when dealing with options, as it severely impacts their value. It is also very challenging to estimate it accurately, and even more so to predict its behavior.
+\fi
 
-In this thesis we studied some of the most used volatility models.
-We began by implementing Dupire's local volatility model, a non-parametric model which assumes that volatility depends deterministically on the stock price and on the option's time to maturity. This dependence must be determined by interpolating some real option data, for which we used Delaunay's triangulation.
+Volatility is one of the most important subjects in all of quantitative finance, due not only to its impact on the prices of options but also to its elusiveness. In this thesis we studied some of the models most used to forecast this variable.
+
+We began by implementing Dupire's local volatility model, a non-parametric model which assumes that volatility is a deterministic function of the stock price and the option's time to maturity. This dependence must be determined by interpolating some real option data, for which we used Delaunay's triangulation.
 
 We also studied Heston and Static/Dynamic SABR stochastic volatility models, which, as the name implies, assume that volatility itself is a stochastic variable, correlated with the stock price. These models are particularly famous due to their closed form solutions that enable us to easily calibrate them, i.e. find the values of the model variables that best fit the data. This calibration was done using a weight function and the CMA-ES optimization algorithm.
 
 Having obtained the deterministic dependence of Dupire's model and having calibrated all the stochastic volatility models, we can input them all into a numerical pricer, using Monte Carlo simulation to output the models' option price predictions, which we then compared to the real data, to validate them. We also benchmarked each of these models against the simpler model of constant volatility, as assumed by Black and Scholes.
-Adapting the Monte Carlo pricers we were also able to price Barrier options.
+Finally, adapting the Monte Carlo pricers we were also able to price Barrier options.
 
 \section{Achievements}
-Regarding Dupire's local volatility model, we observed that for near-the-money options  (i.e. $K\sim S_0$), the predictions obtained with the Monte Carlo simulations followed the real data very closely.
+Regarding the stochastic volatility models, we saw that their theoretical predictions (obtained with the respective closed form solutions) accurately followed real European call option prices, even for deep in- and out-of-the money options.
+For data on a single maturity, the Static SABR model clearly performed best, as is verified by the observed low value of the cost function observed with this model, though some overfitting is expected to have occurred. It also greatly outperforms the constant volatility model assumption, which was unsurprising. When dealing with multiple maturities, the Heston model is performed better than Dynamic SABR, though both models outperform the constant volatility model.
 
-As for the stochastic volatility models, we saw that their theoretical predictions (obtained with the closed form solutions) accurately mimicked market data behavior, even for deep out-of-the money options. On the other hand, the Monte Carlo simulations produced similar results for near-the-money options.
-For data on a single maturity, the Static SABR model is clearly the best, as is verified by the observed low value of the cost function, though some overfitting is expected to have occurred. It also greatly outperforms the constant volatility model assumption. When dealing with multiple maturities, the Heston model is better than Dynamic SABR, but both also greatly outperform the constant volatility model.
-For near-the-money strikes (i.e. $K\sim S_0$), the Monte Carlo simulations of all these models seem to match both the data and the theoretical predictions.
+For near-the-money strikes (i.e. $K\sim S_0$), the Monte Carlo simulations of all these models seemed to match both the data and the theoretical predictions, suggesting that the simulations were working properly.
 
+As for Dupire's local volatility model, for which no theoretical predictions were available, we observed that for near-the-money options the predictions obtained with the Monte Carlo simulations followed the real data very closely.
 
-On all Monte Carlo simulations we also observed some divergence for options with lower strikes, which we were able to explain using the Greek Vega and the relative change of the stock price w.r.t. volatility. One other divergent behavior was found in options with high strikes and short maturities, which we linked to a Monte Carlo method limitation.
+On all Monte Carlo simulations we also observed some divergence for options with lower strikes, which we were able to explain using the Greek Vega and the relative change of the stock price w.r.t. volatility. One other divergent behavior was found in options with very high strikes and short maturities, which we linked to the low number of simulated paths that are able to reach such strikes in the Monte Carlo simulations.
 
-In conclusion, we may say all models greatly surpass the constant volatility model, providing results that better match real world data. However, great care should be employed when applying the calibrations to Monte Carlo pricers, particularly for deep out-of-the-money options, since the results diverge.
+We were also able to price barrier options by adapting the Monte Carlo algorithm, though we weren't able to validate our results. This achievement serves to prove that pricing Exotic options with our methods is possible.
+
+In conclusion, we may say all models greatly surpass the constant volatility model, providing results that better match real world data. However, great care should be employed when applying the calibrations to Monte Carlo pricers, particularly for deep out-of-the-money options, since the results might diverge.
 
 
 \section{Future Work}
-Despite the good results obtained with the models, there is still much room for improvement. In particular, a lot could still be done to improve the Monte Carlo pricers:  first, implementing importance sampling on the simulated paths could significantly reduce the number of simulations required to produce each prediction, thus reducing computation time (this has been done for the Heston model in Stilger \citep{Stilger}). Secondly, we could use the antithetic variates method to reduce the variance of the simulations. Finally, we could use low-discrepancy sequences, such as Sobol sequences~\citep{Sobol2}, in the random number generator used at each simulation step.
+Despite the good results obtained with the models, there is still much room for improvement. In particular, a lot could still be done to improve the Monte Carlo pricers:  first, implementing importance sampling on the simulated paths could significantly reduce the number of simulations required to produce each prediction, thus reducing computation time (this has been done for the Heston model in Stilger \citep{Stilger}). Secondly, we could use the antithetic variates method to reduce the variance of the simulations. Finally, we could use low-discrepancy sequences, such as Sobol sequences~\citep{Sobol2}, in the random number generator used at each simulation step of the Monte Carlo method.
 
 Regarding the models, we could also study the mean-reverting version of the Static SABR model, which prevents the volatility from becoming negative or exploding to very large results. Some different functions for $\rho(t)$ and $\nu(t)$ could also be considered, besides the ones we used.
 

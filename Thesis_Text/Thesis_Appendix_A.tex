@@ -11,10 +11,10 @@
 \chapter{Option Market Data}
 \label{chapter:mktdata}
 
-Here, we present data for European options. For data compliance reasons, the strike prices were normalized by the initial stock price i.e. $K\rightarrow K/S_0$ so that the original strike prices are inaccessible.
+Here, we present data for European options, which we will use to train and validate the models presented in this thesis. For data compliance reasons, the strike prices were normalized by the initial stock price i.e. $K\rightarrow K/S_0$ so that the original strike prices are inaccessible.
 Suffice it to say that the underlying asset of the options here represented is a \emph{stock index}, i.e. a weighted average of the prices of some selected stocks (e.g. PSI-20 (Portugal)).
 
-The data provided pertains to the options' implied volatilities. We can easily obtain their prices from these values using eq.\eqref{impvolform}. The converted prices of call European options are shown below.
+The data provided pertains to the options' implied volatilities. We can easily obtain their prices from these values using eq.\eqref{impvolform}. The converted prices of call European options are also shown below.
 
 The number of days here denoted correspond to trading days (i.e. days where exchanges are open and trading occurs) so that one month corresponds to 21 days and one year to 252.
 

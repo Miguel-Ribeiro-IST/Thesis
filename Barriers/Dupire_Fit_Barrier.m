@@ -149,7 +149,7 @@ SimVolEuro=@(K,PriceVol)PricerEuro(S0,r,T,M,T*252*2,K',PriceVol,sigmamax,interpo
     pbaspect([1.5 1 1])
 
 
-    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lg={'European',['B=',num2str(barr(1)),' €'],['B=',num2str(barr(2)),' €'],['B=',num2str(barr(3)),' €']};
     lgd=legend(lg,'Location','northeast','FontSize',11);
     title(lgd,"Dupire")
 
@@ -171,7 +171,7 @@ SimVolEuro=@(K,PriceVol)PricerEuro(S0,r,T,M,T*252*2,K',PriceVol,sigmamax,interpo
     ylabel('Option Price(€)')
     pbaspect([1.5 1 1])
 
-    lg={'European',['B=',num2str(barr(1))],['B=',num2str(barr(2))],['B=',num2str(barr(3))]};
+    lg={'European',['B=',num2str(barr(1)),' €'],['B=',num2str(barr(2)),' €'],['B=',num2str(barr(3)),' €']};
     lgd=legend(lg,'Location','northeast','FontSize',11);
 title(lgd,"Dupire")
 end

@@ -83,7 +83,7 @@ The payoff function of this type of option is therefore given by
 Before simulating Barrier options and studying their behavior, we can deduce empirically the effect of the barrier level $B$ on the overall price of the option. For an up-and-in Barrier option, if the barrier level is too high, the price of the option will be very low. This is due to the fact that the likelihood of a stock price increasing enough to surpass such a high barrier level, activating the option, is very low. On the other hand, if the barrier level is very close to $S_0$, the probability of the stock price reaching this threshold is very high. Thus, the price of such an option would be very similar to that of its European equivalent.
 With these two examples, we can conclude that the higher the barrier level, the lower the Barrier option price.
 
-From eq.\eqref{barrier} we can furthermore conclude that the prices of Barrier options are always smaller than or equal to those of their equivalent European counterparts (i.e. with same strike and maturity). This should be straightforward, since the Barrier option becomes equal to its European equivalent only if the Barrier threshold is surpassed, and is worthless otherwise.
+From eq.\eqref{barrier} we can furthermore conclude that the prices of Barrier options are always smaller than or equal to those of their equivalent European counterparts (i.e. with same strike and maturity). This should be straightforward, since the Barrier option becomes equal to its European equivalent only if the Barrier threshold is surpassed and is worthless otherwise.
 
 
 
@@ -99,7 +99,7 @@ With this concept in mind, we can price options by setting their expected profit
 \text{Price}(K,t^*)=e^{-rt^*}\mathbb{E}\left[\text{Payoff}(K,t^*)\right],
 \end{equation}
 \noindent where $t^*$ denotes the time at which the option is exercised and $r$ corresponds to the risk-free interest rate, which we will approach in \autoref{section:Black-Scholes Formulae}.
-In particular, with eqs.\eqref{callput} in mind, the price functions of European call and put options is clearly given by
+In particular, with eqs.\eqref{callput} in mind, the price functions of European call and put options are clearly given by
 \begin{subequations}\label{callprice}
 \begin{align}
 &C(K,T)_{Euro}=e^{-rT}\mathbb{E}\left[\max\left(S(T)-K,0\right)\right]=e^{-rT}\mathbb{E}\left[\left(S(T)-K\right)\mathbbm{1}_{\left\{S(T)>K\right\}}\right];\\

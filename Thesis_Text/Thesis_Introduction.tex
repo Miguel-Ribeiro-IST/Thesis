@@ -67,7 +67,7 @@ The code is commented to some degree, to ease the interpretation of all the step
 \newpage
 
 \section{Objectives}
-The goal of this thesis is to study some of the most commonly used models to forecast volatility. We will approach Dupire's local volatility model and Heston, Static/Dynamic SABR stochastic volatility models. We will begin by clearly defining each model, and give some insight regarding their advantages and disadvantages.
+The goal of this thesis is to study some of the most commonly used models to forecast volatility. We will approach Dupire's local volatility model and Heston, Static/Dynamic SABR stochastic volatility models. We will begin by clearly defining each model and give some insight regarding their advantages and disadvantages.
 
 We will then train all models in a data set of real European option prices, so that they can best replicate real market behavior.
 
@@ -78,7 +78,7 @@ Finally, the Monte Carlo pricers will be modified to price Barrier options, as a
 \section{Thesis Outline}
 In \autoref{chapter:background} we begin by giving some financial background required to understand the posterior sections. We will approach the options' payoff and value functions as well as the Black-Scholes formula and related results.
 
-In \autoref{chapter:volatility} we introduce the concept of volatility, implied volatility and the Greek Vega. We then describe the models to be used, namely Dupire's local volatility model and Heston, Static/Dynamic SABR stochastic volatility models.
+In \autoref{chapter:volatility} we introduce the concept of volatility, implied volatility, and the Greek Vega. We then describe the models to be used, namely Dupire's local volatility model and Heston, Static/Dynamic SABR stochastic volatility models.
 
 Then, in \autoref{chapter:implementation} we focus on how each model will be implemented, calibrated and validated. We introduce the CMA-ES optimization algorithm, which we will use to calibrate the models, as well as the Monte Carlo numerical pricer, used to estimate option prices with each calibrated model.
 

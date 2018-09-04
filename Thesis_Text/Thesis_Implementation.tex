@@ -7,7 +7,7 @@ Having trained our models, we should be able to price \emph{any} option, using s
 
 \section{Surface Interpolation (Dupire model)}
 \label{section:Surface Interpolation (Dupire)}
-To apply Dupire's local volatility model, as shown in eq.\eqref{dupire2}, we need to generate the implied volatility surface from the market data. Because we only have data for a finite set of maturities and strikes, the implied volatility surface must be obtained by some form of interpolation and extrapolation. From this interpolated surface we must also calculate the gradients needed for the local volatility formula.
+To apply Dupire's local volatility model, as shown in eq.\eqref{dupire2}, we need to generate the implied volatility surface from the market data. Because we only have data for a finite set of maturities and strikes, the implied volatility surface must be obtained with some form of interpolation and extrapolation. From this interpolated surface we must also calculate the gradients needed for the local volatility formula.
 
  
 One possible interpolation method is known as \emph{Delaunay triangulation}~\citep{Isaac}. In short, assuming a 2-dimensional data set, this interpolation algorithm generates a triangulation between points $P_1$, $P_2$ and $P_3$ if the circumscribed circle of these points contains no other points $P_j$ inside. A scheme of this interpolation method is shown in \autoref{fig:Delaunay}.
@@ -15,7 +15,7 @@ One possible interpolation method is known as \emph{Delaunay triangulation}~\cit
 \begin{figure}[!htb]
     \centering
       \includegraphics[width=.35\columnwidth]{Delaunay.eps}
-      \caption[Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles don't contain any other points inside. A circle for which this property does not hold is also represented, though no triangulation is possible in this case.]{Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles (green) don't contain any other points inside. A circle for which this property does not hold (orange dashed) is also represented, though no triangulation is possible in this case.\\{\small Adapted from: \url{https://www.ti.inf.ethz.ch/ew/Lehre/CG13/lecture/Chapter\%206.pdf}}}\label{fig:Delaunay}
+      \caption[Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles do not contain any other points inside. A circle for which this property does not hold is also represented, though no triangulation is possible in this case.]{Example of a Delaunay triangulation, where we connect the points for which the circumscribed circles (green) do not contain any other points inside. A circle for which this property does not hold (orange dashed) is also represented, though no triangulation is possible in this case.\\{\small Adapted from: \url{https://www.ti.inf.ethz.ch/ew/Lehre/CG13/lecture/Chapter\%206.pdf}}}\label{fig:Delaunay}
     \end{figure}
 
 We can easily adapt this algorithm to 3-dimensions (as is the case of our data), using spheres instead of circles.
@@ -110,7 +110,7 @@ Fortunately, as we mentioned before, both Heston and SABR have closed-form solut
 
 \subsection{Optimization Algorithms}
 There are many optimization algorithms able to find the parameter set that minimizes the cost function shown in eq.\eqref{cost}.
-Our main concern when choosing the best algorithm for this calibration is the nonlinearity of our cost function. This is problematic because several local minima might exist and an unsuitable algorithm might get stuck in these points, causing the globally optimal solution to not be found.
+Our main concern when choosing the best algorithm for this calibration is the nonlinearity of our cost function. This is problematic because several local minima might exist, and an unsuitable algorithm might get stuck in these points, causing the globally optimal solution to not be found.
 
 With this issue in mind, we selected a powerful algorithm known as \emph{CMA-ES}~\citep{Hansen2} (short for Covariance Matrix Adaptation Evolution Strategy), which we will summarize below. It should be noted that we will only provide a general idea of how this optimizer works. For detailed descriptions, the original source should be consulted.
 

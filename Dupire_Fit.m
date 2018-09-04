@@ -11,8 +11,8 @@ S0=17099.4;        %initial stock price
 r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
 sigmamax=1.5;        %maximum value the local volatility can take
-M=10000;           %number of paths to be simulated
-aver=10;
+M=50000;           %number of paths to be simulated
+aver=100;
 %L=T*252*2
 
 
@@ -37,9 +37,7 @@ dK=0.05*S0;         %mesh grid size w.r.t. strike
 interpol=Dupire(S0,r,B,MinT,MaxT,dT,MinK,MaxK,dK);
 
 %Plotter(S0,r,B,M,matur,sigmamax,interpol,aver)
-tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur);
-%tab=Printer(sigmamax,interpol,M,B,S0,r,aver);
-openvar('tab')
+Plotter3D(sigmamax,S0,r,B,M,aver,matur,interpol);
 
 beep
 toc
@@ -99,85 +97,9 @@ interp=scatteredInterpolant(V(:,1),V(:,2),V(:,3),'linear','linear');
 end
 
 
-
-%%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%    PLOT MATURITIES IN DIFFERENT FIGURES  %%%%%%%%%%%%
-function Plotter(S0,r,B,M,matur,sigmamax,interpol,aver)
-times=unique(B(:,1));   %array with all maturity dates
-
-for iter=1:matur
-    figure
-    
-    T = times(iter);
-    C=B(B(:,1)==T,2:3);  %Implied volatilities for the selected maturity
-        
-    %Plot original data points
-    scatter(C(:,1),C(:,2),100,'x','LineWidth',1.5);
-    hold on;
-    
-    %Calculate the implied volatility for an array of Ks and connect the dots to generate a function
-    K=0.4:0.01:1.6;
-    V=zeros(aver,size(K,2));
-    parfor i=1:aver
-    V(i,:)=Pricer(S0,r,T,M,T*252*2,K',"vol",sigmamax,interpol);
-    end
-    V=mean(V);
-    plot(K,V,'-','LineWidth',1.5)
-    
-    %Plot options
-    xlim([0.5,1.6])
-    ylim([0,1])
-    box on;
-    grid on;
-    set(gca,'fontsize',12)
-    xlabel('K/S_0');
-    ylabel('\sigma_{imp} (yr^{-1/2})')
-    pbaspect([1.5 1 1])
-    lgd=legend({'Market Data','Fitted Function'},'Location','northeast','FontSize',11);
-    title(lgd,strcat(strcat("T=",num2str(T*252))," days"))
-    
-    clear Volatility
-end
-end
-
-
-
-%%%%%%%%%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS    %%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%    PLOT MULTIPLE MATURITIES IN A SINGLE FIGURE  %%%%%%%%%%%%
-function MultiPlotter(S0,r,B,M,matur,sigmamax,interpol)
-figure
-times=unique(B(:,1));
-for iter=1:matur
-    ax(iter) = subplot(2,ceil(matur/2),iter);
-    T = times(iter);
-    L = T*252*2;
-    
-    C=B(B(:,1)==T,2:3);
-    
-    X=0.4:0.01:1.6;
-    Y=Pricer(S0,r,T,M,L,X',"vol",sigmamax,interpol);
-    
-    %   Volatility=Pricer(S0,r,T,M,L,C(:,1),"vol",sigmamax,interpol);
-    
-    scatter(ax(iter),C(:,1),C(:,2),'.');
-    hold on;
-    % scatter(ax(iter),C(:,1),Volatility(:),'x');
-    plot(ax(iter),X,Y,'-')
-    hold on;
-    xlim([0.4,1.6])
-    ylim([0.2,1])
-    title(ax(iter),strcat(strcat(strcat(num2str(T*252)," days  ("),num2str(T*252/21))," months)"))
-    clear Volatility
-end
-text1=strcat(strcat(strcat(num2str(times(1)*252)," days  ("),num2str(times(1)*252/21))," months)");
-vars1=strcat(strcat("sigmamax=",num2str(sigmamax)),strcat(",  paths=",num2str(M)));
-title(ax(1),{vars1,text1})
-end
-
-
-
 %%%%%%%%%%%%%%    PLOT OPTIMIZATION RESULTS IN A SURFACE   %%%%%%%%%%%%%%%
-function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur)
+function Plotter3D(sigmamax,S0,r,B,M,aver,matur,interpol)
+
     figure
      times=unique(B(:,1));   %array with all maturity dates
      
@@ -190,13 +112,17 @@ function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur)
     DV2=zeros(size(times,1),size(K2,2));
     
     %Plot implied volatility surface
-    DupireVol=@(K,T)Pricer(S0,r,T,M,T*252*2,K',"vol",sigmamax,interpol);
+    DupireVol=@(K,T)Pricer(S0,r,T,M,T*252*2,K,"vol",sigmamax,interpol);
     [K,T] = meshgrid(K2,0.5/12:0.5/12:0.5+0.5/12); %create the grid to be evaluated
     DV_tmp=zeros(aver,size(K,2)); %matrix to be averaged (reducing noise) to generate the values
     f=1; %auxiliary variable
+    waitb=waitbar(0,'...');
     for i=1:size(K,1)
+        waitbar(i/size(K,1),waitb,[num2str(round(toc/3600)),' hours passed,  ', num2str(round(i/size(K,1)*100)),'% completed'])
+        K_tmp=(K(i,:))';
+        T_tmp=T(i,1);
         parfor j=1:aver
-            DV_tmp(j,:)=DupireVol(K(i,:),T(i,1));
+            DV_tmp(j,:)=DupireVol(K_tmp,T_tmp);
         end
         mn=mean(DV_tmp,1)';
         if i==2 || i==4 || i==6 || i==12
@@ -209,6 +135,7 @@ function tab=Plotter3D(interpol,sigmamax,S0,r,B,M,aver,matur)
         end
         DV(i,:)=mn;
     end
+    close(waitb);
     s=surf(K,T,DV);
     s.EdgeAlpha=0.6;
     s.FaceAlpha=0.85;
@@ -297,24 +224,6 @@ for iter=1:matur
 end
 
 
-
-
-MKTVols=B(:,3);   %Market implied volatilities
-MKTPrices=european_bs(S0,B(:,2),r,B(:,3),B(:,1),"call");  %Market (converted) prices
-
-DV3=DV2(:,[11,36,51,61,71,86,111]);
-
-Vols=[]; Prices=[];
-K3=unique(B(:,2));
-for i=1:matur
-    Vols=[Vols;DV3(i,:)'];
-    DP=european_bs(S0,K3,r,DV3(i,:)',times(i),"call");
-    Prices=[Prices;DP];
-end
-
-%Output table
-tab=[B(:,1)*252,B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols*100,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices*100];
-format short
 end
 
 
@@ -331,7 +240,7 @@ S = S0*ones(M,1);                  %define initial vector of stock prices
 sigma=interpol(0,S0)*ones(M,1);    %define the initial vector of volatilities
 
 for k = 1:L
-    S(:)=S(:)+S(:)*r*dt+sqrt(dt)*sigma(:).*S(:).*randn(M,1);   %GBM formula
+    S(:)=S(:).*(1+r*dt+sqrt(dt)*sigma(:).*randn(M,1));   %GBM formula
     
     for i=1:M
         %At each step, calculate the new local volatility value for each path (maximized by threshold "sigmamax")
@@ -352,7 +261,7 @@ else
     Result=zeros(1,N);
     for j=1:N
         volatility=@(sigma)european_bs(S0,C(j,1),r,sigma,T,"call")-exp(-r*T)*mean(Y(:,j));
-        res=fzero(volatility,0.0001);   %Calculate the expected implied volatility
+        res=fzero(volatility,0.01);   %Calculate the expected implied volatility
         
         if ~isnan(res)
             Result(j)=res;
@@ -364,34 +273,6 @@ end
 
 end
 
-
-
-%%% PRINT A TABLE WITH MODEL/MARKET IMPLIED VOL/PRICES AND REL. ERRORS %%%
-function tab=Printer(sigmamax,interpol,M,B,S0,r,aver)
-format longG      %Change format for maximum precision
-MKTVols=B(:,3);   %Market implied volatilities
-MKTPrices=european_bs(S0,B(:,2),r,B(:,3),B(:,1),"call");  %Market (converted) prices
-
-Vols=[]; Prices=[];
-    DupireVol=@(K,T)Pricer(S0,r,T,M,T*252*2,K',"vol",sigmamax,interpol);    
-    times=unique(B(:,1));   %array with all maturity dates
-    K2=unique(B(:,2));
-    for i=1:size(times,1)
-        DV_tmp=zeros(aver,size(K2,1));
-        for f=1:aver
-           DV_tmp(f,:)=DupireVol(K2',times(i));
-        end
-        DV=mean(DV_tmp)';
-        DP=european_bs(S0,K2,r,DV,times(i),"call");
-       Vols=[Vols;DV];
-       Prices=[Prices;DP];
-    end
-    
-
-%Output table
-tab=[B(:,1)*252,B(:,2),MKTVols,Vols,abs(MKTVols-Vols)./MKTVols*100,MKTPrices,Prices,abs(MKTPrices-Prices)./MKTPrices*100];
-format short
-end
 
 
 

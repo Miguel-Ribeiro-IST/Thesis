@@ -51,7 +51,7 @@ This difference should be measured with a cost function, which we have to minimi
 \begin{equation}\label{cost}
 \boxed{\mathrm{Cost}(\theta)=\sum_{i=1}^n\sum_{j=1}^mw_{i,j}\left(\sigma_{imp,\mathrm{mkt}}(T_i,K_j)-\sigma_{imp,\mathrm{mdl}}(T_i,K_j;\theta)\right)^2,}
 \end{equation}
-\noindent where we denote $\theta$ as the model's parameter set, $w_i$ corresponds to some weight function and where $\sigma_{imp,\mathrm{mkt}}(\cdot)$ and $\sigma_{imp,\mathrm{mdl}}(\cdot)$ correspond to the real-market and the model's implied volatilities, respectively, for maturities $\{T_i,\ i=1,\ldots,n\}$ and strikes $\{K_j,\ j=1,\ldots,m\}$. This will be the cost function used in the calibration of the stochastic volatility models.
+\noindent where we denote $\theta$ as the model's parameter set, $w_{i,j}$ corresponds to some weight function and where $\sigma_{imp,\mathrm{mkt}}(\cdot)$ and $\sigma_{imp,\mathrm{mdl}}(\cdot)$ correspond to the real-market and the model's implied volatilities, respectively, for maturities $\{T_i,\ i=1,\ldots,n\}$ and strikes $\{K_j,\ j=1,\ldots,m\}$. This will be the cost function used in the calibration of the stochastic volatility models.
 
 
 \subsubsection{Weight function}

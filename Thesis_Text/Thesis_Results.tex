@@ -720,7 +720,7 @@ We now consider the adjustments above. Observing the theoretical curves in \auto
 
 Analyzing the calibrated parameters in \autoref{tab:DSR}, we begin by noting that the value of $\alpha$ is typical from market observations. As we mentioned previously, the parameter $\beta$ controls how the implied volatility curve shifts when the stock prices move, and the calibrated value indicates that when the stock prices increase, the curve not only shifts to the right but also downwards, though only slightly.
 
-The parameter $a$ being $0$ means that the correlation function, $\rho(t)$, is stuck at $\rho_0$ through time, and the parameter $b$ being very large means that the volatility of the volatility function, $\nu(t)$, goes to $0$ extremely fast (e.g. at the end of the first month, this parameter is only $\nu(t=1$ month$)=0.0578\SI{}{\year\tothe{-1}}$). These results are very inconsistent with what we observed in the Static SABR model, where both the correlations (in absolute value) and the volatilities of the volatility decreased (slowly) with time. This seems to suggest that the functions chosen to model these two parameters were not appropriate.
+The parameter $a$ being $0$ implies that the correlation function, $\rho(t)$, is stuck at $\rho_0$ through time, and the parameter $b$ being very large means that the volatility of the volatility function, $\nu(t)$, goes to $0$ extremely fast (e.g. at the end of the first month, this parameter is only $\nu(t=1$ month$)=0.0578\SI{}{\year\tothe{-1}}$). These results are very inconsistent with what we observed in the Static SABR model, where $\rho$ and $\nu$ tend (slowly) to zero with time. This seems to suggest that the functions chosen to model these two parameters were not appropriate.
 
 
 Considering now the simulated curves, we see that they accurately follow the theoretical curves for the regions around $S_0$, behaving badly only for the low strike regions and for high strikes with low maturities. This has been observed before in all models and is therefore expected.
@@ -818,7 +818,7 @@ Heston & 0.0025 & - \\
 Dynamic SABR & 0.0108\\
 \bottomrule
 \end{tabular}
-  \caption[Comparison between the costs from all trained models.]{Comparison between the costs from all trained models.}
+  \caption[Comparison between the costs from the calibrated stochastic volatility models.]{Comparison between the costs from the calibrated stochastic volatility models.}
   \label{tab:CostsCompare}
 \end{table}
 

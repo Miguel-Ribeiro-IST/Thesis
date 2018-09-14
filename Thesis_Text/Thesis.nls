@@ -28,8 +28,6 @@
 
   \item [{$Euro$}]\begingroup European type option.\nomeqref {0}
 		\nompageref{xix}
-  \item [{$Amer$}]\begingroup American type option.\nomeqref {0}
-		\nompageref{xix}
   \item [{$Barr$}]\begingroup Barrier type option.\nomeqref {0}
 		\nompageref{xix}
   \item [{$call$}]\begingroup Call type option.\nomeqref {0}

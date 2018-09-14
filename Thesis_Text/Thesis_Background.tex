@@ -1,7 +1,7 @@
 \chapter{Background}
 \label{chapter:background}
 \section{Option Types}
-Before completely focusing on the mechanics of options, what influences their prices and how we can try to predict their behavior, we should begin by clearly defining the main option types, their characteristics, as well as their payoff functions. Not only will we approach the two main types of options - European and American - but we will also shortly introduce other less common types, commonly referred to as Exotic options, focusing particularly on Barrier options.
+Before completely focusing on the mechanics of options, what influences their prices and how we can try to predict their behavior, we should begin by clearly defining the main option types, their characteristics, as well as their payoff functions. Not only will we approach one of the main types of options - European - but we will also shortly introduce other less common types, commonly referred to as Exotic options, focusing particularly on Barrier options.
 
 
 
@@ -27,9 +27,10 @@ The same reasoning can be made for European put type options, such that the payo
       \caption[Payoff functions of European call and put options]{Payoff functions of European \emph{call} and \emph{put options}.}\label{fig:Payoff}
     \end{figure}
     
+Along with European, \emph{American options} are the other most common type of derivative. While European options dominate the OTC market, their American counterparts are the most traded type of option in exchanges~\citep{InvAmer}. Because of their great importance, many models have been developed to find the prices of these options~\citep{Longstaff}.
+American options grant the right to buy/sell (call/put) the underlying asset at any point in time \emph{until the maturity date}. Though they will not be used in this work, they will be briefly mentioned in later sections.
 
-
-
+\iffalse
 \subsection{American Options}
 \emph{American options} are more complex than European and thus harder to price. While European options dominate the OTC market, their American counterparts are the most traded type of option in exchanges~\citep{InvAmer}. Because of their great importance, many models have been developed to find the prices of these options~\citep{Longstaff}.
 
@@ -43,10 +44,10 @@ American options grant the right to buy/sell (call/put) the underlying asset at 
 \noindent where we now define $t^*$ (with $0\leq t^*\leq T$) as the exercise date.
 
 It should be obvious that the price of American options will always be greater than or equal to the prices of equivalent European options. The reason behind this is the fact that with European contracts our exercising decision is restricted to a single date, whereas with American options we have that same date as well as several others to make this choice.
-
+\fi
 
 \subsection{Exotic Options}
-While European and American options are, by far, the most traded types, \emph{Exotic options} should not be neglected. Exotic options are derivatives that differ from European and American options in terms of the underlying asset or the payoff function~\citep{InvExotic}.
+While European and American options are, by far, the most traded types, \emph{Exotic options} should not be neglected. Exotic options are derivatives that differ from European in terms of the underlying asset or the payoff function~\citep{InvExotic}.
 Not only does there exist a great number of Exotic option types, but these are also highly customizable, making this type of derivatives ideal for unconventional investment strategies. Due to their high complexity, these options are only traded in the OTC market, and not in exchanges. We will explore one of the most common types of Exotic options - \emph{Barrier} options - though many others exist.
 
 
@@ -124,11 +125,9 @@ Due to their high importance, options have been studied in great detail in the p
 Probably the most important result in this field came from Fischer Black, Myron Scholes and Robert Merton, who developed a mathematical model to price European options - the famous Black-Scholes (BS) model~\citep{Scholes} - still in use in present days~\citep{Wilmott3}.
 
 This model states that the price of a European (call or put) option follows the partial differential equation (PDE)
-
 \begin{equation}\label{BS2}
 \boxed{\pdv{V}{t}+\frac{1}{2}\sigma^2S^2\pdv{^2V}{S^2}+rS\pdv{V}{S}-rV=0,}
 \end{equation}
-
 \noindent where $V$ is the price of the option, $S$ is the price of the underlying (risky) asset, $r$ is the risk-free interest rate and $\sigma$ is the stock price volatility.
 The underlying asset is commonly referred to as \emph{stock}, so these terms will be used interchangeably in the following sections.
 
@@ -204,8 +203,8 @@ With this result, pricing options is fairly straightforward - we simply need to 
 The results published originally by Black \textit{et al.} state that call and put options can be valued as
 \begin{subequations}\label{callputBS}
 \begin{empheq}[box=\widefbox]{align}
-&C=N(d_1)S_0-N(d_2)Ke^{-rT};\\
-&P=-N(-d_1)S_0+N(-d_2)Ke^{-rT},
+&C(K,T)=N(d_1)S_0-N(d_2)Ke^{-rT};\\
+&P(K,T)=-N(-d_1)S_0+N(-d_2)Ke^{-rT},
 \end{empheq}
 \end{subequations}
 \noindent where $N(\cdot)$ is the cumulative distribution function of the standard normal distribution and where $d_1$, $d_2$ are given by
@@ -216,15 +215,17 @@ The results published originally by Black \textit{et al.} state that call and pu
 \end{empheq}
 \end{subequations}
 
-
-This is a very important result that can be used to precisely price European options, so long as all the parameters are exactly known and remain constant throughout the option's duration. Both assumptions are never true for any real market option, though.
-
 In \autoref{fig:Inception} we represent the values of call and put options at both the inception ($t=0$) and at maturity ($t=T$). Notice how at maturity the value functions tend to the payoff functions, shown in \autoref{fig:Payoff} (take into account that the x-axis in \autoref{fig:Payoff} represents $S(T)$ and in \autoref{fig:Inception} we have $K/S_0$, so they are inverted).
 \begin{figure}[!htb]
     \centering
       \includegraphics[width=.65\columnwidth]{Inception.eps}
       \caption[Call and Put option values at inception and maturity]{Call and Put option values at inception and maturity with $T=0.5\SI{}{\year}$, interest rate $r=0.01\SI{}{\per\year}$, volatility $\sigma=0.3\SI{}{\year\tothe{-1/2}}$ and initial stock price $S_0=1\SI{}{\EUR}$.}\label{fig:Inception}
     \end{figure}
+    
+    
+Eqs.\eqref{callputBS} are a very important result that can be used to precisely price European options, so long as all the parameters are exactly known and remain constant throughout the option's duration. Both assumptions are never true for any real market option, though.
+
+
 
 
 \iffalse

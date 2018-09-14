@@ -37,8 +37,8 @@ The volatility (measured yearly) can be \emph{estimated} with
 The volatility can also be measured in other time periods: we can define a monthly or a daily volatility, instead of a yearly volatility as we defined before, but these are less common and will therefore not be used.
 
 We are now able to estimate the volatility of any given asset at the present moment. With this result, we could assume that the volatilities remain constant over time and use today's volatility to price options with maturities in the future. The clear problem with this approach is that, when observing market data, we can see that \emph{volatilities change over time}, so that even if we had the exact value of this parameter in the present, it can, and will, change in the future. \emph{If we try to price options assuming a constant volatility, our options will become mispriced, causing potential losses}.
-Our goal is therefore to model the instantaneous volatility (i.e. the volatility at a given point in time) of any given stock price, and, with this model, predict its future behavior, using this knowledge to better price options.
-We begin by introducing the concept of implied volatility, crucial to fully grasping the concepts used later. Afterwards, we will introduce four models to replicate volatility: one using local volatility (Dupire's formula), where we assume that the volatility depends on the stock price and time (i.e. $\sigma=\sigma(t,S(t))$), and three others using stochastic volatility (Heston and Static/Dynamic SABR), where the volatility also depends on a Brownian motion process (i.e. $\sigma=\sigma(t,S(t),W(t))$).
+Our goal is therefore to model the instantaneous volatility (i.e. the volatility at a given point in time) and, with this model, predict its future behavior, using this knowledge to better price options.
+We begin by introducing the concept of implied volatility, crucial to fully grasping the concepts used later. Afterwards, we will introduce four models to replicate volatility: one using local volatility (Dupire's formula), where we assume that the volatility depends on the stock price and time (i.e. $\sigma=\sigma(t,S(t))$), and three others using stochastic volatility (Heston and Static/Dynamic SABR), where the volatility also depends on a Brownian motion process (i.e. $\sigma=\sigma(t,S(t),W(t))$, with the Brownian motion process $\{W(t),\ t>0\}$).
 
 We should note that other very common models exist. The GARCH model~\citep{bollerslev} (Generalized Autoregressive Conditional Heteroskedasticity) along with all its many variations (EGARCH, NGARCH, ...) is particularly popular among econometricians. However, this model is mostly used to forecast volatility, and performs poorly when used to price derivatives~\citep{chourdakis}. Because pricing is our objective, GARCH will not be covered in this work. We will also study the constant volatility model, as done by Black \textit{et al.}, and use it as a benchmark for the quality of our models.
 
@@ -55,7 +55,7 @@ We can also relate the implied volatility to the volatility of the stock price a
 \end{equation}
 \noindent where $\sigma_{imp}$ denotes the implied volatility and $\sigma(t)$ is the instantaneous volatility of the stock price. Thus, the implied volatility can be thought of as the (root mean square) average of the instantaneous volatility.
 
-Because eq.\eqref{callputBS} is not explicitly invertible w.r.t. $\sigma$, we need to use some numerical procedure (e.g. Newton's method) to find the value of implied volatility that matches the market and model prices, i.e. we must find, numerically, the solution to the equation
+Because eq.\eqref{callputBS} is not explicitly invertible w.r.t. $\sigma$, we need to use some numerical procedure (e.g. Newton's method) to find the value of implied volatility that matches the market price with the model price, i.e. we must find, numerically, the solution to the equation
 \begin{equation}\label{impvolform}
 C(\sigma_{imp})=C_{\mathrm{mkt}},
 \end{equation}
@@ -147,7 +147,7 @@ As an example, if we have a relative change of $5$, this means that a variation 
       \caption[Relationship between the (call) option price's relative change (w.r.t. volatility) and the respective strike prices, for different maturities.]{Relationship between the (call) option price's relative change (w.r.t. volatility) and the respective strike prices, for different maturities. The parameters used were interest rate $r=0.01\SI{}{\per\year}$, initial stock price $S_0=1\SI{}{\EUR}$ and a constant volatility of $\sigma=0.3\SI{}{\year\tothe{-1/2}}$.}\label{fig:Vega2}
     \end{figure}
     
-As we can see in \autoref{fig:Vega2}, the relative change of the option price w.r.t. volatility is very large for call options with high strikes. We can therefore conclude that the prices of options with high strikes are very sensitive to the value of volatility. This implies that a very slight (relative) change in the volatility will produce a very large (relative) change in the option price. It also means that the volatility is very robust w.r.t. the option price ,i.e. a very large (relative) variation in the option price will barely affect the volatility. We will observe this effect in later sections.
+As we can see in \autoref{fig:Vega2}, the relative change of the option price w.r.t. volatility is very large for call options with high strikes. We can therefore conclude that the prices of options with high strikes are very sensitive to the value of volatility. This implies that a very slight (relative) change in the volatility will produce a very large (relative) change in the option price. It also means that the volatility is very robust w.r.t. the option price, i.e. a very large (relative) variation in the option price will barely affect the volatility. We will observe this effect in later sections.
 
 The opposite effect is found for call options with lower strikes - we can see that the relative variation of the option price w.r.t. the volatility is extremely small in these cases, meaning that the option price is extremely robust to the volatility, i.e. a change in the volatility will affect the option price only very slightly. It also implies that the volatility is extremely sensitive to the option price, meaning that a very slight (relative) change in the price of a call option with low strikes will dramatically change its volatility. This observation will become very important in later sections.
 
@@ -598,7 +598,7 @@ One of the main limitations of the static SABR model is the fact that, unlike th
 One of the main reasons why static SABR is so popular is due to its quasi-closed-form solutions that enable us to quickly find the implied volatilities of options priced under this model. With the corrections done by Oblój on Hagan's formula~\citep{Obloj}, we can show that these implied volatilities are given by
 \begin{equation}\label{sabr}
 \begin{split}
-\sigma_{SABR}(K,f,T)\approx&\frac{1}{\displaystyle\left[1+\frac{(1-\beta)^2}{24}\log^2\left(\frac{f}{K}\right)+\frac{(1-\beta)^4}{1920}\log^4\left(\frac{f}{K}\right)\right]}.\left(\frac{\nu\log\left(f/K\right)}{x(z)}\right)\\
+\sigma_{StatSABR}(K,f,T)\approx&\frac{1}{\displaystyle\left[1+\frac{(1-\beta)^2}{24}\log^2\left(\frac{f}{K}\right)+\frac{(1-\beta)^4}{1920}\log^4\left(\frac{f}{K}\right)\right]}.\left(\frac{\nu\log\left(f/K\right)}{x(z)}\right)\\
 &.\left\{1+T\left[\frac{(1-\beta)^2}{24}\frac{\alpha^2}{(Kf)^{1-\beta}}+\frac{1}{4}\frac{\rho\beta\nu\alpha}{(Kf)^{(1-\beta)/2}}+\frac{2-3\rho^2}{24}\nu^2\right]\right\},
 \end{split}
 \end{equation}
@@ -613,7 +613,7 @@ x(z)=\log\left\{\frac{\sqrt{1-2\rho z+z^2}+z-\rho}{1-\rho}\right\},
 
 For the particular case where $f=K$, evaluating eq.\eqref{sabr} produces a $0/0$ indeterminate form. This poses no problem because the closed form solution actually simplifies to~\citep{Hagan}
 \begin{equation}
-\sigma_{SABR}(K,f=K,T)\approx\frac{\alpha}{K^{1-\beta}}.\left\{1+T\left[\frac{(1-\beta)^2}{24}\frac{\alpha^2}{K^{2(1-\beta)}}+\frac{1}{4}\frac{\rho\beta\nu\alpha}{K^{1-\beta}}+\frac{2-3\rho^2}{24}\nu^2\right]\right\}.
+\sigma_{StatSABR}(K,f=K,T)\approx\frac{\alpha}{K^{1-\beta}}.\left\{1+T\left[\frac{(1-\beta)^2}{24}\frac{\alpha^2}{K^{2(1-\beta)}}+\frac{1}{4}\frac{\rho\beta\nu\alpha}{K^{1-\beta}}+\frac{2-3\rho^2}{24}\nu^2\right]\right\}.
 \end{equation}
 
 As with the Heston model, we again need to calibrate the parameters of this model to be able to model the volatility process.

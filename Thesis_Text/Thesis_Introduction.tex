@@ -11,7 +11,7 @@ With the colossal sums traded daily in financial markets around the world~\citep
 
 \section{Derivatives}
 \label{section:derivatives}
-Derivatives are currently one of the subjects most studied by financial mathematicians.
+Derivatives are currently one of the most studied subjects in all of mathematical finance.
 In finance, a \emph{derivative} is simply a contract whose value depends on other simpler financial instruments, known as \emph{underlying assets}, such as stock prices or interest rates.
 They can virtually take any form desirable, so long as there are two parties interested in signing it and all government regulations are met.
 
@@ -33,8 +33,7 @@ Of all classes of derivatives, in this master thesis we will focus particularly 
 As the name implies, an \emph{option} contract grants its buyer the \emph{option} to buy (in the case of a \emph{call} type option) or sell (for \emph{put} options) its underlying asset at a future date, known as the \emph{maturity}, for a fixed price, known as the \emph{strike price}.
 In other words, when signing an option, buyers choose a price at which they want to buy/sell (call/put) some asset and a future date to do this transaction. When this date arrives, if the transaction is favorable to the buyers, they exercise their right to execute it.
 
-The description above pertains only to \emph{European} options. In this thesis, this type of contracts will be used for model calibration and validation. Other option types will also be considered, however. We shall approach \emph{American} options, contracts that enable their buyers to exercise their right to buy/sell the underlying asset at any point in time \emph{until} the maturity date. Other less common types, commonly known as \emph{Exotic} options, will also be studied in the following sections, with focus on one of the most common types, known as \emph{Barrier} options.
-
+The description above pertains only to \emph{European} options. In this thesis, this type of contracts will be used for model calibration and validation. Other less common types, commonly known as \emph{Exotic} options, will also be studied in the following sections, with focus on one of the most common types, known as \emph{Barrier} options, a contract that behaves similarly to European options with the difference that it only becomes valid if the stock price increases past a given threshold at any point until the maturity (assuming a up-and-in Barrier option).
 
 
 It's important to emphasize the fact that an option grants its buyer the \emph{right} to do something. If \emph{exercising} the option would lead to losses, the buyer can simply decide to let the maturity date pass, allowing the option to expire without further costs. This is indeed the most attractive characteristic of options.
@@ -55,7 +54,7 @@ Finding this price can be very difficult for some option types, however, and tho
 
 \section{Volatility}
 Volatility is a quantity that greatly affects option prices and is used as a parameter in all pricing models. It's very difficult to define it without the necessary financial background, so we will postpone this description to \autoref{chapter:volatility}, where we will study it in great detail.
-For now, we can say that despite its importance, and despite our great efforts to study it, this parameter remains as one of the most elusive phenomena in all of quantitative finance. This elusiveness is mainly caused by our inability not only to predict its future behavior but even actually to accurately measuring it, which clearly gives rise to all sorts of problems when using it in any option pricing model.
+For now, we can say that despite its importance, and despite our great efforts to study it, this parameter remains as one of the most elusive phenomena in all of quantitative finance. This elusiveness is mainly caused by our inability not only to predict its future behavior but even actually to accurately measure it, which clearly gives rise to all sorts of problems when using it in any option pricing model.
 
 Due to its importance, many models have been developed throughout the years in an attempt to model this parameter, with varying degrees of success. We will analyze in detail some of the most famous ones in the following chapters, comparing them with one another.
 

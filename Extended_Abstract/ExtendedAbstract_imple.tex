@@ -1,0 +1,49 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     File: ExtendedAbstract_imple.tex                               %
+%     Tex Master: ExtendedAbstract.tex                               %
+%                                                                    %
+%     Author: Andre Calado Marta                                     %
+%     Last modified : 27 Dez 2011                                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% A Calculation section represents a practical development
+% from a theoretical basis.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Implementation}
+\label{sec:imple}
+\subsection{Model Training}
+To use the models for predicting future option prices we first need to train them on some real market data. We had access to some implied volatility data for options with an index as underlying asset, with 7 different strike prices over maturities of 1, 2, 3 and 6 months.
+
+Starting with Dupire's local volatility, we applied a Delaunay triangulation on the data to produce the implied volatility surface, from which we extracted the gradients required for eq.\eqref{dupire2}. Having obtained the local volatility surface, we can obtain the option's implied volatility with a numerical method, as we will explain shortly.
+
+Regarding the stochastic volatility models (Heston and Static/Dynamic SABR), we trained our models on the aforementioned data using their respective closed form solutions. This calibration was done by minimizing the distance between the data and the model predictions, measuring it with the cost function
+\begin{equation}\label{cost}
+\begin{split}
+\mathrm{Cost}(\theta)=\sum_{i=1}^n\sum_{j=1}^mw_{i,j}(&\sigma_{imp,\mathrm{mkt}}(T_i,K_j)-\\
+-&\sigma_{imp,\mathrm{mdl}}(T_i,K_j;\theta))^2,
+\end{split}
+\end{equation}
+\noindent where $\sigma_{imp,\mathrm{mkt}}(\cdot)$ and $\sigma_{imp,\mathrm{mdl}}(\cdot)$ correspond to the real-market and the model's implied volatilities, respectively, for maturities $\{T_i,\ i=1,\ldots,n\}$ and strikes $\{K_j,\ j=1,\ldots,m\}$ and where we defined the weight function, $w_{i,j}$, as (assuming that the strikes are restricted to $K<2S_0$)
+\begin{equation}\label{weight}
+w_{i,j}=\left(1-\left|1-\frac{K_j}{S_0}\right|\right)^2,
+\end{equation}
+\noindent such that a higher weight is given to the prices close to the starting price, $S_0$.
+
+Finally, to find the parameters that minimize the aforementioned distance, we have to use an optimization algorithm, able to deal with the nonlinearities of the cost function.
+We chose an algorithm developed by Hansen~\citep{Hansen2} known as \emph{CMA-ES}. Other algorithms were tested, but CMA-ES performed best.
+
+\subsection{Numerical Option Pricing}
+Having trained all the models on some real market data, we should now be able to price any options, European or not. To achieve this we chose the Monte Carlo numerical pricing algorithm, a versatile but powerful method.
+
+The Monte Carlo algorithm consists of simulating a very large number of stock price paths, using any of the mentioned models, and then calculate the option's payoff for each of the stock prices. Averaging the payoffs and discounting them to the present should provide a fairly good estimate of the option's value.
+
+Because the Brownian motion is a self-similar process, to simulate the stock prices we need first to discretize their diffusion process~\citep{Mikosch}. For the constant volatility model and Dupire's local volatility we used the Euler–Maruyama discretization method, meaning that the stock price process follows
+\begin{equation}
+\begin{split}
+S(t+\Delta t)=&S(t)+rS(t)\Delta t+\\
+&+\sigma(S(t),t)S(t)\sqrt{\Delta t}Z(t),
+\end{split}
+\end{equation}
+\noindent where $Z(t)\sim N(0,1)$ defines a normal distributed random variable and $\Delta t$ a (small) subinterval of the whole time to maturity.
+As for the stochastic volatility models we used the more robust Milstein discretization method for both the stock price and the volatility processes.
+

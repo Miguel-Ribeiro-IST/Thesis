@@ -1,0 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     File: ExtendedAbstract_concl.tex                               %
+%     Tex Master: ExtendedAbstract.tex                               %
+%                                                                    %
+%     Author: Andre Calado Marta                                     %
+%     Last modified : 27 Dez 2011                                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The main conclusions of the study presented in short form.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Conclusions}
+\label{sec:concl}
+Volatility is one of the most important subjects in all of quantitative finance, due not only to its impact on the prices of options but also to its elusiveness. In this thesis we studied some of the models most used to forecast this variable.
+
+We began by studying Dupire's local volatility model as well as Heston and Static/Dynamic SABR stochastic volatility models. We used some real implied volatility data to train the models: we generated the local volatility surface for Dupire's model and calibrated all the parameters for the stochastic volatility models using their closed form solutions.
+From this calibration we concluded that the Static SABR model best fit the data, though some overfitting is expected to have occurred, for which reason we consider the Heston model to perform best. All models vastly outperform the constant volatility model.
+
+Having trained all models, we input them into a numerical pricer, using the Monte Carlo method to estimate the option prices under each model. All simulations followed the data very closely for options with strikes around $S_0$, though some significant variation was found in the results for very low strikes and for high strikes with early maturities. In these cases great care should be employed when using these models.
+
+Finally, we adapted our Monte Carlo pricers to price Barrier options.
+
+Regarding future work, one clear possibility is to improve the Monte Carlo pricer, using, for example, importance sampling or the antithetic variates method. Some different functions for $\rho(t)$ and $\nu(t)$ could also be considered, besides the ones we used.

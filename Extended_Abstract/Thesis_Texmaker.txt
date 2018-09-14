@@ -1,0 +1,4 @@
+pdflatex Thesis.tex | makeindex  Thesis.glo -s Thesis.ist -t Thesis.glg -o Thesis.gls | makeindex  Thesis.nlo -s nomencl.ist -o Thesis.nls | bibtex Thesis.aux | pdflatex -synctex=1 -interaction=nonstopmode  Thesis.tex | pdflatex -synctex=1 -interaction=nonstopmode  Thesis.tex|"C:/Program Files (x86)/Adobe/Reader 11.0/Reader/AcroRd32.exe" %.pdf
+
+
+pdflatex ExtendedAbstract.tex | bibtex ExtendedAbstract.aux | pdflatex -synctex=1 -interaction=nonstopmode  ExtendedAbstract.tex | pdflatex -synctex=1 -interaction=nonstopmode  ExtendedAbstract.tex|"C:/Program Files (x86)/Adobe/Reader 11.0/Reader/AcroRd32.exe" %.pdf

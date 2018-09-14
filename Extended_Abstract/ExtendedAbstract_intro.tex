@@ -1,0 +1,34 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     File: ExtendedAbstract_intro.tex                               %
+%     Tex Master: ExtendedAbstract.tex                               %
+%                                                                    %
+%     Author: Andre Calado Marta                                     %
+%     Last modified : 27 Dez 2011                                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% State the objectives of the work and provide an adequate background,
+% avoiding a detailed literature survey or a summary of the results.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+\label{sec:intro}
+Derivatives are currently one of the most studied subjects in all of mathematical finance.
+In finance, a \emph{derivative} is simply a contract whose value depends on other simpler financial instruments, known as \emph{underlying assets}, such as stock prices or interest rates. These contracts are currently responsible for over \textdollar542 trillion worth of trades, in the Over-the-Counter (OTC) market alone~\citep{BIS}.
+We can thus see that fully understanding the behavior of derivatives is crucial to investors.
+
+
+\subsection{Options}
+Of all classes of derivatives, in this master thesis we focus particularly on the most traded type~\citep{Hull}: \emph{options}.
+A (European) \emph{option} contract grants its buyer the \emph{option} to buy (in the case of a \emph{call} type option) or sell (for \emph{put} options) its underlying asset, referred to as \emph{stock}, at a future date, known as the \emph{maturity}, for a fixed price, known as the \emph{strike price}.
+There are other option types, such as \emph{Barrier options}, that behave similarly to European options with the condition that they only become valid if the stock price increases past a given threshold at any point until the maturity.
+
+
+It's important to emphasize the fact that an option grants its buyer the \emph{right} to do something. If \emph{exercising} the option would lead to losses, the buyer can simply decide to let the maturity date pass, allowing the option to expire without further losses.
+
+Due to their importance, finding the ideal price of an option is a major concern to investors, though this can be very difficult for some option types.
+
+\subsection{Volatility}
+Volatility is a parameter that is used in all pricing models and that greatly affects option prices. Despite its importance and our great efforts to study it, this parameter remains as one of the most elusive phenomena in all of quantitative finance, mainly due to our inability not only to forecast its behavior but even actually to accurately measure it.
+
+Many models have been developed throughout the years in an attempt to model this parameter, with varying degrees of success. We will analyze in detail some of the most famous ones, comparing them with one another.
+
+

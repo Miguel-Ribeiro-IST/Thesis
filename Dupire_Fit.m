@@ -11,7 +11,7 @@ S0=17099.4;        %initial stock price
 r = 0;          %risk-free rate. Forward prices in data file assumed r=0.06
 matur=4;           %maturity until which we want to fit the data.
 sigmamax=1.5;        %maximum value the local volatility can take
-M=50000;           %number of paths to be simulated
+M=100000;           %number of paths to be simulated
 aver=100;
 %L=T*252*2
 
@@ -116,9 +116,9 @@ function Plotter3D(sigmamax,S0,r,B,M,aver,matur,interpol)
     [K,T] = meshgrid(K2,0.5/12:0.5/12:0.5+0.5/12); %create the grid to be evaluated
     DV_tmp=zeros(aver,size(K,2)); %matrix to be averaged (reducing noise) to generate the values
     f=1; %auxiliary variable
-    waitb=waitbar(0,'...');
+    waitb=waitbar(0,[num2str(round(toc/3600)),' hours passed,  ', num2str(0),'/',num2str(size(K,1)),' completed']);
     for i=1:size(K,1)
-        waitbar(i/size(K,1),waitb,[num2str(round(toc/3600)),' hours passed,  ', num2str(round(i/size(K,1)*100)),'% completed'])
+        
         K_tmp=(K(i,:))';
         T_tmp=T(i,1);
         parfor j=1:aver
@@ -134,6 +134,7 @@ function Plotter3D(sigmamax,S0,r,B,M,aver,matur,interpol)
             f=f+1;
         end
         DV(i,:)=mn;
+        waitbar(i/size(K,1),waitb,[num2str(round(toc/3600)),' hours passed,  ', num2str(i),'/',num2str(size(K,1)),' completed'])
     end
     close(waitb);
     s=surf(K,T,DV);
@@ -261,7 +262,7 @@ else
     Result=zeros(1,N);
     for j=1:N
         volatility=@(sigma)european_bs(S0,C(j,1),r,sigma,T,"call")-exp(-r*T)*mean(Y(:,j));
-        res=fzero(volatility,0.01);   %Calculate the expected implied volatility
+        res=fzero(volatility,0.0001);   %Calculate the expected implied volatility
         
         if ~isnan(res)
             Result(j)=res;

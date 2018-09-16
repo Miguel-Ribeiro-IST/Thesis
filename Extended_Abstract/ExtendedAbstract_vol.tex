@@ -14,7 +14,7 @@ Volatility is a measure of the uncertainty in future stock price movements - a h
 \begin{figure}[H]
     \centering
       \includegraphics[width=.8\columnwidth,trim={0.6cm 0.55cm 1.35cm 1.5cm},clip]{VarVol.eps}
-      \caption{Example of three identical GBM processes with different volatilities.}\label{fig:VarVol}
+      \caption{Example of three realizations of GBM processes with different volatilities}\label{fig:VarVol}
     \end{figure}
     
 Of all the parameters in the BS model, volatility is the only one we can't easily estimate or predict, even though it has a major impact on the prices of options.
@@ -45,7 +45,7 @@ C(\sigma_{imp})=C_{\mathrm{mkt}},
 \end{equation}
 \noindent where $C(\sigma_{imp})$ is the BS option price using $\sigma_{imp}$ as volatility and $C_{\mathrm{mkt}}$ is the price observed in the market.
 
-It can be shown that the relation between implied volatility and option price is a monotonous increasing function, which means that we can obtain the implied volatility of an option from its price and vice versa (i.e. the relationship is bijective)~\citep{Wilmott3}. Thus, we can train our models on implied volatility data instead of using option prices, since they are equivalent.
+It can be shown that the relation between implied volatility and option price is a monotonous increasing function (i.e. the relationship is bijective), which means that we can obtain the implied volatility of an option from its price and vice versa~\citep{Wilmott3}. Thus, we can train our models on implied volatility data instead of using option prices, since they are equivalent.
 
 One important property of implied volatility is that, when observing real market data, we can clearly see that it depends on the strike price, which is incompatible with the BS view (which assumes it is independent).
 This phenomenon is known as the implied volatility \emph{smile} and is represented in \autoref{fig:Smile} (a \emph{skew} can also be observed for some types of underlying assets).
@@ -89,7 +89,7 @@ The opposite effect is observed for call options with lower strikes, since we ca
 This phenomenon will become important when we examine our results.
 
 \subsection{Volatility Models}
-As previously stated volatility is not only dynamic but also dependent on the strike price.
+As previously stated volatility not only changes with time but is also dependent on the strike price.
 The (constant volatility) BS model is therefore clearly insufficient to completely grasp real-world trading and we should try to find some more appropriate volatility models.
 
 \vspace{5pt}

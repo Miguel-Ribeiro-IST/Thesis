@@ -52,7 +52,7 @@ dS(t)=rS(t)dt+\sigma S(t)dW(t),
 \begin{figure}[H]
     \centering
       \includegraphics[width=.8\columnwidth,trim={0.35cm 0.6cm 1.4cm 1.35cm},clip]{GBM.eps}
-      \caption{Example of three Geometric Brownian Motion processes.}\label{fig:GBM}
+      \caption{Example of three realizations of a Geometric Brownian Motion process.}\label{fig:GBM}
     \end{figure}
     
 To price options, we need to solve the PDE in eq.\eqref{BS2} as we would for the diffusion equation's initial value problem~\citep{Dilao}, resulting in
@@ -71,7 +71,7 @@ To price options, we need to solve the PDE in eq.\eqref{BS2} as we would for the
 \end{subequations}
 
 
-In \autoref{fig:Inception} we represent the values of call and put options at both the inception (i.e. $t=0$) and maturity.
+In \autoref{fig:Inception} we represent the prices of call and put options at both the inception (i.e. $t=0$) and maturity as a function of the ratio $K/S_0$.
 \begin{figure}[H]
     \centering
       \includegraphics[width=.8\columnwidth,trim={0.6cm 0.4cm 1.15cm 1.4cm},clip]{Inception.eps}

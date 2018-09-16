@@ -17,6 +17,6 @@ From this calibration we concluded that the Static SABR model best fit the data,
 
 Having trained all models, we input them into a numerical pricer, using the Monte Carlo method to estimate the option prices under each model. All simulations followed the data very closely for options with strikes around $S_0$, though some significant variation was found in the results for very low strikes and for high strikes with early maturities. In these cases great care should be employed when using these models.
 
-Finally, we adapted our Monte Carlo pricers to price Barrier options.
+Finally, we adapted our Monte Carlo pricers to price Barrier options and observed that the option prices decreased when we increased the barrier levels and remained strictly below the corresponding European option prices. Both observations were expected.
 
 Regarding future work, one clear possibility is to improve the Monte Carlo pricer, using, for example, importance sampling or the antithetic variates method. Some different functions for $\rho(t)$ and $\nu(t)$ could also be considered, besides the ones we used.

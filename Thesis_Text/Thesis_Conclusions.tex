@@ -27,7 +27,7 @@ Finally, adapting the Monte Carlo pricers we were also able to price Barrier opt
 
 \section{Achievements}
 Regarding the stochastic volatility models, we saw that their theoretical predictions (obtained with the respective closed form solutions) accurately followed real European call option prices, even for deep in- and out-of-the money options.
-For data on a single maturity, the Static SABR model clearly performed best, as is verified by the observed low value of the cost function observed with this model, though some overfitting is expected to have occurred. It also vastly outperforms the constant volatility model, which was unsurprising. When dealing with multiple maturities, the Heston model is performed better than Dynamic SABR, though both models outperform the constant volatility model.
+For data on a single maturity, the Static SABR model clearly performed best, as is verified by the observed low value of the cost function observed with this model, though some overfitting is expected to have occurred. It also vastly outperforms the constant volatility model, which was unsurprising. When dealing with multiple maturities, the Heston model performed better than Dynamic SABR, though both models outperform the constant volatility model.
 
 For near-the-money strikes (i.e. $K\sim S_0$), the Monte Carlo simulations of all stochastic volatility models seemed to match both the data and the theoretical predictions, suggesting that the simulations were working properly.
 
